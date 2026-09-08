@@ -87,10 +87,11 @@ export default function Cart() {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center border border-hairline rounded-lg">
                     <button
+                      disabled={item.quantity <= 1}
                       onClick={() =>
                         handleQuantityChange(item.id, item.quantity - 1)
                       }
-                      className="p-1.5 text-stone hover:text-ink"
+                      className="p-1.5 text-stone hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
                     >
                       <Minus size={13} strokeWidth={2} />
                     </button>
@@ -98,10 +99,14 @@ export default function Cart() {
                       {item.quantity}
                     </span>
                     <button
+                      disabled={
+                        item.product?.stock != null &&
+                        item.quantity >= item.product.stock
+                      }
                       onClick={() =>
                         handleQuantityChange(item.id, item.quantity + 1)
                       }
-                      className="p-1.5 text-stone hover:text-ink"
+                      className="p-1.5 text-stone hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
                     >
                       <Plus size={13} strokeWidth={2} />
                     </button>

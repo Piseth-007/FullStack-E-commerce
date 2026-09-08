@@ -20,10 +20,19 @@ class SettingController extends Controller
 
     public function index()
     {
+        $payment = Setting::getGroup('payment');
+
+        $paymentSettings = [
+            'bakong_account_id' => $payment['bakong_account_id'] ?? config('services.bakong.account_id') ?? '',
+            'bakong_developer_token' => $payment['bakong_developer_token'] ?? config('services.bakong.token') ?? '',
+            'bakong_merchant_name' => $payment['bakong_merchant_name'] ?? config('services.bakong.merchant_name') ?? '',
+            'bakong_merchant_city' => $payment['bakong_merchant_city'] ?? config('services.bakong.merchant_city') ?? '',
+        ];
+
         return response()->json([
             'data' => [
                 'store' => Setting::getGroup('store'),
-                'payment' => Setting::getGroup('payment'),
+                'payment' => $paymentSettings,
                 'notifications' => Setting::getGroup('notifications'),
             ],
         ]);
@@ -67,18 +76,34 @@ class SettingController extends Controller
         return response()->json(['data' => Setting::putGroup('store', $data)]);
     }
 
+
     public function updatePayment(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'bakong_account_id' => 'nullable|string|max:255',
-            'bakong_developer_token' => 'nullable|string|max:500',
+        $input = array_map(function ($value) {
+            return is_string($value) ? trim($value) : $value;
+        }, $request->all());
+
+        $validator = Validator::make($input, [
+            'bakong_account_id' => [
+                'nullable',
+                'string',
+                'max:255',
+                'regex:/^[^@\s]+@[^@\s]+$/',
+            ],
+            'bakong_developer_token' => 'nullable|string|max:4096',
+            'bakong_merchant_name' => 'nullable|string|max:255',
+            'bakong_merchant_city' => 'nullable|string|max:255',
+        ], [
+            'bakong_account_id.regex' => 'The Bakong account ID must be in the format username@bank (e.g. your_name@wing or your_name@bkrt).',
         ]);
 
         if ($validator->fails()) {
             return response()->json(['message' => $validator->errors()->first()], 422);
         }
 
-        return response()->json(['data' => Setting::putGroup('payment', $validator->validated())]);
+        $saved = Setting::putGroup('payment', $validator->validated());
+
+        return response()->json(['data' => $saved]);
     }
 
     public function updateNotifications(Request $request)

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use App\Models\Payment;
+use App\Models\Setting;
 use App\Services\OrderCancellationService;
 use App\Services\TelegramService;
 use Illuminate\Http\Request;
@@ -39,8 +40,9 @@ class PaymentController extends Controller
             ], 422);
         }
 
-        $token = config('services.bakong.token');
-        $accountId = config('services.bakong.account_id');
+        $bakongConfig = $this->getBakongConfig();
+        $token = $bakongConfig['token'];
+        $accountId = $bakongConfig['account_id'];
 
         if (!$token || !$accountId) {
             return response()->json([
@@ -77,14 +79,8 @@ class PaymentController extends Controller
 
             $individualInfo = new IndividualInfo(
                 bakongAccountID: $accountId,
-                merchantName: config(
-                    'services.bakong.merchant_name',
-                    'My Store'
-                ),
-                merchantCity: config(
-                    'services.bakong.merchant_city',
-                    'Phnom Penh'
-                ),
+                merchantName: $bakongConfig['merchant_name'],
+                merchantCity: $bakongConfig['merchant_city'],
                 currency: KHQRData::CURRENCY_USD,
                 amount: $amount,
                 expirationTimestamp: (string) $expiresAt->valueOf(),
@@ -218,9 +214,21 @@ class PaymentController extends Controller
         }
 
         try {
-            $bakong = new BakongKHQR(
-                config('services.bakong.token')
-            );
+            $bakongConfig = $this->getBakongConfig();
+            $token = $bakongConfig['token'];
+
+            if (!$token) {
+                Log::error('Bakong token missing during payment status check', [
+                    'payment_id' => $payment->id,
+                ]);
+
+                return response()->json([
+                    'status' => 'pending',
+                    'message' => 'Payment provider configuration is missing.',
+                ], 503);
+            }
+
+            $bakong = new BakongKHQR($token);
 
             $result = $bakong->checkTransactionByMD5(
                 $payment->md5
@@ -400,5 +408,40 @@ class PaymentController extends Controller
         if (!$hasActivePayment) {
             $orderCancellation->cancelPendingOrder($order);
         }
+    }
+
+    private function getBakongConfig(): array
+    {
+        try {
+            $settings = Setting::getGroup('payment');
+        } catch (Throwable $e) {
+            Log::warning('Failed to load payment settings from database', [
+                'error' => $e->getMessage(),
+            ]);
+            $settings = [];
+        }
+
+        $token = !empty($settings['bakong_developer_token'])
+            ? trim($settings['bakong_developer_token'])
+            : config('services.bakong.token');
+
+        $accountId = !empty($settings['bakong_account_id'])
+            ? trim($settings['bakong_account_id'])
+            : config('services.bakong.account_id');
+
+        $merchantName = !empty($settings['bakong_merchant_name'])
+            ? trim($settings['bakong_merchant_name'])
+            : config('services.bakong.merchant_name', 'My Store');
+
+        $merchantCity = !empty($settings['bakong_merchant_city'])
+            ? trim($settings['bakong_merchant_city'])
+            : config('services.bakong.merchant_city', 'Phnom Penh');
+
+        return [
+            'token' => $token,
+            'account_id' => $accountId,
+            'merchant_name' => $merchantName ?: 'My Store',
+            'merchant_city' => $merchantCity ?: 'Phnom Penh',
+        ];
     }
 }

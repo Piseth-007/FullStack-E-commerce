@@ -53,24 +53,35 @@ class CartController extends Controller
         ]);
 
         $cart = $request->user()->cart;
-        $item = $cart->items()->findOrFail($itemId);
+        if (!$cart) {
+            return response()->json(['message' => 'Cart not found'], 404);
+        }
 
-        if ($item->product->stock < $validated['qantity']) {
+        $item = $cart->items()->with('product')->findOrFail($itemId);
+
+        if (!$item->product) {
+            return response()->json(['message' => 'Product no longer exists'], 404);
+        }
+
+        if ($item->product->stock < $validated['quantity']) {
             return response()->json(['message' => 'Not enough stock available'], 422);
         }
 
         $item->update($validated);
 
-        return response()->json($cart->load('items.product'));
+        return response()->json($cart->refresh()->load('items.product'));
     }
-
 
     public function destroy(Request $request, $itemId)
     {
         $cart = $request->user()->cart;
+        if (!$cart) {
+            return response()->json(['message' => 'Cart not found'], 404);
+        }
+
         $cart->items()->findOrFail($itemId)->delete();
 
-        return response()->json($cart->load('items.product'));
+        return response()->json($cart->refresh()->load('items.product'));
     }
 
 
