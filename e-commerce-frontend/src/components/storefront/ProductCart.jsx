@@ -1,0 +1,579 @@
+import { Link } from "react-router-dom";
+import { Star, ImageOff, ShoppingBag, ArrowUpRight, Truck } from "lucide-react";
+
+import FavoriteButton from "./FavoriteButton";
+import FadeImage from "../common/FadeImage";
+
+export default function ProductCard({ product }) {
+  const productId = product?.id;
+
+  const image = product?.images?.[0]?.url || "";
+
+  const productName = product?.name || "Product";
+
+  const brandName =
+    product?.brand?.name || product?.category?.name || "Skincare";
+
+  const price = Math.max(0, Number(product?.price) || 0);
+
+  const discount = Math.min(100, Math.max(0, Number(product?.discount) || 0));
+
+  const hasDiscount = discount > 0;
+
+  const finalPrice = hasDiscount
+    ? Math.max(0, price - (price * discount) / 100)
+    : price;
+
+  const rating = Math.min(
+    5,
+    Math.max(0, Number(product?.reviews_avg_rating) || 0),
+  );
+
+  const reviewCount = Math.max(0, Number(product?.reviews_count) || 0);
+
+  const stock = Math.max(0, Number(product?.stock) || 0);
+
+  const isOutOfStock = stock <= 0;
+
+  const isLowStock = stock > 0 && stock <= 5;
+
+  const hasFreeDelivery = Boolean(product?.free_delivery) && !isOutOfStock;
+
+  const formatPrice = (value) =>
+    new Intl.NumberFormat("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+
+  const roundedRating = Math.round(rating);
+
+  return (
+    <article
+      className={`
+        group
+        relative
+        ${isOutOfStock ? "opacity-[0.92]" : ""}
+      `}
+    >
+      <Link
+        to={`/products/${productId}`}
+        aria-label={`View ${productName}`}
+        className="
+          block
+          outline-none
+          focus-visible:rounded-2xl
+          focus-visible:ring-2
+          focus-visible:ring-moss/40
+          focus-visible:ring-offset-2
+        "
+      >
+        <div
+          className="
+            relative
+            aspect-square
+            overflow-hidden
+            rounded-2xl
+            border
+            border-hairline
+            bg-paper
+            transition-all
+            duration-500
+            ease-[cubic-bezier(.22,1,.36,1)]
+            group-hover:-translate-y-1
+            group-hover:border-moss/20
+            group-hover:shadow-[0_18px_40px_rgba(63,88,67,0.10)]
+          "
+        >
+          {image ? (
+            <FadeImage
+              src={image}
+              alt={productName}
+              loading="lazy"
+              wrapperClassName="h-full w-full"
+              className={`
+                h-full
+                w-full
+                object-cover
+                transition-all
+                duration-700
+                ease-out
+                ${
+                  isOutOfStock
+                    ? "grayscale-30 opacity-70"
+                    : "group-hover:scale-[1.055]"
+                }
+              `}
+            />
+          ) : (
+            <div
+              className="
+                flex
+                h-full
+                w-full
+                items-center
+                justify-center
+                bg-paper
+              "
+            >
+              <div
+                className="
+                  flex
+                  flex-col
+                  items-center
+                  gap-2
+                  text-stone/50
+                "
+              >
+                <ImageOff size={27} strokeWidth={1.25} />
+
+                <span
+                  className="
+                    text-[10px]
+                    uppercase
+                    tracking-[0.12em]
+                  "
+                >
+                  No image
+                </span>
+              </div>
+            </div>
+          )}
+
+          {(hasDiscount || hasFreeDelivery) && (
+            <div
+              className="
+                absolute
+                left-3
+                top-3
+                z-10
+                flex
+                flex-col
+                items-start
+                gap-1.5
+              "
+            >
+              {hasDiscount && !isOutOfStock && (
+                <span
+                  className="
+                      rounded-full
+                      bg-red-600
+                      px-2.5
+                      py-1
+                      text-[9px]
+                      font-medium
+                      uppercase
+                      tracking-[0.08em]
+                      text-white
+                      shadow-sm
+                    "
+                >
+                  -{discount}%
+                </span>
+              )}
+
+              {hasFreeDelivery && (
+                <span
+                  className="
+                    flex
+                    items-center
+                    gap-1
+                    rounded-full
+                    border
+                    border-hairline/60
+                    bg-surface/90
+                    px-2.5
+                    py-1
+                    text-[9px]
+                    font-medium
+                    uppercase
+                    tracking-[0.06em]
+                    text-moss
+                    shadow-sm
+                    backdrop-blur-md
+                  "
+                >
+                  <Truck size={10} strokeWidth={1.8} />
+                  Free delivery
+                </span>
+              )}
+            </div>
+          )}
+
+          <div
+            className="
+              absolute
+              right-3
+              top-3
+              z-20
+            "
+            onClick={(event) => {
+              event.preventDefault();
+              event.stopPropagation();
+            }}
+            onPointerDown={(event) => {
+              event.stopPropagation();
+            }}
+          >
+            <FavoriteButton productId={productId} size={16} />
+          </div>
+
+          {isOutOfStock && (
+            <div
+              className="
+                absolute
+                inset-0
+                z-10
+                flex
+                items-center
+                justify-center
+                bg-paper/25
+                backdrop-blur-[1px]
+              "
+            >
+              <span
+                className="
+                  rounded-full
+                  border
+                  border-hairline
+                  bg-surface/90
+                  px-4
+                  py-2
+                  text-[10px]
+                  font-medium
+                  uppercase
+                  tracking-[0.12em]
+                  text-stone
+                  shadow-sm
+                "
+              >
+                Out of stock
+              </span>
+            </div>
+          )}
+
+          {!isOutOfStock && (
+            <div
+              className="
+                pointer-events-none
+                absolute
+                bottom-3
+                right-3
+                z-10
+                flex
+                h-9
+                w-9
+                translate-y-2
+                items-center
+                justify-center
+                rounded-full
+                border
+                border-hairline/60
+                bg-surface/90
+                text-ink
+                opacity-0
+                shadow-[0_8px_20px_rgba(0,0,0,0.08)]
+                backdrop-blur-md
+                transition-all
+                duration-300
+                ease-out
+                group-hover:translate-y-0
+                group-hover:opacity-100
+              "
+            >
+              <ArrowUpRight
+                size={15}
+                strokeWidth={1.7}
+                className="
+                  transition-transform
+                  duration-300
+                  group-hover:rotate-6
+                "
+              />
+            </div>
+          )}
+
+          <div
+            className="
+              pointer-events-none
+              absolute
+              inset-0
+              z-1
+              bg-linear-to-t
+              from-moss/[0.07]
+              via-transparent
+              to-transparent
+              opacity-0
+              transition-opacity
+              duration-500
+              group-hover:opacity-100
+            "
+          />
+
+          {!isOutOfStock && (
+            <div
+              className="
+                pointer-events-none
+                absolute
+                bottom-0
+                left-0
+                right-0
+                h-20
+                translate-y-5
+                bg-linear-to-t
+                from-moss/8
+                to-transparent
+                opacity-0
+                transition-all
+                duration-500
+                group-hover:translate-y-0
+                group-hover:opacity-100
+              "
+            />
+          )}
+        </div>
+
+        <div className="pt-3">
+          <div
+            className="
+              mb-1.5
+              flex
+              min-w-0
+              items-center
+              justify-between
+              gap-2
+            "
+          >
+            <p
+              className="
+                min-w-0
+                truncate
+                text-[10px]
+                font-medium
+                uppercase
+                tracking-[0.09em]
+                text-stone
+              "
+              title={brandName}
+            >
+              {brandName}
+            </p>
+
+            {reviewCount > 0 && (
+              <div
+                className="
+                  flex
+                  shrink-0
+                  items-center
+                  gap-1
+                "
+              >
+                <Star
+                  size={11}
+                  strokeWidth={1.5}
+                  className="
+                    fill-moss
+                    text-moss
+                  "
+                />
+
+                <span
+                  className="
+                    text-[10px]
+                    text-stone
+                  "
+                >
+                  {rating.toFixed(1)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <h3
+            className="
+              truncate
+              text-[14px]
+              font-medium
+              leading-tight
+              text-ink
+              transition-colors
+              duration-300
+              group-hover:text-moss-deep
+            "
+            title={productName}
+          >
+            {productName}
+          </h3>
+
+          <div
+            className="
+              mt-2
+              flex
+              min-w-0
+              items-end
+              justify-between
+              gap-2
+            "
+          >
+            <div
+              className="
+                flex
+                min-w-0
+                items-baseline
+                gap-2
+              "
+            >
+              <span
+                className="
+                  whitespace-nowrap
+                  font-mono
+                  text-[14px]
+                  font-medium
+                  text-ink
+                "
+              >
+                ${formatPrice(finalPrice)}
+              </span>
+
+              {hasDiscount && (
+                <span
+                  className="
+                    whitespace-nowrap
+                    font-mono
+                    text-[11px]
+                    text-stone/60
+                    line-through
+                  "
+                >
+                  ${formatPrice(price)}
+                </span>
+              )}
+            </div>
+
+            {isLowStock && (
+              <span
+                className="
+                  shrink-0
+                  text-[9px]
+                  font-medium
+                  uppercase
+                  tracking-wider
+                  text-clay
+                "
+              >
+                {stock} left
+              </span>
+            )}
+          </div>
+
+          {reviewCount > 0 && (
+            <div
+              className="
+                mt-2
+                flex
+                items-center
+                gap-1.5
+              "
+            >
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-0.5
+                "
+              >
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    size={10}
+                    strokeWidth={1.5}
+                    className={
+                      star <= roundedRating
+                        ? "fill-moss text-moss"
+                        : "fill-hairline text-hairline"
+                    }
+                  />
+                ))}
+              </div>
+
+              <span
+                className="
+                  text-[10px]
+                  text-stone
+                "
+              >
+                {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+              </span>
+            </div>
+          )}
+
+          {!isOutOfStock && (
+            <div
+              className="
+                mt-3
+                flex
+                items-center
+                justify-between
+                border-t
+                border-hairline
+                pt-2.5
+              "
+            >
+              <span
+                className="
+                  text-[10px]
+                  font-medium
+                  uppercase
+                  tracking-[0.08em]
+                  text-stone
+                  transition-colors
+                  duration-300
+                  group-hover:text-moss
+                "
+              >
+                View product
+              </span>
+
+              <ShoppingBag
+                size={13}
+                strokeWidth={1.6}
+                className="
+                  translate-x-1
+                  text-stone
+                  opacity-0
+                  transition-all
+                  duration-300
+                  group-hover:translate-x-0
+                  group-hover:text-moss
+                  group-hover:opacity-100
+                "
+              />
+            </div>
+          )}
+
+          {isOutOfStock && (
+            <div
+              className="
+                mt-3
+                border-t
+                border-hairline
+                pt-2.5
+              "
+            >
+              <span
+                className="
+                  text-[10px]
+                  font-medium
+                  uppercase
+                  tracking-[0.08em]
+                  text-stone/60
+                "
+              >
+                Currently unavailable
+              </span>
+            </div>
+          )}
+        </div>
+      </Link>
+    </article>
+  );
+}
