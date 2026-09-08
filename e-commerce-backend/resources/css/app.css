@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php";
+@source "../../storage/framework/views/*.php";
+@source "../**/*.blade.php";
+@source "../**/*.js";
+
+@font-face {
+    font-family: "Inter";
+    src: url("/src/fonts/Inter-VariableFont_opsz\,wght.ttf") format("TrueType");
+    font-style: normal;
+    font-display: swap;
+}
+
+* {
+    font-family: "Inter", sans-serif;
+}
+
+:root {
+    --gray: #f2f2f6;
+}
+html,
+body {
+    scrollbar-width: thin;
+}
