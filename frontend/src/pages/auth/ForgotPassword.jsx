@@ -1,24 +1,21 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Mail, Loader2, AlertCircle, Sparkles } from "lucide-react";
+import { Mail, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import AuthShell, {
   AuthField,
   AuthInput,
 } from "../../components/auth/AuthShell";
-
-const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [googleLoading, setGoogleLoading] = useState(false);
   const { loginWithGoogle } = useAuth();
   const navigate = useNavigate();
-  const googleBtnRef = useRef(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,84 +31,41 @@ export default function ForgotPassword() {
     }
   };
 
-  const handleGoogleResponse = async (response) => {
+  const handleGoogleSuccess = async (credential) => {
     setError("");
-    setGoogleLoading(true);
-    try {
-      await loginWithGoogle(response.credential);
-      navigate("/");
-    } catch (err) {
-      setError(
-        err.response?.data?.message || "Google sign-in failed. Please try again."
-      );
-    } finally {
-      setGoogleLoading(false);
-    }
+    await loginWithGoogle(credential);
+    navigate("/");
   };
-
-  useEffect(() => {
-    if (!GOOGLE_CLIENT_ID) {
-      return;
-    }
-
-    const scriptId = "google-identity-services";
-    let script = document.getElementById(scriptId);
-
-    const initGoogle = () => {
-      if (!window.google || !googleBtnRef.current) return;
-
-      window.google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleResponse,
-      });
-
-      window.google.accounts.id.renderButton(googleBtnRef.current, {
-        theme: "outline",
-        size: "large",
-        width: googleBtnRef.current.offsetWidth,
-        text: "continue_with",
-      });
-    };
-
-    if (!script) {
-      script = document.createElement("script");
-      script.id = scriptId;
-      script.src = "https://accounts.google.com/gsi/client";
-      script.async = true;
-      script.defer = true;
-      script.onload = initGoogle;
-      document.body.appendChild(script);
-    } else {
-      initGoogle();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   return (
     <AuthShell
-      eyebrow="Account recovery"
-      title="A fresh start is close."
-      description="Enter your email to receive a reset link, or sign in instantly with Google."
-      visualTitle="Your routine is worth returning to."
-      visualCopy="We’ll help you get back to the products and rituals that make you feel at home in your skin."
-      badge="Instant Recovery"
-      quote={{
-        text: "Thoughtful, simple, and always easy to pick up right where you left off.",
-        author: "Botaniq Care Team",
-      }}
-      tags={["✦ Secure Access", "Instant Google Recovery", "24/7 Support"]}
+      title="Forgot password"
+      description="Enter your email address and we'll send you a link to reset your password."
     >
-      <div className="auth-form">
-        {sent ? (
-          <div className="auth-success">
-            <div className="auth-brand-mark">
-              <Mail size={17} strokeWidth={1.8} />
-            </div>
-            <strong>Check your inbox</strong>
-            <p>We’ve sent a password reset link to {email}.</p>
+      {sent ? (
+        <div className="text-center py-2 space-y-4">
+          <div className="w-12 h-12 rounded-full bg-moss-tint flex items-center justify-center mx-auto text-moss">
+            <CheckCircle2 size={24} strokeWidth={2} />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="auth-form">
+          <div>
+            <h3 className="font-display text-lg font-medium text-ink">
+              Check your email
+            </h3>
+            <p className="mt-1 text-[13.5px] text-stone leading-relaxed">
+              We’ve sent a password reset link to{" "}
+              <span className="text-ink font-medium">{email}</span>.
+            </p>
+          </div>
+          <Link
+            to="/login"
+            className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center"
+          >
+            Return to sign in
+          </Link>
+        </div>
+      ) : (
+        <>
+          <form onSubmit={handleSubmit} className="space-y-4">
             <AuthField label="Email address">
               <AuthInput
                 icon={Mail}
@@ -124,13 +78,17 @@ export default function ForgotPassword() {
             </AuthField>
 
             {error && (
-              <div className="auth-alert">
-                <AlertCircle size={15} className="shrink-0" />
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-clay-tint border border-clay/20 text-clay-deep text-[13px] leading-relaxed">
+                <AlertCircle size={16} className="shrink-0 mt-0.5 text-clay" />
                 <span>{error}</span>
               </div>
             )}
 
-            <button type="submit" disabled={loading} className="auth-submit">
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+            >
               {loading ? (
                 <>
                   <Loader2 size={16} className="animate-spin" />
@@ -141,44 +99,37 @@ export default function ForgotPassword() {
               )}
             </button>
           </form>
-        )}
-      </div>
 
-      {!sent && (
-        <>
-          <div className="auth-divider">
-            <span>or signed up with Google?</span>
+          <div className="relative my-5 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-hairline" />
+            </div>
+            <div className="relative flex justify-center text-[12px] uppercase">
+              <span className="bg-surface px-2.5 text-stone tracking-wider font-medium">
+                or continue with
+              </span>
+            </div>
           </div>
 
-          <div className="w-full flex justify-center min-h-10">
-            {googleLoading ? (
-              <div className="flex items-center gap-2 text-[13px] text-stone py-2">
-                <Loader2 size={15} className="animate-spin text-moss" />
-                <span>Signing in with Google…</span>
-              </div>
-            ) : (
-              <div ref={googleBtnRef} className="w-full [&>div]:w-full flex justify-center" />
-            )}
-          </div>
+          <GoogleLoginButton
+            text="continue_with"
+            label="Sign in with Google"
+            onSuccess={handleGoogleSuccess}
+            onError={(msg) => setError(msg)}
+          />
 
-          <div className="mt-2.5 p-2.5 rounded-lg bg-moss-tint/70 border border-moss/10 flex items-start gap-2 text-[11.5px] text-stone">
-            <Sparkles size={13} className="text-moss shrink-0 mt-0.5" />
-            <span>
-              If you originally created your account with Google, you don't need a password reset — clicking above logs you in immediately.
-            </span>
-          </div>
+          <p className="mt-6 text-center text-[13px] text-stone">
+            Remember your password?{" "}
+            <Link
+              to="/login"
+              className="text-moss font-medium hover:text-moss-deep transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
         </>
       )}
-
-      <p className="auth-switch">
-        Remember your password?{" "}
-        <Link
-          to="/login"
-          className="text-moss font-medium hover:text-moss-deep"
-        >
-          Sign in
-        </Link>
-      </p>
     </AuthShell>
   );
 }
+

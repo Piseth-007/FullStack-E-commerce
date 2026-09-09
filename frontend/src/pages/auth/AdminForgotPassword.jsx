@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Mail, Loader2, AlertCircle } from "lucide-react";
+import { Mail, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
 import api from "../../api/axios";
 import AuthShell, {
   AuthField,
@@ -33,61 +33,74 @@ export default function AdminForgotPassword() {
 
   return (
     <AuthShell
-      eyebrow="Admin account recovery"
-      title="Get back to the work."
-      description="Enter your admin email and we’ll send a secure password reset link."
-      visualTitle="The details behind every order."
-      visualCopy="Reset your access and return to the calm, clear space that keeps your store moving."
-      badge="Admin Recovery"
-      tags={["✦ Verified Admin Only", "Encrypted Reset", "Store Security"]}
-      compact
+      title="Admin Password Recovery"
+      description="Enter your admin email to receive a password reset link."
     >
-      <div className="auth-form">
-        {sent ? (
-          <div className="auth-success">
-            <div className="auth-brand-mark">
-              <Mail size={17} strokeWidth={1.8} />
-            </div>
-            <strong>Check your inbox</strong>
-            <p>We’ve sent a reset link to {email}.</p>
+      {sent ? (
+        <div className="text-center py-2 space-y-4">
+          <div className="w-12 h-12 rounded-full bg-moss-tint flex items-center justify-center mx-auto text-moss">
+            <CheckCircle2 size={24} strokeWidth={2} />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="auth-form">
-            <AuthField label="Admin email">
-              <AuthInput
-                icon={Mail}
-                type="email"
-                value={email}
-                onChange={(event) => setEmail(event.target.value)}
-                placeholder="admin@example.com"
-                required
-              />
-            </AuthField>
+          <div>
+            <h3 className="font-display text-lg font-medium text-ink">
+              Check your email
+            </h3>
+            <p className="mt-1 text-[13.5px] text-stone leading-relaxed">
+              We’ve sent a reset link to <span className="text-ink font-medium">{email}</span>.
+            </p>
+          </div>
+          <Link
+            to="/admin/login"
+            className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center"
+          >
+            Return to admin sign in
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <AuthField label="Admin email">
+            <AuthInput
+              icon={Mail}
+              type="email"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
+              placeholder="admin@example.com"
+              required
+            />
+          </AuthField>
 
-            {error && (
-              <div className="auth-alert">
-                <AlertCircle size={15} className="shrink-0" />
-                <span>{error}</span>
-              </div>
+          {error && (
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-clay-tint border border-clay/20 text-clay-deep text-[13px] leading-relaxed">
+              <AlertCircle size={16} className="shrink-0 mt-0.5 text-clay" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Sending…</span>
+              </>
+            ) : (
+              "Send reset link"
             )}
+          </button>
 
-            <button type="submit" disabled={loading} className="auth-submit">
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Sending…</span>
-                </>
-              ) : (
-                "Send reset link"
-              )}
-            </button>
-          </form>
-        )}
-      </div>
-
-      <p className="auth-switch">
-        <Link to="/admin/login">Back to admin sign in</Link>
-      </p>
+          <p className="pt-2 text-center text-[13px] text-stone">
+            <Link
+              to="/admin/login"
+              className="text-moss font-medium hover:text-moss-deep transition-colors"
+            >
+              Back to admin sign in
+            </Link>
+          </p>
+        </form>
+      )}
     </AuthShell>
   );
 }

@@ -42,17 +42,11 @@ export default function AdminLogin() {
 
   return (
     <AuthShell
-      eyebrow="Store administration"
-      title="Keep the whole shop in view."
-      description="Sign in to manage products, orders, and the details behind every customer experience."
-      visualTitle="Everything, thoughtfully arranged."
-      visualCopy="A clear space for the work that keeps your store moving beautifully."
-      badge="Store Administration"
-      tags={["✦ Admin Workspace", "Store Controls", "Analytics & Orders"]}
-      compact
+      title="Admin Portal"
+      description="Sign in with your administrator credentials."
     >
-      <form onSubmit={handleSubmit} className="auth-form">
-        <AuthField label="Email">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <AuthField label="Admin email">
           <AuthInput
             icon={Mail}
             type="email"
@@ -64,35 +58,40 @@ export default function AdminLogin() {
           />
         </AuthField>
 
-        <AuthField label="Password">
+        <AuthField
+          label="Password"
+          action={
+            <Link
+              to="/admin/forgot-password"
+              className="text-moss hover:text-moss-deep font-medium transition-colors"
+            >
+              Forgot password?
+            </Link>
+          }
+        >
           <AuthInput
             icon={Lock}
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="Your admin password"
+            placeholder="••••••••"
             autoComplete="current-password"
             required
           />
         </AuthField>
 
-        <div className="auth-form-meta">
-          <Link
-            to="/admin/forgot-password"
-            className="text-[12px] text-moss hover:text-moss-deep font-medium transition-colors"
-          >
-            Forgot admin password?
-          </Link>
-        </div>
-
         {error && (
-          <div className="auth-alert">
-            <AlertCircle size={15} className="shrink-0" />
+          <div className="flex items-start gap-2.5 p-3 rounded-xl bg-clay-tint border border-clay/20 text-clay-deep text-[13px] leading-relaxed">
+            <AlertCircle size={16} className="shrink-0 mt-0.5 text-clay" />
             <span>{error}</span>
           </div>
         )}
 
-        <button type="submit" disabled={loading} className="auth-submit">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+        >
           {loading ? (
             <>
               <Loader2 size={16} className="animate-spin" />

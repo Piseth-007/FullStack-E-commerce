@@ -58,10 +58,25 @@ export default function ResetPassword() {
 
   if (!token || !email) {
     return (
-      <main className="auth-page px-4 py-8">
-        <div className="auth-alert">
-          <AlertCircle size={16} className="shrink-0" />
-          <span>Invalid or expired reset link.</span>
+      <main className="min-h-screen w-full flex flex-col justify-center items-center px-4 py-8 bg-paper">
+        <div className="w-full max-w-[440px] bg-surface rounded-2xl border border-hairline p-7 sm:p-9 text-center space-y-4 shadow-sm">
+          <div className="w-12 h-12 rounded-full bg-clay-tint flex items-center justify-center mx-auto text-clay">
+            <AlertCircle size={24} strokeWidth={2} />
+          </div>
+          <div>
+            <h2 className="font-display text-xl font-medium text-ink">
+              Invalid or expired link
+            </h2>
+            <p className="mt-1 text-[13.5px] text-stone leading-relaxed">
+              This password reset link is invalid or has expired. Please request a new one.
+            </p>
+          </div>
+          <Link
+            to="/forgot-password"
+            className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center"
+          >
+            Request new reset link
+          </Link>
         </div>
       </main>
     );
@@ -69,81 +84,86 @@ export default function ResetPassword() {
 
   return (
     <AuthShell
-      eyebrow="Almost there"
-      title="Choose a new password."
-      description="Make it something memorable, private, and easy to come back to."
-      visualTitle="Back to your best skin days."
-      visualCopy="One small reset, then you’re ready to return to your everyday ritual."
-      reverse
+      title="Set new password"
+      description="Enter your new password below."
     >
-      <div className="auth-form">
-        {success ? (
-          <div className="auth-success">
-            <CheckCircle2
-              size={28}
-              className="auth-success-icon"
-              strokeWidth={1.75}
-            />
-            <strong>Password reset successfully</strong>
-            <p>Redirecting you to sign in…</p>
+      {success ? (
+        <div className="text-center py-2 space-y-4">
+          <div className="w-12 h-12 rounded-full bg-moss-tint flex items-center justify-center mx-auto text-moss">
+            <CheckCircle2 size={24} strokeWidth={2} />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="auth-form">
-            <AuthField label="New password">
-              <AuthInput
-                icon={Lock}
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="At least 8 characters"
-                required
-              />
-            </AuthField>
+          <div>
+            <h3 className="font-display text-lg font-medium text-ink">
+              Password reset successfully
+            </h3>
+            <p className="mt-1 text-[13.5px] text-stone leading-relaxed">
+              Your password has been updated. Redirecting to sign in…
+            </p>
+          </div>
+          <Link
+            to="/login"
+            className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center"
+          >
+            Continue to sign in
+          </Link>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <AuthField label="New password">
+            <AuthInput
+              icon={Lock}
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 8 characters"
+              required
+            />
+          </AuthField>
 
-            <AuthField label="Confirm password">
-              <AuthInput
-                icon={Lock}
-                type="password"
-                value={passwordConfirmation}
-                onChange={(e) => setPasswordConfirmation(e.target.value)}
-                placeholder="Confirm password"
-                required
-              />
-            </AuthField>
+          <AuthField label="Confirm password">
+            <AuthInput
+              icon={Lock}
+              type="password"
+              value={passwordConfirmation}
+              onChange={(e) => setPasswordConfirmation(e.target.value)}
+              placeholder="Repeat your new password"
+              required
+            />
+          </AuthField>
 
-            {passwordsMatch && (
-              <div className="flex items-center gap-1.5 text-[11.5px] text-moss font-medium -mt-1">
-                <CheckCircle2 size={13} className="shrink-0" />
-                <span>Passwords match</span>
-              </div>
+          {error && (
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-clay-tint border border-clay/20 text-clay-deep text-[13px] leading-relaxed">
+              <AlertCircle size={16} className="shrink-0 mt-0.5 text-clay" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+          >
+            {loading ? (
+              <>
+                <Loader2 size={16} className="animate-spin" />
+                <span>Updating password…</span>
+              </>
+            ) : (
+              "Reset password"
             )}
-            {passwordsMismatch && (
-              <div className="flex items-center gap-1.5 text-[11.5px] text-clay font-medium -mt-1">
-                <XCircle size={13} className="shrink-0" />
-                <span>Passwords do not match</span>
-              </div>
-            )}
+          </button>
 
-            {error && (
-              <div className="auth-alert">
-                <AlertCircle size={15} className="shrink-0" />
-                <span>{error}</span>
-              </div>
-            )}
-
-            <button type="submit" disabled={loading} className="auth-submit">
-              {loading ? (
-                <>
-                  <Loader2 size={16} className="animate-spin" />
-                  <span>Resetting…</span>
-                </>
-              ) : (
-                "Reset password"
-              )}
-            </button>
-          </form>
-        )}
-      </div>
+          <p className="pt-2 text-center text-[13px] text-stone">
+            Remember your password?{" "}
+            <Link
+              to="/login"
+              className="text-moss font-medium hover:text-moss-deep transition-colors"
+            >
+              Sign in
+            </Link>
+          </p>
+        </form>
+      )}
     </AuthShell>
   );
 }
