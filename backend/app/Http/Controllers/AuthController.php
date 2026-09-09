@@ -2,11 +2,15 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\VerifyEmailOtp;
+use App\Models\EmailVerification;
 use App\Models\User;
 use App\Rules\RealEmail;
 use Google\Client as GoogleClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
@@ -16,22 +20,157 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'max:255', 'unique:users', new RealEmail()],
+            'email' => ['required', 'string', 'max:255', new RealEmail()],
             'password' => 'required|string|min:8|confirmed',
         ]);
 
-        $user = User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
+        $existingUser = User::where('email', $validated['email'])->first();
+        if ($existingUser && $existingUser->email_verified_at) {
+            throw ValidationException::withMessages([
+                'email' => ['An account with this email address already exists.'],
+            ]);
+        }
+
+        if ($existingUser) {
+            $user = $existingUser;
+            $user->update([
+                'name' => $validated['name'],
+                'password' => Hash::make($validated['password']),
+            ]);
+        } else {
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+                'email_verified_at' => null,
+            ]);
+        }
+
+        $otp = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+
+        EmailVerification::updateOrCreate(
+            ['email' => $user->email],
+            [
+                'otp' => $otp,
+                'expires_at' => now()->addMinutes(10),
+            ]
+        );
+
+        try {
+            Mail::to($user->email)->send(new VerifyEmailOtp($otp, $user->name));
+        } catch (\Throwable $e) {
+            Log::error("Failed to send OTP email to {$user->email}: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Unable to send verification email to this address. Please verify your email and try again.',
+            ], 422);
+        }
+
+        return response()->json([
+            'message' => 'A 6-digit verification code has been sent to your email.',
+            'email' => $user->email,
+            'requires_verification' => true,
+        ], 200);
+    }
+
+    public function verifyOtp(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+            'otp' => 'required|string|size:6',
         ]);
+
+        $verification = EmailVerification::where('email', $validated['email'])
+            ->where('otp', $validated['otp'])
+            ->first();
+
+        if (!$verification) {
+            throw ValidationException::withMessages([
+                'otp' => ['The verification code is incorrect.'],
+            ]);
+        }
+
+        if ($verification->expires_at->isPast()) {
+            throw ValidationException::withMessages([
+                'otp' => ['The verification code has expired. Please request a new one.'],
+            ]);
+        }
+
+        $user = User::where('email', $validated['email'])->first();
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => ['User not found.'],
+            ]);
+        }
+
+        $user->email_verified_at = now();
+        $user->save();
+
+        $verification->delete();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
+            'message' => 'Email verified successfully.',
             'user' => $user,
             'token' => $token,
-        ], 201);
+        ]);
+    }
+
+    public function resendOtp(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+        if (!$user) {
+            throw ValidationException::withMessages([
+                'email' => ['No account found with this email.'],
+            ]);
+        }
+
+        if ($user->email_verified_at) {
+            return response()->json([
+                'message' => 'Your email is already verified. You can log in directly.',
+                'already_verified' => true,
+            ]);
+        }
+
+        $recent = EmailVerification::where('email', $validated['email'])
+            ->where('created_at', '>', now()->subSeconds(60))
+            ->first();
+
+        if ($recent) {
+            $secondsLeft = 60 - now()->diffInSeconds($recent->created_at);
+            return response()->json([
+                'message' => "Please wait {$secondsLeft} seconds before requesting a new code.",
+            ], 429);
+        }
+
+        $otp = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+
+        EmailVerification::updateOrCreate(
+            ['email' => $user->email],
+            [
+                'otp' => $otp,
+                'expires_at' => now()->addMinutes(10),
+                'created_at' => now(),
+            ]
+        );
+
+        try {
+            Mail::to($user->email)->send(new VerifyEmailOtp($otp, $user->name));
+        } catch (\Throwable $e) {
+            Log::error("Failed to resend OTP to {$user->email}: " . $e->getMessage());
+            return response()->json([
+                'message' => 'Unable to send verification email. Please try again later.',
+            ], 500);
+        }
+
+        return response()->json([
+            'message' => 'A new 6-digit verification code has been sent to your email.',
+            'email' => $user->email,
+        ]);
     }
 
     public function login(Request $request)
@@ -47,6 +186,30 @@ class AuthController extends Controller
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);
+        }
+
+        if (!$user->email_verified_at) {
+            $otp = str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+            EmailVerification::updateOrCreate(
+                ['email' => $user->email],
+                [
+                    'otp' => $otp,
+                    'expires_at' => now()->addMinutes(10),
+                    'created_at' => now(),
+                ]
+            );
+
+            try {
+                Mail::to($user->email)->send(new VerifyEmailOtp($otp, $user->name));
+            } catch (\Throwable $e) {
+                Log::error("Failed to send login OTP to {$user->email}: " . $e->getMessage());
+            }
+
+            return response()->json([
+                'message' => 'Your email is not verified yet. We have sent a 6-digit verification code to your email.',
+                'requires_verification' => true,
+                'email' => $user->email,
+            ], 403);
         }
 
         $token = $user->createToken('auth_token')->plainTextToken;

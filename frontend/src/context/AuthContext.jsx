@@ -37,9 +37,25 @@ export function AuthProvider({ children }) {
 
   const register = async (data) => {
     const res = await api.post("/register", data);
-    localStorage.setItem("token", res.data.token);
-    setUser(res.data.user);
-    return res.data.user;
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
+      setUser(res.data.user);
+    }
+    return res.data;
+  };
+
+  const verifyOtp = async (email, otp) => {
+    const res = await api.post("/verify-otp", { email, otp });
+    if (res.data.token) {
+      localStorage.setItem("token", res.data.token);
+      setUser(res.data.user);
+    }
+    return res.data;
+  };
+
+  const resendOtp = async (email) => {
+    const res = await api.post("/resend-otp", { email });
+    return res.data;
   };
 
   const logout = async () => {
@@ -95,6 +111,8 @@ export function AuthProvider({ children }) {
         login,
         loginWithGoogle,
         register,
+        verifyOtp,
+        resendOtp,
         logout,
         forgotPassword,
         resetPassword,
