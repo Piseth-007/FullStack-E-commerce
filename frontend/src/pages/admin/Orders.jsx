@@ -21,6 +21,7 @@ import api from "../../api/axios";
 import { RowSkeleton } from "../../components/Skeleton";
 import { ToastContext } from "../../context/ToastContext";
 import Receipt from "../../components/Receipt";
+import ReceiptModal from "../../components/admin/ReceiptModal";
 import { useAdminNotifications } from "../../context/AdminNotificationsContext";
 const STATUSES = ["pending", "paid", "shipped", "completed", "cancelled"];
 const ORDERS_PER_PAGE = 10;
@@ -55,6 +56,9 @@ export default function Orders() {
   const [expanded, setExpanded] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
   const [printingOrder, setPrintingOrder] = useState(null);
+  const [receiptModalOrder, setReceiptModalOrder] = useState(null);
+  const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+  const [receiptFormat, setReceiptFormat] = useState("pos");
   const [currentPage, setCurrentPage] = useState(1);
   const { showToast } = useContext(ToastContext);
   const loadOrders = async (status = filter, isRefresh = false) => {
@@ -143,11 +147,11 @@ export default function Orders() {
       setUpdatingId(null);
     }
   };
-  const handlePrint = (order) => {
+  const handlePrint = (order, format = "pos") => {
+    setReceiptModalOrder(order);
     setPrintingOrder(order);
-    setTimeout(() => {
-      window.print();
-    }, 50);
+    setReceiptFormat(format);
+    setIsReceiptModalOpen(true);
   };
   const filteredOrders = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -328,6 +332,7 @@ export default function Orders() {
                     <TableHead>Total</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
+                    <TableHead className="text-right">Receipt</TableHead>
                   </tr>
                 </thead>
                 <tbody>
@@ -368,8 +373,20 @@ export default function Orders() {
         </>
       )}
       <div className="print-area">
-        <Receipt order={printingOrder} />
+        <Receipt
+          order={receiptModalOrder || printingOrder}
+          format={receiptFormat}
+        />
       </div>
+      <ReceiptModal
+        order={receiptModalOrder}
+        isOpen={isReceiptModalOpen}
+        initialFormat={receiptFormat}
+        onClose={() => {
+          setIsReceiptModalOpen(false);
+          setReceiptModalOrder(null);
+        }}
+      />
     </div>
   );
 }
@@ -392,7 +409,7 @@ function OrderRow({
   const addressPhone =
     address?.telephone || address?.phone_number || address?.phoneNumber || "";
   const addressLine = [
-    address?.commnune,
+    address?.commune || address?.commnune,
     address?.district,
     address?.city_province,
     address?.label,
@@ -485,10 +502,21 @@ function OrderRow({
             </select>
           </div>
         </td>
+        <td className="px-5 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            onClick={onPrint}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface hover:bg-paper text-stone hover:text-ink text-[12px] font-medium transition-colors shadow-2xs cursor-pointer"
+            title="Preview & Print Receipt"
+          >
+            <Printer size={13} strokeWidth={1.8} />
+            <span className="hidden sm:inline">Receipt</span>
+          </button>
+        </td>
       </tr>
       {expanded && (
         <tr className="border-b border-hairline bg-paper/30">
-          <td colSpan={5} className="px-5 py-4">
+          <td colSpan={6} className="px-5 py-4">
             <div className="mb-3 flex items-center justify-end">
               <button
                 type="button"
@@ -496,9 +524,10 @@ function OrderRow({
                   e.stopPropagation();
                   onPrint();
                 }}
-                className="flex items-center gap-2 rounded-lg border border-hairline bg-surface px-3.5 py-2 text-[12.5px] font-medium text-ink transition-colors hover:bg-paper"
+                className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-surface px-4 py-2 text-[12.5px] font-medium text-ink transition-all hover:bg-paper shadow-2xs hover:shadow-xs cursor-pointer"
               >
-                <Printer size={14} strokeWidth={1.75} /> Print Receipt
+                <Printer size={15} strokeWidth={1.8} className="text-moss" />
+                <span>Print Receipt</span>
               </button>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
