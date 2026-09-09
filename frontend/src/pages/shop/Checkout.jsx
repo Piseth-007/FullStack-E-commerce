@@ -590,7 +590,7 @@ export default function Checkout() {
                 <div
                   key={addr.id}
                   onClick={() => setSelectedId(addr.id)}
-                  className={`w-full text-left flex items-start gap-3 p-4 rounded-xl border transition-colors cursor-pointer ${
+                  className={`w-full text-left flex items-start gap-3 p-4 rounded-none border transition-colors cursor-pointer ${
                     selectedId === addr.id
                       ? "border-moss bg-moss-tint"
                       : "border-hairline bg-surface hover:border-stone/30"
@@ -663,7 +663,7 @@ export default function Checkout() {
             {showForm && (
               <form
                 onSubmit={handleAddAddress}
-                className="bg-surface border border-hairline rounded-xl p-5 space-y-3 mt-3"
+                className="bg-surface border border-hairline rounded-none p-5 space-y-3 mt-3 shadow-xs"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
@@ -753,7 +753,7 @@ export default function Checkout() {
                 <div className="flex gap-2 pt-1">
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-lg bg-moss text-white text-[13px] font-medium hover:bg-moss-deep"
+                    className="px-4 py-2 rounded-none border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep shadow-xs"
                   >
                     {editingAddressId ? "Update Address" : "Save Address"}
                   </button>
@@ -765,7 +765,7 @@ export default function Checkout() {
                         setShowForm(false);
                         resetAddressForm();
                       }}
-                      className="px-4 py-2 rounded-lg border border-hairline text-ink text-[13px] font-medium hover:bg-paper"
+                      className="px-4 py-2 rounded-none border border-hairline text-ink text-[13px] font-medium hover:bg-paper"
                     >
                       Cancel
                     </button>
@@ -781,11 +781,11 @@ export default function Checkout() {
               Payment Method
             </p>
 
-            <div className="bg-surface border-2 border-moss/40 rounded-xl p-4.5 relative overflow-hidden transition-all shadow-xs">
+            <div className="bg-surface border-2 border-moss/40 rounded-none p-4.5 relative overflow-hidden transition-all shadow-xs">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-moss">
-                    <div className="h-2 w-2 rounded-full bg-moss" />
+                  <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-none border-2 border-moss">
+                    <div className="h-2 w-2 rounded-none bg-moss" />
                   </div>
 
                   <div>
@@ -793,7 +793,7 @@ export default function Checkout() {
                       <span className="font-medium text-[14px] text-ink">
                         Bakong KHQR
                       </span>
-                      <span className="rounded-full bg-moss-tint px-2 py-0.5 text-[11px] font-medium text-moss">
+                      <span className="rounded-none border border-moss/20 bg-moss-tint px-2 py-0.5 text-[11px] font-medium text-moss">
                         Instant
                       </span>
                     </div>
@@ -842,7 +842,7 @@ export default function Checkout() {
               Order Items
             </p>
 
-            <div className="bg-surface border border-hairline rounded-xl divide-y divide-hairline">
+            <div className="bg-surface border border-hairline rounded-none divide-y divide-hairline shadow-xs">
               {items.map((item) => (
                 <div
                   key={item.id}
@@ -872,7 +872,7 @@ export default function Checkout() {
         </div>
 
         {/* ORDER SUMMARY */}
-        <div className="bg-surface border border-hairline rounded-xl p-5 h-fit lg:sticky lg:top-24">
+        <div className="bg-surface border border-hairline rounded-none p-5 h-fit lg:sticky lg:top-24 shadow-xs">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-4">
             Order Summary
           </p>
@@ -897,7 +897,7 @@ export default function Checkout() {
             disabled={
               placing || items.length === 0 || !selectedId || showQrModal
             }
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl bg-[#E1232E] hover:bg-[#C81A24] text-white text-[14px] font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-none border border-[#E1232E] bg-[#E1232E] hover:bg-[#C81A24] text-white text-[14px] font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {placing ? (
               <Loader2 size={18} className="animate-spin" />
@@ -927,7 +927,7 @@ export default function Checkout() {
       {/* KHQR MODAL */}
       {showQrModal && paymentData && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-surface rounded-3xl max-w-[380px] w-full shadow-2xl overflow-hidden border border-hairline my-auto animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-surface rounded-none max-w-[380px] w-full shadow-2xl overflow-hidden border border-hairline my-auto animate-in fade-in zoom-in-95 duration-200">
             {/* OFFICIAL KHQR STAND CARD */}
             <div className="relative bg-surface">
               {/* TOP KHQR RED BANNER */}
@@ -942,7 +942,7 @@ export default function Checkout() {
                     type="button"
                     onClick={handleClosePayment}
                     disabled={checkingPayment || cancellingPayment}
-                    className="p-1.5 rounded-full bg-white/15 hover:bg-white/25 transition-colors disabled:opacity-50 text-white"
+                    className="p-1.5 rounded-none border border-white/20 bg-white/15 hover:bg-white/25 transition-colors disabled:opacity-50 text-white"
                     title="Close"
                   >
                     <X size={18} />
@@ -968,16 +968,16 @@ export default function Checkout() {
 
               {/* TICKET-STYLE DASHED DIVIDER */}
               <div className="relative flex items-center justify-between my-2 px-3">
-                <div className="w-3 h-5 bg-black/15 dark:bg-black/40 rounded-r-full -ml-3" />
+                <div className="w-3 h-5 bg-black/15 dark:bg-black/40 rounded-r-none -ml-3" />
                 <div className="flex-1 border-t-2 border-dashed border-hairline mx-2" />
-                <div className="w-3 h-5 bg-black/15 dark:bg-black/40 rounded-l-full -mr-3" />
+                <div className="w-3 h-5 bg-black/15 dark:bg-black/40 rounded-l-none -mr-3" />
               </div>
 
               {/* QR BODY: ACTIVE QR OR SUCCESS */}
               <div className="px-6 pb-4">
                 {paymentStatus === "paid" ? (
-                  <div className="rounded-2xl border border-moss/20 bg-moss-tint px-6 py-10 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-moss text-white shadow-sm">
+                  <div className="rounded-none border border-moss/20 bg-moss-tint px-6 py-10 text-center">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-none border border-moss bg-moss text-white shadow-sm">
                       <CheckCircle2 size={36} strokeWidth={2} />
                     </div>
                     <h3 className="mt-4 text-[17px] font-semibold text-ink">
@@ -996,7 +996,7 @@ export default function Checkout() {
                     {/* DYNAMIC QR CANVAS */}
                     <div
                       ref={qrCanvasRef}
-                      className="p-3 bg-white rounded-2xl shadow-xs border border-hairline/80 flex items-center justify-center"
+                      className="p-3 bg-white rounded-none shadow-xs border border-hairline/80 flex items-center justify-center"
                     >
                       {paymentData.qr_string ? (
                         <QRCodeCanvas
@@ -1046,12 +1046,12 @@ export default function Checkout() {
                 <>
                   {/* COUNTDOWN */}
                   {paymentStatus === "expired" ? (
-                    <div className="rounded-xl border border-clay/30 bg-clay-tint px-3 py-2 text-center text-[12px] font-medium text-clay">
+                    <div className="rounded-none border border-clay/30 bg-clay-tint px-3 py-2 text-center text-[12px] font-medium text-clay">
                       This QR code has expired. Please close and try again.
                     </div>
                   ) : (
                     <div
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-none border ${
                         isExpiringSoon
                           ? "border-clay/30 bg-clay-tint text-clay"
                           : "border-moss/20 bg-moss-tint text-moss-deep"
@@ -1072,8 +1072,8 @@ export default function Checkout() {
                   {/* AUTO-CHECK INDICATOR */}
                   <div className="flex items-center justify-center gap-1.5 text-[11px] text-stone">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-moss opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-moss"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-none bg-moss opacity-75"></span>
+                      <span className="relative inline-flex rounded-none h-2 w-2 bg-moss"></span>
                     </span>
                     <span>Checking payment automatically every 5s</span>
                   </div>
@@ -1091,7 +1091,7 @@ export default function Checkout() {
                     type="button"
                     onClick={() => checkPaymentStatus(true)}
                     disabled={checkingPayment || paymentStatus === "expired"}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-none bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs disabled:opacity-50"
                   >
                     {checkingPayment && (
                       <Loader2 size={16} className="animate-spin" />
@@ -1108,7 +1108,7 @@ export default function Checkout() {
                     <button
                       type="button"
                       onClick={handleCopyQr}
-                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors"
+                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-none hover:bg-paper text-ink text-[12px] font-medium transition-colors"
                     >
                       <Copy size={13} />
                       <span>Copy KHQR</span>
@@ -1117,7 +1117,7 @@ export default function Checkout() {
                     <button
                       type="button"
                       onClick={handleDownloadQr}
-                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors"
+                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-none hover:bg-paper text-ink text-[12px] font-medium transition-colors"
                     >
                       <Download size={13} />
                       <span>Download QR</span>
@@ -1144,4 +1144,4 @@ export default function Checkout() {
 }
 
 const inputClass =
-  "w-full px-3 py-2 rounded-lg border border-hairline bg-paper text-[13.5px] focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss";
+  "w-full px-3 py-2 rounded-none border border-hairline bg-paper text-[13.5px] focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss";

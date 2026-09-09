@@ -630,7 +630,7 @@ export default function Home() {
           flex
           items-center
           gap-2
-          rounded-full
+          rounded-none
           border
           border-hairline
           bg-surface/90
@@ -815,12 +815,12 @@ export default function Home() {
                   {/* Slider Top Bar: Tag, Counter & Arrows */}
                   <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 rounded-full bg-moss-tint px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-moss">
-                        <span className="h-1.5 w-1.5 rounded-full bg-moss" />
+                      <span className="inline-flex items-center gap-1.5 rounded-none border border-moss/20 bg-moss-tint px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-moss">
+                        <span className="h-1.5 w-1.5 rounded-none bg-moss" />
                         {heroSlides[activeSlide]?.tag || "Featured Product"}
                       </span>
                       {Number(heroSlides[activeSlide]?.discount) > 0 && (
-                        <span className="rounded-full bg-terracotta/10 px-2 py-0.5 text-[10.5px] font-semibold text-terracotta">
+                        <span className="rounded-none border border-terracotta/20 bg-terracotta/10 px-2 py-0.5 text-[10.5px] font-semibold text-terracotta">
                           -{Math.round(Number(heroSlides[activeSlide]?.discount))}% OFF
                         </span>
                       )}
@@ -835,7 +835,7 @@ export default function Home() {
                           type="button"
                           onClick={prevSlide}
                           aria-label="Previous product"
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-hairline bg-surface text-stone transition-colors hover:border-moss/30 hover:bg-moss-tint hover:text-moss active:scale-95"
+                          className="flex h-7 w-7 items-center justify-center rounded-none border border-hairline bg-surface text-stone transition-colors hover:border-moss/30 hover:bg-moss-tint hover:text-moss active:scale-95"
                         >
                           <ChevronLeft size={14} />
                         </button>
@@ -843,7 +843,7 @@ export default function Home() {
                           type="button"
                           onClick={nextSlide}
                           aria-label="Next product"
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-hairline bg-surface text-stone transition-colors hover:border-moss/30 hover:bg-moss-tint hover:text-moss active:scale-95"
+                          className="flex h-7 w-7 items-center justify-center rounded-none border border-hairline bg-surface text-stone transition-colors hover:border-moss/30 hover:bg-moss-tint hover:text-moss active:scale-95"
                         >
                           <ChevronRight size={14} />
                         </button>
@@ -923,7 +923,7 @@ export default function Home() {
                           type="button"
                           onClick={() => setActiveSlide(idx)}
                           aria-label={`Go to product slide ${idx + 1}`}
-                          className={`h-2 rounded-full transition-all duration-300 ${
+                          className={`h-1.5 rounded-none transition-all duration-300 ${
                             activeSlide === idx
                               ? "w-6 bg-moss"
                               : "w-2 bg-hairline hover:bg-stone/50"
@@ -1202,7 +1202,7 @@ export default function Home() {
                 w-10
                 items-center
                 justify-center
-                rounded-full
+                rounded-none
                 border
                 border-moss/15
                 bg-paper
@@ -1508,7 +1508,9 @@ export default function Home() {
           w-11
           items-center
           justify-center
-          rounded-full
+          rounded-none
+          border
+          border-moss
           bg-moss
           text-white
           shadow-[0_8px_25px_rgba(63,88,67,0.25)]
@@ -1713,7 +1715,7 @@ function CompactCategoryCard({ category, index }) {
           w-8
           items-center
           justify-center
-          rounded-full
+          rounded-none
           border
           border-moss/15
           bg-paper
@@ -1760,7 +1762,9 @@ function CompactCategoryCard({ category, index }) {
             shrink-0
             items-center
             justify-center
-            rounded-full
+            rounded-none
+            border
+            border-hairline
             bg-paper
             text-stone
             translate-x-2
@@ -1830,7 +1834,9 @@ function TrustItem({ icon: Icon, label }) {
           w-9
           items-center
           justify-center
-          rounded-full
+          rounded-none
+          border
+          border-moss/15
           bg-moss-tint
           transition-all
           duration-300

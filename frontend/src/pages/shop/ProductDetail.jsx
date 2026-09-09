@@ -313,7 +313,7 @@ export default function ProductDetail() {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-6xl items-center justify-center px-6">
         <div className="text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-moss-tint">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-none border border-hairline bg-moss-tint">
             <ImageOff size={22} strokeWidth={1.4} className="text-moss" />
           </div>
 
@@ -479,7 +479,7 @@ export default function ProductDetail() {
       <main className="mx-auto max-w-6xl px-6 pb-20 pt-7">
         <div className="grid items-start gap-10 p-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
           <div className="product-detail-fade">
-            <div className="group relative aspect-square overflow-hidden rounded-2xl border border-hairline bg-surface">
+            <div className="group relative aspect-square overflow-hidden rounded-none border border-hairline bg-surface">
               <div className="product-detail-pulse pointer-events-none absolute -right-16 -top-16 z-0 h-40 w-40 rounded-full bg-moss/6 blur-2xl" />
 
               {getImageUrl(images[activeImage]) ? (
@@ -502,13 +502,13 @@ export default function ProductDetail() {
               )}
 
               {hasDiscount && !isOutOfStock && (
-                <span className="absolute left-4 top-4 z-20 rounded-full bg-moss px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white shadow-sm">
+                <span className="absolute left-4 top-4 z-20 border border-moss bg-moss px-3 py-1.5 text-[10px] font-medium uppercase tracking-[0.08em] text-white shadow-sm">
                   -{discount}%
                 </span>
               )}
 
               {product.free_delivery && !isOutOfStock && (
-                <span className="absolute right-4 top-4 z-20 flex items-center gap-1.5 rounded-full border border-hairline/70 bg-surface/90 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.06em] text-moss backdrop-blur-md">
+                <span className="absolute right-4 top-4 z-20 flex items-center gap-1.5 border border-hairline/70 bg-surface/90 px-3 py-1.5 text-[9px] font-medium uppercase tracking-[0.06em] text-moss backdrop-blur-md">
                   <Truck size={11} strokeWidth={1.7} />
                   Free delivery
                 </span>
@@ -516,7 +516,7 @@ export default function ProductDetail() {
 
               {isOutOfStock && (
                 <div className="absolute inset-0 z-20 flex items-center justify-center bg-paper/30 backdrop-blur-[2px]">
-                  <span className="rounded-full border border-hairline bg-surface/90 px-5 py-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-stone shadow-sm">
+                  <span className="border border-hairline bg-surface/90 px-5 py-2.5 text-[10px] font-medium uppercase tracking-[0.12em] text-stone shadow-sm">
                     Out of stock
                   </span>
                 </div>
@@ -528,7 +528,7 @@ export default function ProductDetail() {
                     type="button"
                     onClick={previousImage}
                     aria-label="Previous image"
-                    className="absolute left-4 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-hairline/70 bg-surface/90 text-ink opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface group-hover:opacity-100"
+                    className="absolute left-4 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-hairline/70 bg-surface/90 text-ink opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface group-hover:opacity-100"
                   >
                     <ChevronLeft size={17} />
                   </button>
@@ -537,7 +537,7 @@ export default function ProductDetail() {
                     type="button"
                     onClick={nextImage}
                     aria-label="Next image"
-                    className="absolute right-4 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-hairline/70 bg-surface/90 text-ink opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface group-hover:opacity-100"
+                    className="absolute right-4 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center border border-hairline/70 bg-surface/90 text-ink opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface group-hover:opacity-100"
                   >
                     <ChevronRight size={17} />
                   </button>
@@ -545,7 +545,7 @@ export default function ProductDetail() {
               )}
 
               {images.length > 1 && (
-                <div className="absolute bottom-4 right-4 z-20 rounded-full border border-hairline/70 bg-surface/85 px-3 py-1 text-[9px] font-mono text-stone backdrop-blur-md">
+                <div className="absolute bottom-4 right-4 z-20 border border-hairline/70 bg-surface/85 px-3 py-1 text-[9px] font-mono text-stone backdrop-blur-md">
                   {activeImage + 1} / {images.length}
                 </div>
               )}
@@ -599,7 +599,7 @@ export default function ProductDetail() {
                 type="button"
                 onClick={() => setLiked((value) => !value)}
                 aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
-                className={`flex h-9 w-9 items-center justify-center rounded-full border transition-all duration-300 ${
+                className={`flex h-9 w-9 items-center justify-center rounded-none border transition-all duration-300 ${
                   liked
                     ? "border-moss/20 bg-moss-tint text-moss"
                     : "border-hairline bg-surface text-stone hover:border-moss/30 hover:text-moss"
@@ -668,7 +668,7 @@ export default function ProductDetail() {
                     ${formatPrice(price)}
                   </span>
 
-                  <span className="rounded-full bg-moss-tint px-2 py-1 text-[9px] font-medium uppercase tracking-[0.06em] text-moss">
+                  <span className="rounded-none border border-moss/20 bg-moss-tint px-2 py-1 text-[9px] font-mono font-medium uppercase tracking-[0.06em] text-moss">
                     Save {discount}%
                   </span>
                 </>
@@ -692,7 +692,7 @@ export default function ProductDetail() {
                     <span
                       key={skinType.id || skinType.name}
                       title={skinType.description || undefined}
-                      className="rounded-full border border-hairline bg-moss-tint px-3 py-1.5 text-[11px] font-medium text-moss"
+                      className="rounded-none border border-hairline bg-moss-tint px-3 py-1.5 text-[11px] font-medium text-moss"
                     >
                       {skinType.name || skinType}
                     </span>
@@ -711,17 +711,17 @@ export default function ProductDetail() {
             <div className="mt-6">
               {isOutOfStock ? (
                 <div className="flex items-center gap-2 text-[12px] font-medium text-clay">
-                  <span className="h-1.5 w-1.5 rounded-full bg-clay" />
+                  <span className="h-1.5 w-1.5 rounded-none bg-clay" />
                   Currently unavailable
                 </div>
               ) : isLowStock ? (
                 <div className="flex items-center gap-2 text-[12px] font-medium text-clay">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-clay" />
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-none bg-clay" />
                   Only {stock} left in stock
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-[12px] font-medium text-moss">
-                  <span className="h-1.5 w-1.5 rounded-full bg-moss" />
+                  <span className="h-1.5 w-1.5 rounded-none bg-moss" />
                   In stock
                 </div>
               )}
@@ -729,10 +729,10 @@ export default function ProductDetail() {
 
             <div className="mt-7 flex gap-3">
               <div
-                className={`flex h-12.5 items-center rounded-xl border ${
+                className={`flex h-12.5 items-center rounded-none border ${
                   isOutOfStock
                     ? "border-hairline opacity-50"
-                    : "border-hairline"
+                    : "border-hairline bg-surface"
                 }`}
               >
                 <button
@@ -762,10 +762,10 @@ export default function ProductDetail() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={adding || isOutOfStock}
-                className={`group flex h-12.5 flex-1 items-center justify-center gap-2 rounded-xl px-5 text-[13px] font-medium text-white shadow-[0_10px_25px_rgba(63,88,67,0.14)] transition-all duration-300 ${
+                className={`group flex h-12.5 flex-1 items-center justify-center gap-2 rounded-none border px-5 text-[13px] font-medium text-white shadow-[0_10px_25px_rgba(63,88,67,0.14)] transition-all duration-300 ${
                   added
-                    ? "bg-moss-deep"
-                    : "bg-moss hover:-translate-y-0.5 hover:bg-moss-deep hover:shadow-[0_14px_30px_rgba(63,88,67,0.22)]"
+                    ? "border-moss-deep bg-moss-deep"
+                    : "border-moss bg-moss hover:-translate-y-0.5 hover:bg-moss-deep hover:shadow-[0_14px_30px_rgba(63,88,67,0.22)]"
                 } disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 {added ? (
@@ -880,8 +880,8 @@ export default function ProductDetail() {
               {reviewsLoading ? (
                 <ReviewsSkeleton />
               ) : reviews.length === 0 ? (
-                <div className="rounded-2xl border border-hairline bg-surface px-6 py-10 text-center">
-                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-moss-tint">
+                <div className="rounded-none border border-hairline bg-surface px-6 py-10 text-center">
+                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-none border border-hairline bg-moss-tint">
                     <Sparkles
                       size={17}
                       strokeWidth={1.4}
@@ -937,13 +937,13 @@ export default function ProductDetail() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="cart-sheet-title"
-            className="cart-sheet-panel w-full rounded-t-3xl bg-surface px-6 pb-8 pt-4 shadow-2xl sm:mx-auto sm:max-w-lg"
+            className="cart-sheet-panel w-full rounded-none border-t border-hairline bg-surface px-6 pb-8 pt-4 shadow-2xl sm:mx-auto sm:max-w-lg"
             onClick={(event) => event.stopPropagation()}
           >
-            <div className="mx-auto mb-5 h-1.5 w-12 rounded-full bg-hairline" />
+            <div className="mx-auto mb-5 h-1 w-12 rounded-none bg-hairline" />
 
             <div className="cart-sheet-content flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-moss-tint text-moss">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-none border border-moss/20 bg-moss-tint text-moss">
                 <Check size={20} strokeWidth={2} />
               </div>
 
@@ -1083,7 +1083,7 @@ function RelatedProductCard({ product }) {
         )}
 
         {hasDiscount && (
-          <span className="absolute left-3 top-3 rounded-full bg-moss px-2.5 py-1 text-[9px] font-medium text-white">
+          <span className="absolute left-3 top-3 rounded-none border border-moss bg-moss px-2.5 py-1 text-[9px] font-mono font-medium text-white">
             -{discount}%
           </span>
         )}
@@ -1119,7 +1119,7 @@ function RelatedProductCard({ product }) {
 function ProductBenefit({ icon: Icon, title, text }) {
   return (
     <div className="group flex items-center gap-3 py-4">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-moss-tint transition-all duration-300 group-hover:scale-105 group-hover:bg-moss">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-none border border-hairline bg-moss-tint transition-all duration-300 group-hover:scale-105 group-hover:bg-moss">
         <Icon
           size={15}
           strokeWidth={1.5}
@@ -1143,7 +1143,7 @@ function ReviewItem({ review }) {
     <article className="py-6 first:pt-0 last:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-moss-tint">
+          <div className="flex h-8 w-8 items-center justify-center rounded-none border border-hairline bg-moss-tint">
             <span className="text-[10px] font-medium uppercase text-moss">
               {(review.user?.name || "U").charAt(0).toUpperCase()}
             </span>

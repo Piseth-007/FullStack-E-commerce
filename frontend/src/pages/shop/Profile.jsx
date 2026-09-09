@@ -514,7 +514,7 @@ export default function Profile() {
 
                     <div className="flex flex-col sm:flex-row sm:items-center gap-5">
                       <div
-                        className="relative w-20 h-20 shrink-0 rounded-full overflow-hidden flex items-center justify-center"
+                        className="relative w-20 h-20 shrink-0 rounded-none border border-hairline overflow-hidden flex items-center justify-center shadow-2xs"
                         style={{
                           backgroundColor: "var(--color-moss)",
                           color: "var(--color-paper)",
@@ -541,7 +541,7 @@ export default function Profile() {
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={savingProfile}
-                          className="absolute bottom-1 right-1 w-7 h-7 flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-105 disabled:opacity-50"
+                          className="absolute bottom-1 right-1 w-7 h-7 flex items-center justify-center rounded-none border transition-all duration-200 hover:scale-105 disabled:opacity-50"
                           style={{
                             backgroundColor: "var(--color-surface)",
                             borderColor: "var(--color-paper)",
@@ -782,7 +782,7 @@ export default function Profile() {
 
                             {address.is_default && (
                               <span
-                                className="inline-flex px-2 py-0.5 text-[11px] rounded-full"
+                                className="inline-flex px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-none"
                                 style={{
                                   backgroundColor: "var(--color-surface)",
                                   border: "1px solid var(--color-hairline)",

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Star, RefreshCw } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Star, RefreshCw, PackageX } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { useToast } from "../../context/useToast";
 
@@ -296,7 +296,7 @@ export default function OrderHistory() {
   // Full-page skeleton — only when there's truly no
   // cached data to show yet.
   // ─────────────────────────────────────────────
-  const showFullSkeleton = loading && orders.length === 0;
+  const showFullSkeleton = loading || (refreshing && orders.length === 0);
 
   if (showFullSkeleton) {
     return <OrderHistorySkeleton />;
@@ -325,10 +325,22 @@ export default function OrderHistory() {
           onRetry={() => loadOrders()}
         />
       ) : orders.length === 0 ? (
-        <div className="py-16 text-center">
-          <p className="text-[13.5px] text-stone">
-            You haven't placed any orders yet.
+        <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-none bg-surface px-6">
+          <div className="w-14 h-14 rounded-none border border-hairline bg-moss-tint flex items-center justify-center mb-4">
+            <PackageX size={22} className="text-moss" strokeWidth={1.75} />
+          </div>
+          <p className="font-display text-[20px] font-medium text-ink mb-1">
+            No orders found
           </p>
+          <p className="text-[13.5px] text-stone mb-6 max-w-sm">
+            You haven't placed any orders yet. Start exploring our collection.
+          </p>
+          <Link
+            to="/products"
+            className="rounded-none border border-moss bg-moss px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-moss-deep shadow-xs"
+          >
+            Browse products
+          </Link>
         </div>
       ) : (
         <div

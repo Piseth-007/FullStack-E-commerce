@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import api from "../../api/axios";
 import ProductCard from "../../components/storefront/ProductCart";
+import { ProductSkeleton } from "../../components/Skeleton";
 
 const SORTS = [
   { value: "", label: "Newest" },
@@ -233,9 +234,7 @@ export default function ProductList() {
   };
 
   const clearFilters = () => {
-    const next = new URLSearchParams();
-    if (search) next.set("search", search);
-    setSearchParams(next);
+    setSearchParams(new URLSearchParams());
   };
 
   const clearSearch = () => updateParam("search", "");
@@ -302,7 +301,7 @@ export default function ProductList() {
     maxPrice,
   ].filter(Boolean).length;
 
-  const showFullSkeleton = loading && products.length === 0;
+  const isLoading = loading || fetching;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -343,16 +342,16 @@ export default function ProductList() {
       </div>
 
       <div className="flex items-center gap-2 mb-4">
-        {meta && (
+        {meta && !isLoading && (
           <p className="text-[13px] text-stone">
             {meta.total} {meta.total === 1 ? "product" : "products"}
           </p>
         )}
 
-        {fetching && products.length > 0 && (
+        {isLoading && (
           <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-stone/60">
             <RefreshCw size={11} className="animate-spin" />
-            Updating
+            Loading products...
           </span>
         )}
       </div>
@@ -508,18 +507,14 @@ export default function ProductList() {
             </select>
           </div>
 
-          {showFullSkeleton ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6">
+          {isLoading ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 mb-10">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="animate-pulse">
-                  <div className="aspect-square bg-hairline/40 rounded-xl mb-3" />
-                  <div className="h-2.5 w-16 bg-hairline/50 rounded mb-2" />
-                  <div className="h-3.5 w-3/4 bg-hairline/60 rounded" />
-                </div>
+                <ProductSkeleton key={i} />
               ))}
             </div>
           ) : error && products.length === 0 ? (
-            <div className="flex flex-col items-center text-center py-20 border border-dashed border-clay/20 rounded-xl">
+            <div className="flex flex-col items-center text-center py-20 border border-dashed border-clay/20 rounded-none bg-surface">
               <p className="text-[14px] text-clay mb-3">
                 Couldn't load products.
               </p>
@@ -532,23 +527,25 @@ export default function ProductList() {
               </button>
             </div>
           ) : products.length === 0 ? (
-            <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-xl">
-              <div className="w-14 h-14 rounded-2xl bg-moss-tint flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-none bg-surface px-6">
+              <div className="w-14 h-14 rounded-none border border-hairline bg-moss-tint flex items-center justify-center mb-4">
                 <PackageX size={22} className="text-moss" strokeWidth={1.75} />
               </div>
 
-              <p className="text-[15px] font-medium text-ink mb-1">
+              <p className="font-display text-[20px] font-medium text-ink mb-1">
                 No products found
               </p>
 
-              <p className="text-[13px] text-stone mb-5 max-w-sm">
-                Try adjusting or clearing your filters to see more results.
+              <p className="text-[13.5px] text-stone mb-6 max-w-md">
+                {search
+                  ? `We couldn't find any products matching "${search}". Try checking your spelling or clearing filters.`
+                  : "No products matched your selected filters. Try adjusting or clearing your criteria."}
               </p>
 
-              {activeFilterCount > 0 && (
+              {(activeFilterCount > 0 || search) && (
                 <button
                   onClick={clearFilters}
-                  className="text-[13px] font-medium text-moss hover:text-moss-deep transition-colors"
+                  className="rounded-none border border-moss bg-moss px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-moss-deep shadow-xs"
                 >
                   Clear all filters
                 </button>
@@ -556,13 +553,7 @@ export default function ProductList() {
             </div>
           ) : (
             <>
-              <div
-                className={`
-                  grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 mb-10
-                  transition-opacity duration-300
-                  ${fetching ? "opacity-60" : "opacity-100"}
-                `}
-              >
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 mb-10">
                 {products.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}

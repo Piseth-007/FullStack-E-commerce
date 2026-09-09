@@ -87,7 +87,7 @@ function BrandCard({ brand, index }) {
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Arrow */}
-      <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full bg-paper text-stone opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:bg-moss group-hover:text-white">
+      <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-none border border-hairline bg-paper text-stone opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:border-moss group-hover:bg-moss group-hover:text-white">
         <ArrowUpRight
           size={14}
           strokeWidth={2}

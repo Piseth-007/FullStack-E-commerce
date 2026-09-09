@@ -6,9 +6,7 @@ import FadeImage from "../common/FadeImage";
 
 export default function ProductCard({ product }) {
   const productId = product?.id;
-
   const image = product?.images?.[0]?.url || "";
-
   const productName = product?.name || "Product";
 
   const brandName =
@@ -61,10 +59,9 @@ export default function ProductCard({ product }) {
         className="
           block
           outline-none
-          focus-visible:rounded-2xl
-          focus-visible:ring-2
-          focus-visible:ring-moss/40
-          focus-visible:ring-offset-2
+          focus-visible:rounded-none
+          focus-visible:ring-1
+          focus-visible:ring-moss
         "
       >
         <div
@@ -72,16 +69,15 @@ export default function ProductCard({ product }) {
             relative
             aspect-square
             overflow-hidden
-            rounded-2xl
             border
             border-hairline
             bg-paper
             transition-all
             duration-500
             ease-[cubic-bezier(.22,1,.36,1)]
-            group-hover:-translate-y-1
-            group-hover:border-moss/20
-            group-hover:shadow-[0_18px_40px_rgba(63,88,67,0.10)]
+            group-hover:-translate-y-0.5
+            group-hover:border-moss/40
+            group-hover:shadow-[0_12px_32px_rgba(63,88,67,0.08)]
           "
         >
           {image ? (
@@ -100,7 +96,7 @@ export default function ProductCard({ product }) {
                 ${
                   isOutOfStock
                     ? "grayscale-30 opacity-70"
-                    : "group-hover:scale-[1.055]"
+                    : "group-hover:scale-[1.04]"
                 }
               `}
             />
@@ -155,16 +151,19 @@ export default function ProductCard({ product }) {
               {hasDiscount && !isOutOfStock && (
                 <span
                   className="
-                      rounded-full
+                      rounded-none
+                      border
+                      border-red-600
                       bg-red-600
-                      px-2.5
-                      py-1
+                      px-2
+                      py-0.5
                       text-[9px]
+                      font-mono
                       font-medium
                       uppercase
-                      tracking-[0.08em]
+                      tracking-wider
                       text-white
-                      shadow-sm
+                      shadow-xs
                     "
                 >
                   -{discount}%
@@ -176,19 +175,20 @@ export default function ProductCard({ product }) {
                   className="
                     flex
                     items-center
-                    gap-1
-                    rounded-full
+                    gap-1.5
+                    rounded-none
                     border
-                    border-hairline/60
-                    bg-surface/90
-                    px-2.5
-                    py-1
+                    border-hairline
+                    bg-surface/95
+                    px-2
+                    py-0.5
                     text-[9px]
+                    font-mono
                     font-medium
                     uppercase
-                    tracking-[0.06em]
+                    tracking-wider
                     text-moss
-                    shadow-sm
+                    shadow-xs
                     backdrop-blur-md
                   "
                 >
@@ -226,24 +226,25 @@ export default function ProductCard({ product }) {
                 flex
                 items-center
                 justify-center
-                bg-paper/25
+                bg-paper/30
                 backdrop-blur-[1px]
               "
             >
               <span
                 className="
-                  rounded-full
+                  rounded-none
                   border
                   border-hairline
-                  bg-surface/90
-                  px-4
-                  py-2
+                  bg-surface/95
+                  px-3
+                  py-1.5
                   text-[10px]
+                  font-mono
                   font-medium
                   uppercase
-                  tracking-[0.12em]
+                  tracking-widest
                   text-stone
-                  shadow-sm
+                  shadow-xs
                 "
               >
                 Out of stock
@@ -260,33 +261,34 @@ export default function ProductCard({ product }) {
                 right-3
                 z-10
                 flex
-                h-9
-                w-9
-                translate-y-2
+                h-8
+                w-8
+                translate-y-1.5
                 items-center
                 justify-center
-                rounded-full
+                rounded-none
                 border
-                border-hairline/60
-                bg-surface/90
+                border-hairline
+                bg-surface/95
                 text-ink
                 opacity-0
-                shadow-[0_8px_20px_rgba(0,0,0,0.08)]
+                shadow-xs
                 backdrop-blur-md
                 transition-all
-                duration-300
+                duration-250
                 ease-out
                 group-hover:translate-y-0
                 group-hover:opacity-100
+                group-hover:border-moss/40
               "
             >
               <ArrowUpRight
-                size={15}
-                strokeWidth={1.7}
+                size={14}
+                strokeWidth={1.8}
                 className="
                   transition-transform
                   duration-300
-                  group-hover:rotate-6
+                  group-hover:scale-110
                 "
               />
             </div>

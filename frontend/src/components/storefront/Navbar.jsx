@@ -240,7 +240,7 @@ export default function Navbar() {
           right: 0;
           bottom: -6px;
           height: 1.5px;
-          border-radius: 999px;
+          border-radius: 0px;
           background: currentColor;
           transform: scaleX(0);
           transform-origin: center;
@@ -447,7 +447,7 @@ export default function Navbar() {
 
           <Link
             to="/cart"
-            className="nav-action relative p-2 rounded-lg text-stone hover:bg-paper hover:text-ink"
+            className="nav-action relative p-2 rounded-none text-stone hover:bg-paper hover:text-ink"
             aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
           >
             <ShoppingBag size={18} strokeWidth={1.75} />
@@ -455,7 +455,7 @@ export default function Navbar() {
             {itemCount > 0 && (
               <span
                 key={itemCount}
-                className="nav-cart-badge absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-moss text-white text-[10px] font-medium flex items-center justify-center"
+                className="nav-cart-badge absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-none border border-moss bg-moss text-white text-[9px] font-mono font-medium flex items-center justify-center shadow-xs"
               >
                 {itemCount > 99 ? "99+" : itemCount}
               </span>
@@ -464,7 +464,7 @@ export default function Navbar() {
 
           <Link
             to="/favorites"
-            className="nav-action relative p-2 rounded-lg text-stone hover:bg-paper hover:text-ink"
+            className="nav-action relative p-2 rounded-none text-stone hover:bg-paper hover:text-ink"
             aria-label={`Favorites${
               favoriteCount > 0 ? `, ${favoriteCount} items` : ""
             }`}
@@ -474,7 +474,7 @@ export default function Navbar() {
             {favoriteCount > 0 && (
               <span
                 key={favoriteCount}
-                className="nav-cart-badge absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-clay text-white text-[10px] font-medium flex items-center justify-center"
+                className="nav-cart-badge absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-none border border-clay bg-clay text-white text-[9px] font-mono font-medium flex items-center justify-center shadow-xs"
               >
                 {favoriteCount > 99 ? "99+" : favoriteCount}
               </span>
@@ -486,7 +486,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setAccountOpen((v) => !v)}
-                className="nav-action ml-1 flex h-7 w-7 items-center justify-center overflow-hidden rounded-full border border-hairline bg-paper text-stone hover:text-ink"
+                className="nav-action ml-1 flex h-7 w-7 items-center justify-center overflow-hidden rounded-none border border-hairline bg-paper text-stone hover:text-ink"
                 aria-label="Account menu"
                 aria-expanded={accountOpen}
               >
@@ -510,10 +510,10 @@ export default function Navbar() {
                     aria-hidden="true"
                   />
 
-                  <div className="navdrop-in absolute right-0 top-11 z-20 w-52 bg-surface border border-hairline rounded-xl shadow-[0_8px_24px_rgba(33,31,27,0.1)] py-1.5">
+                  <div className="navdrop-in absolute right-0 top-11 z-20 w-52 bg-surface border border-hairline rounded-none shadow-[0_8px_24px_rgba(33,31,27,0.1)] py-1.5">
                     <div className="px-3.5 py-2.5 border-b border-hairline">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full border border-hairline bg-paper flex items-center justify-center">
+                        <div className="h-8 w-8 shrink-0 overflow-hidden rounded-none border border-hairline bg-paper flex items-center justify-center">
                           {profileImage ? (
                             <img
                               src={profileImage}
@@ -648,7 +648,7 @@ export default function Navbar() {
             <Heart size={15} strokeWidth={1.75} />
             Favorites
             {favoriteCount > 0 && (
-              <span className="ml-auto rounded-full bg-clay px-1.5 py-0.5 text-[10px] font-medium text-white">
+              <span className="ml-auto rounded-none border border-clay bg-clay px-1.5 py-0.5 text-[10px] font-mono font-medium text-white">
                 {favoriteCount > 99 ? "99+" : favoriteCount}
               </span>
             )}
@@ -675,7 +675,7 @@ export default function Navbar() {
           {user && (
             <div className="mt-2 pt-2 border-t border-hairline">
               <div className="flex items-center gap-3 py-2.5 mb-1">
-                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full border border-hairline bg-paper flex items-center justify-center text-stone">
+                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-none border border-hairline bg-paper flex items-center justify-center text-stone">
                   {profileImage ? (
                     <img
                       src={profileImage}
@@ -797,8 +797,8 @@ function MegaMenu({
           )}
         </div>
 
-        <div className="rounded-2xl border border-hairline bg-moss-tint p-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-moss">
+        <div className="rounded-none border border-hairline bg-moss-tint p-5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-none border border-hairline bg-surface text-moss">
             <Leaf size={16} strokeWidth={1.75} />
           </span>
 

@@ -9,7 +9,7 @@ export default function AdminLayout() {
 
   return (
     <AdminNotificationsProvider>
-      <div className="min-h-screen bg-paper">
+      <div className="admin-theme min-h-screen bg-paper">
         <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
 
         <div className="lg:ml-64">

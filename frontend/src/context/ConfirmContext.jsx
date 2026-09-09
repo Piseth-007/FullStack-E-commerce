@@ -1,10 +1,13 @@
 import { createContext, useState, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { AlertTriangle } from "lucide-react";
 
 export const ConfirmContext = createContext();
 
 export function ConfirmProvider({ children }) {
   const [dialog, setDialog] = useState(null);
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
 
   const confirm = useCallback((message, options = {}) => {
     return new Promise((resolve) => {
@@ -28,14 +31,22 @@ export function ConfirmProvider({ children }) {
       {children}
       {dialog && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-ink/30 backdrop-blur-[2px]"
+          className={`fixed inset-0 z-50 flex items-center justify-center bg-ink/30 backdrop-blur-[2px] ${
+            isAdmin ? "admin-theme" : ""
+          }`}
           onClick={() => handleClose(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="bg-surface border border-hairline rounded-xl p-6 w-full max-w-sm shadow-[0_8px_24px_rgba(33,31,27,0.12)]"
+            className={`bg-surface border border-hairline p-6 w-full max-w-sm shadow-[0_8px_24px_rgba(33,31,27,0.12)] ${
+              isAdmin ? "rounded-2xl" : "rounded-none"
+            }`}
           >
-            <div className="w-10 h-10 rounded-full bg-clay-tint flex items-center justify-center mb-4">
+            <div
+              className={`w-10 h-10 border border-clay/20 bg-clay-tint flex items-center justify-center mb-4 ${
+                isAdmin ? "rounded-xl" : "rounded-none"
+              }`}
+            >
               <AlertTriangle
                 size={18}
                 className="text-clay"
@@ -51,13 +62,17 @@ export function ConfirmProvider({ children }) {
             <div className="flex gap-2.5">
               <button
                 onClick={() => handleClose(true)}
-                className="flex-1 py-2.5 rounded-lg bg-clay text-white text-[13.5px] font-medium hover:bg-clay/90 transition-colors"
+                className={`flex-1 py-2.5 border border-clay bg-clay text-white text-[13.5px] font-medium hover:bg-clay/90 transition-colors shadow-xs ${
+                  isAdmin ? "rounded-lg" : "rounded-none"
+                }`}
               >
                 {dialog.confirmLabel}
               </button>
               <button
                 onClick={() => handleClose(false)}
-                className="flex-1 py-2.5 rounded-lg border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors"
+                className={`flex-1 py-2.5 border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors ${
+                  isAdmin ? "rounded-lg" : "rounded-none"
+                }`}
               >
                 Cancel
               </button>

@@ -883,10 +883,10 @@ function GrowthBadge({ value, positive }) {
 
   return (
     <span
-      className={`flex items-center gap-1 rounded-full px-2 py-1 text-[10.5px] font-medium ${
+      className={`flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-mono font-medium ${
         positive
-          ? "bg-moss-tint text-moss dark:bg-emerald-500/15 dark:text-emerald-400"
-          : "bg-red-50 text-clay dark:bg-red-500/15 dark:text-red-400"
+          ? "border-moss/20 bg-moss-tint text-moss dark:border-emerald-500/20 dark:bg-emerald-500/15 dark:text-emerald-400"
+          : "border-red-200 bg-red-50 text-clay dark:border-red-500/20 dark:bg-red-500/15 dark:text-red-400"
       }`}
     >
       {positive ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
@@ -970,7 +970,7 @@ function OrderStatus({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10.5px] font-medium capitalize ${current.className}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border border-current/15 px-2.5 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wider capitalize ${current.className}`}
     >
       <Icon size={11} />
       {current.label}

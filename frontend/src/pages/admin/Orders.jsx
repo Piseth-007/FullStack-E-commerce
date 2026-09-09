@@ -300,7 +300,7 @@ export default function Orders() {
           </button>
         </div>
       )}
-      {loading ? (
+      {loading || refreshing ? (
         <div className="overflow-hidden rounded-xl border border-hairline bg-surface print:hidden">
           <div className="hidden border-b border-hairline px-5 py-3 md:grid md:grid-cols-[1.2fr_1.4fr_0.8fr_1fr_1fr]">
             {["Order", "Customer", "Total", "Date", "Status"].map((item) => (
@@ -441,7 +441,7 @@ function OrderRow({
         </td>
         <td className="px-5 py-3">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-moss-tint">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-hairline bg-moss-tint">
               <User size={14} className="text-moss" strokeWidth={1.75} />
             </div>
             <div className="min-w-0">
@@ -728,8 +728,8 @@ function EmptyState({ filter, onClear }) {
 }
 function SearchEmptyState({ search, onClear }) {
   return (
-    <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-16 text-center print:hidden">
-      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-paper">
+    <div className="flex flex-col items-center rounded-2xl border border-dashed border-hairline bg-surface px-6 py-16 text-center print:hidden">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-hairline bg-paper">
         <Search size={20} className="text-stone" strokeWidth={1.75} />
       </div>
       <p className="mb-1 text-[14px] font-medium text-ink"> No orders found </p>

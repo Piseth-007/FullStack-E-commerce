@@ -34,7 +34,7 @@ export default function Cart() {
   if (items.length === 0) {
     return (
       <div className="max-w-2xl mx-auto px-6 py-24 text-center">
-        <div className="w-14 h-14 rounded-full bg-moss-tint flex items-center justify-center mx-auto mb-5">
+        <div className="w-14 h-14 rounded-none border border-hairline bg-moss-tint flex items-center justify-center mx-auto mb-5">
           <ShoppingBag size={22} className="text-moss" strokeWidth={1.75} />
         </div>
         <h1 className="font-display text-[24px] font-medium text-ink mb-2">
@@ -45,7 +45,7 @@ export default function Cart() {
         </p>
         <Link
           to="/products"
-          className="inline-block px-6 py-3 rounded-lg bg-moss text-white text-[14px] font-medium hover:bg-moss-deep transition-colors"
+          className="inline-block px-6 py-3 rounded-none border border-moss bg-moss text-white text-[14px] font-medium hover:bg-moss-deep transition-colors shadow-xs"
         >
           Shop all products
         </Link>
@@ -64,9 +64,9 @@ export default function Cart() {
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex gap-4 bg-surface border border-hairline rounded-xl p-4"
+              className="flex gap-4 bg-surface border border-hairline rounded-none p-4 shadow-xs"
             >
-              <div className="w-20 h-20 rounded-lg bg-paper border border-hairline overflow-hidden shrink-0">
+              <div className="w-20 h-20 rounded-none bg-paper border border-hairline overflow-hidden shrink-0">
                 {item.product?.images?.[0]?.url && (
                   <img
                     src={item.product.images[0].url}
@@ -85,7 +85,7 @@ export default function Cart() {
                 </p>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center border border-hairline rounded-lg">
+                  <div className="flex items-center border border-hairline rounded-none bg-paper">
                     <button
                       disabled={item.quantity <= 1}
                       onClick={() =>
@@ -114,7 +114,7 @@ export default function Cart() {
 
                   <button
                     onClick={() => handleRemove(item.id)}
-                    className="p-1.5 rounded-lg text-stone hover:bg-clay-tint hover:text-clay transition-colors"
+                    className="p-1.5 rounded-none border border-transparent hover:border-clay/20 text-stone hover:bg-clay-tint hover:text-clay transition-colors"
                   >
                     <X size={15} strokeWidth={1.75} />
                   </button>
@@ -124,7 +124,7 @@ export default function Cart() {
           ))}
         </div>
 
-        <div className="bg-surface border border-hairline rounded-xl p-5 h-fit sticky top-24">
+        <div className="bg-surface border border-hairline rounded-none p-5 h-fit sticky top-24 shadow-xs">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-4">
             Order Summary
           </p>
@@ -137,7 +137,7 @@ export default function Cart() {
           </p>
           <button
             onClick={() => navigate("/checkout")}
-            className="w-full py-3 rounded-lg bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep transition-colors"
+            className="w-full py-3 rounded-none border border-moss bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep transition-colors shadow-xs"
           >
             Checkout
           </button>

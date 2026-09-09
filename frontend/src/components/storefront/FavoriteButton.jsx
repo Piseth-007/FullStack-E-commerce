@@ -44,7 +44,7 @@ export default function FavoriteButton({
       disabled={pending}
       aria-label={favorited ? "Remove from favorites" : "Save to favorites"}
       aria-pressed={favorited}
-      className={`inline-flex items-center justify-center rounded-full shrink-0 transition-transform active:scale-90 disabled:opacity-60 ${className}`}
+      className={`inline-flex items-center justify-center rounded-none shrink-0 transition-all hover:bg-paper active:scale-95 disabled:opacity-60 shadow-2xs ${className}`}
       style={{
         width: size + 20,
         height: size + 20,

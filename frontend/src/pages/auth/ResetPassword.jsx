@@ -60,7 +60,7 @@ export default function ResetPassword() {
     return (
       <main className="min-h-screen w-full flex flex-col justify-center items-center px-4 py-8 bg-paper">
         <div className="w-full max-w-[440px] bg-surface rounded-2xl border border-hairline p-7 sm:p-9 text-center space-y-4 shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-clay-tint flex items-center justify-center mx-auto text-clay">
+          <div className="w-12 h-12 rounded-none border border-clay/20 bg-clay-tint flex items-center justify-center mx-auto text-clay">
             <AlertCircle size={24} strokeWidth={2} />
           </div>
           <div>
@@ -73,7 +73,7 @@ export default function ResetPassword() {
           </div>
           <Link
             to="/forgot-password"
-            className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center"
+            className="w-full h-11 rounded-none border border-moss bg-moss hover:bg-moss-deep text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center"
           >
             Request new reset link
           </Link>
@@ -89,7 +89,7 @@ export default function ResetPassword() {
     >
       {success ? (
         <div className="text-center py-2 space-y-4">
-          <div className="w-12 h-12 rounded-full bg-moss-tint flex items-center justify-center mx-auto text-moss">
+          <div className="w-12 h-12 rounded-none border border-moss/20 bg-moss-tint flex items-center justify-center mx-auto text-moss">
             <CheckCircle2 size={24} strokeWidth={2} />
           </div>
           <div>

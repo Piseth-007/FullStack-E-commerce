@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { Loader2 } from "lucide-react";
+import { PackageX, ArrowLeft } from "lucide-react";
 import api from "../../api/axios";
 import khqrLogoRed from "../../assets/KHQR Logo red.svg";
 
@@ -83,7 +83,7 @@ function ItemRow({ item }) {
             {skinTypes.map((skinType) => (
               <span
                 key={skinType.id || skinType.name || skinType}
-                className="text-xs px-2 py-0.5 rounded-full border border-hairline text-stone"
+                className="text-[11px] px-2 py-0.5 rounded-none border border-hairline text-stone font-mono uppercase tracking-wider"
               >
                 {skinType.name || skinType}
               </span>
@@ -159,24 +159,33 @@ export default function OrderDetail() {
     };
   }, [order]);
 
-  if (loading)
+  if (loading) {
+    return <OrderDetailSkeleton />;
+  }
+
+  if (error || !order || !details) {
     return (
-      <div className="min-h-[45vh] flex items-center justify-center text-stone">
-        <Loader2 className="animate-spin" size={22} />
-      </div>
-    );
-  if (error || !order || !details)
-    return (
-      <div className="max-w-4xl mx-auto px-6 py-16 text-center">
-        <p className="text-clay">{error || "Order not found."}</p>
+      <div className="max-w-xl mx-auto px-6 py-24 text-center">
+        <div className="w-14 h-14 rounded-none border border-hairline bg-moss-tint flex items-center justify-center mx-auto mb-4">
+          <PackageX size={24} className="text-moss" strokeWidth={1.5} />
+        </div>
+        <h1 className="font-display text-[22px] font-medium text-ink mb-1.5">
+          Order not found
+        </h1>
+        <p className="text-[13.5px] text-stone mb-6">
+          {error ||
+            "We couldn't find the order you're looking for. It may have been cancelled or the ID is incorrect."}
+        </p>
         <Link
           to="/orders"
-          className="inline-block mt-5 text-sm text-moss hover:text-moss-deep"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-none border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs"
         >
-          Back to orders
+          <ArrowLeft size={14} />
+          Back to all orders
         </Link>
       </div>
     );
+  }
 
   const { items, subtotal, payment, address } = details;
   const paidStatuses = ["paid", "shipped", "completed"];
@@ -210,7 +219,7 @@ export default function OrderDetail() {
           </p>
         </div>
         <span
-          className={`rounded-full px-3 py-1 text-sm capitalize ${statusTone}`}
+          className={`rounded-none border px-3 py-1 text-xs font-mono uppercase tracking-wider capitalize ${statusTone}`}
         >
           {order.status || "pending"}
         </span>
@@ -273,6 +282,41 @@ export default function OrderDetail() {
             <SummaryRow label="Total" value={money(order.total)} strong />
           </div>
         </aside>
+      </div>
+    </div>
+  );
+}
+
+function OrderDetailSkeleton() {
+  return (
+    <div className="max-w-4xl mx-auto px-6 py-10 animate-pulse">
+      <div className="h-4 w-28 bg-hairline/50 mb-6" />
+      <div className="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-hairline mb-8">
+        <div className="space-y-2">
+          <div className="h-8 w-44 bg-hairline/60" />
+          <div className="h-4 w-32 bg-hairline/40" />
+        </div>
+        <div className="h-7 w-24 bg-hairline/50" />
+      </div>
+      <div className="h-14 w-full bg-paper border border-hairline mb-10" />
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <div className="lg:col-span-2 space-y-4">
+          <div className="h-5 w-24 bg-hairline/50" />
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div key={i} className="flex gap-4 py-4 border-b border-hairline">
+              <div className="w-16 h-16 bg-paper border border-hairline shrink-0" />
+              <div className="flex-1 space-y-2 pt-1">
+                <div className="h-4 w-48 bg-hairline/60" />
+                <div className="h-3 w-20 bg-hairline/40" />
+              </div>
+              <div className="h-4 w-14 bg-hairline/50" />
+            </div>
+          ))}
+        </div>
+        <div className="space-y-6">
+          <div className="h-40 bg-surface border border-hairline p-5" />
+          <div className="h-40 bg-surface border border-hairline p-5" />
+        </div>
       </div>
     </div>
   );

@@ -76,7 +76,7 @@ export default function Favorites() {
           /* Empty State */
           <div className="py-16 text-center">
             <div
-              className="w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center"
+              className="w-12 h-12 mx-auto mb-4 rounded-none flex items-center justify-center"
               style={{
                 backgroundColor: "var(--color-surface)",
                 border: "1px solid var(--color-hairline)",
@@ -190,7 +190,7 @@ export default function Favorites() {
 
                   {/* Favorite */}
                   <div
-                    className="absolute top-2 right-2 rounded-full p-1"
+                    className="absolute top-2 right-2 rounded-none p-1"
                     style={{
                       backgroundColor:
                         "color-mix(in srgb, var(--color-paper) 85%, transparent)",

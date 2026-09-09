@@ -1,10 +1,13 @@
 import { createContext, useState, useCallback } from "react";
+import { useLocation } from "react-router-dom";
 import { CheckCircle2, XCircle, X } from "lucide-react";
 
 export const ToastContext = createContext();
 
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([]);
+  const location = useLocation();
+  const isAdmin = location.pathname.startsWith("/admin");
 
   const showToast = useCallback((message, type = "success") => {
     const id = Date.now() + Math.random();
@@ -20,7 +23,11 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2">
+      <div
+        className={`fixed bottom-5 right-5 z-50 flex flex-col gap-2 ${
+          isAdmin ? "admin-theme" : ""
+        }`}
+      >
         {toasts.map((toast) => (
           <div
             key={toast.id}
