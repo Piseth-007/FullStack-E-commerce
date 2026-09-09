@@ -8,6 +8,7 @@ import AuthShell, {
   AuthInput,
 } from "../../components/auth/AuthShell";
 import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
+import { validateRealEmail } from "../../utils/emailValidation";
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,13 @@ export default function ForgotPassword() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    const emailCheck = validateRealEmail(email);
+    if (!emailCheck.isValid) {
+      setError(emailCheck.error);
+      return;
+    }
+
     setLoading(true);
     try {
       await api.post("/forgot-password", { email });

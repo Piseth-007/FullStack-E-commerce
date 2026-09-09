@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Rules\RealEmail;
 use Google\Client as GoogleClient;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,7 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
+            'email' => ['required', 'string', 'max:255', 'unique:users', new RealEmail()],
             'password' => 'required|string|min:8|confirmed',
         ]);
 
@@ -78,7 +79,7 @@ class AuthController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => ['required', 'string', 'max:255', 'unique:users,email,' . $user->id, new RealEmail()],
             'phone' => 'nullable|string|max:30',
         ]);
 

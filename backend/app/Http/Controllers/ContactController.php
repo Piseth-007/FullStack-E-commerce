@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Contact;
+use App\Rules\RealEmail;
 use Illuminate\Http\Request;
 
 class ContactController extends Controller
@@ -12,7 +13,7 @@ class ContactController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', 'max:255'],
+            'email' => ['required', 'string', 'max:255', new RealEmail()],
             'message' => ['required', 'string', 'max:5000'],
         ]);
 

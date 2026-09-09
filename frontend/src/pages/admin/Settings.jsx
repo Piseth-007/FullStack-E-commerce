@@ -14,6 +14,7 @@ import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import { useToast } from "../../context/useToast";
 import { ConfirmContext } from "../../context/ConfirmContext";
+import { validateRealEmail } from "../../utils/emailValidation";
 
 const TABS = [
   { id: "store", label: "Store Profile", icon: Store },
@@ -102,6 +103,15 @@ function StoreTab({ initial, onSaved }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (form.contact_email?.trim()) {
+      const emailCheck = validateRealEmail(form.contact_email);
+      if (!emailCheck.isValid) {
+        showToast(emailCheck.error, "error");
+        return;
+      }
+    }
+
     setSaving(true);
     try {
       const fd = new FormData();
@@ -241,6 +251,13 @@ function AccountTab() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const emailCheck = validateRealEmail(form.email);
+    if (!emailCheck.isValid) {
+      showToast(emailCheck.error, "error");
+      return;
+    }
+
     setSaving(true);
     try {
       await updateProfile(form);

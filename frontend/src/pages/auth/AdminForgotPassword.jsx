@@ -6,6 +6,7 @@ import AuthShell, {
   AuthField,
   AuthInput,
 } from "../../components/auth/AuthShell";
+import { validateRealEmail } from "../../utils/emailValidation";
 
 export default function AdminForgotPassword() {
   const [email, setEmail] = useState("");
@@ -16,6 +17,13 @@ export default function AdminForgotPassword() {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError("");
+
+    const emailCheck = validateRealEmail(email);
+    if (!emailCheck.isValid) {
+      setError(emailCheck.error);
+      return;
+    }
+
     setLoading(true);
 
     try {

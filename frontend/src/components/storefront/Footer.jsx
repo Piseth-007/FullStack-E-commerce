@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Leaf, ArrowRight, ShieldCheck, Check } from "lucide-react";
 import { createElement } from "react";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
+import { validateRealEmail } from "../../utils/emailValidation";
 const SOCIAL_ICONS = {
   instagram: (
     <svg
@@ -48,13 +49,18 @@ export default function Footer() {
   const store = useStoreSettings();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubscribe = (e) => {
     e.preventDefault();
+    setError("");
 
-    if (!email.trim()) return;
+    const emailCheck = validateRealEmail(email);
+    if (!emailCheck.isValid) {
+      setError(emailCheck.error);
+      return;
+    }
 
-   
     setSubscribed(true);
     setEmail("");
   };
@@ -82,26 +88,34 @@ export default function Footer() {
               You're on the list
             </div>
           ) : (
-            <form
-              onSubmit={handleSubscribe}
-              className="flex w-full lg:w-auto max-w-sm gap-2"
-            >
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="flex-1 min-w-0 px-4 py-2.5 rounded-lg border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/25 focus:border-moss transition-colors"
-              />
-              <button
-                type="submit"
-                className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-moss text-white text-[13px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all shrink-0"
+            <div className="w-full lg:w-auto max-w-sm">
+              <form
+                onSubmit={handleSubscribe}
+                className="flex w-full gap-2"
               >
-                Subscribe
-                <ArrowRight size={14} strokeWidth={2} />
-              </button>
-            </form>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    if (error) setError("");
+                  }}
+                  placeholder="you@example.com"
+                  className="flex-1 min-w-0 px-4 py-2.5 rounded-lg border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/25 focus:border-moss transition-colors"
+                />
+                <button
+                  type="submit"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-moss text-white text-[13px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all shrink-0"
+                >
+                  Subscribe
+                  <ArrowRight size={14} strokeWidth={2} />
+                </button>
+              </form>
+              {error && (
+                <p className="mt-1.5 text-xs text-clay">{error}</p>
+              )}
+            </div>
           )}
         </div>
       </div>

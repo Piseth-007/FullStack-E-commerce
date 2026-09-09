@@ -6,6 +6,7 @@ import { AuthContext } from "../../context/AuthContext";
 import { ToastContext } from "../../context/ToastContext";
 import { ConfirmContext } from "../../context/ConfirmContext";
 import AddressFormModal from "../../components/storefront/AddressFormModal";
+import { validateRealEmail } from "../../utils/emailValidation";
 
 const NAV = [
   { key: "account", label: "Account details" },
@@ -256,6 +257,14 @@ export default function Profile() {
     if (!form.name.trim()) {
       setFormErrors({
         name: "Full name is required.",
+      });
+      return;
+    }
+
+    const emailCheck = validateRealEmail(form.email);
+    if (!emailCheck.isValid) {
+      setFormErrors({
+        email: emailCheck.error,
       });
       return;
     }

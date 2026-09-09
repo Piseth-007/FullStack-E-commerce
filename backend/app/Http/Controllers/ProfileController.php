@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Rules\RealEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -61,7 +62,7 @@ class ProfileController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'email' => ['required', 'string', 'max:255', 'unique:users,email,' . $user->id, new RealEmail()],
             'phone' => 'nullable|string|max:30',
         ]);
 

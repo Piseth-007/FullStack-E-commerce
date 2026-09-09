@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Rules\RealEmail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Auth\Events\PasswordReset;
@@ -14,7 +15,7 @@ class PasswordResetController extends Controller
 
     public function sendResetLink(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate(['email' => ['required', 'string', new RealEmail()]]);
 
         $status = Password::sendResetLink($request->only('email'));
 
@@ -31,7 +32,7 @@ class PasswordResetController extends Controller
     {
         $validated = $request->validate([
             'token' => 'required',
-            'email' => 'required|email',
+            'email' => ['required', 'string', new RealEmail()],
             'password' => 'required|min:8|confirmed',
         ]);
 

@@ -7,6 +7,7 @@ import AuthShell, {
   AuthInput,
 } from "../../components/auth/AuthShell";
 import GoogleLoginButton from "../../components/auth/GoogleLoginButton";
+import { validateRealEmail } from "../../utils/emailValidation";
 
 export default function Register() {
   const [form, setForm] = useState({
@@ -26,6 +27,12 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrors({});
+
+    const emailCheck = validateRealEmail(form.email);
+    if (!emailCheck.isValid) {
+      setErrors({ email: [emailCheck.error] });
+      return;
+    }
 
     if (form.password !== form.password_confirmation) {
       setErrors({

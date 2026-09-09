@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import api from "../../api/axios";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
+import { validateRealEmail } from "../../utils/emailValidation";
 
 const FAQS = [
   {
@@ -95,10 +96,9 @@ export default function Contact() {
       errors.name = "Name is required.";
     }
 
-    if (!form.email.trim()) {
-      errors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
-      errors.email = "Please enter a valid email.";
+    const emailCheck = validateRealEmail(form.email);
+    if (!emailCheck.isValid) {
+      errors.email = emailCheck.error;
     }
 
     if (!form.message.trim()) {

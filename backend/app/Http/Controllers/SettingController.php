@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
+use App\Rules\RealEmail;
 use App\Services\TelegramService;
 use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
@@ -42,7 +43,7 @@ class SettingController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
-            'contact_email' => 'nullable|email|max:255',
+            'contact_email' => ['nullable', 'string', 'max:255', new RealEmail()],
             'contact_phone' => 'nullable|string|max:50',
             'address' => 'nullable|string|max:500',
             'logo' => 'nullable|image|max:5120',
