@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function CategoryFormModal({
   category,
@@ -7,6 +8,7 @@ export default function CategoryFormModal({
   onSave,
   saving,
 }) {
+  const { t } = useLanguage();
   const isEdit = Boolean(category);
 
   const [name, setName] = useState(category?.name || "");
@@ -49,11 +51,11 @@ export default function CategoryFormModal({
         <div className="flex items-start justify-between gap-4 border-b border-hairline px-6 py-5">
           <div>
             <p className="text-[10.5px] font-medium uppercase tracking-widest text-stone mb-1">
-              {isEdit ? "Edit" : "Create"}
+              {isEdit ? t("admin_cat_edit") : t("admin_cat_create")}
             </p>
 
             <h2 className="font-display text-[19px] font-medium text-ink">
-              {isEdit ? `Edit ${category.name}` : "New Category"}
+              {isEdit ? `${t("admin_cat_edit")} ${category.name}` : t("admin_cat_new")}
             </h2>
           </div>
 
@@ -71,7 +73,7 @@ export default function CategoryFormModal({
 
         <form id="category-form" onSubmit={handleSubmit} className="px-6 py-5">
           <label className="block text-[11px] font-medium uppercase tracking-[0.08em] text-stone mb-2">
-            Category Name
+            {t("admin_cat_name_label")}
           </label>
 
           <input
@@ -81,13 +83,13 @@ export default function CategoryFormModal({
             disabled={saving}
             maxLength={255}
             required
-            placeholder="Example: Electronics"
+            placeholder={t("admin_cat_name_placeholder")}
             className="w-full px-3.5 py-2.5 rounded-lg border border-hairline bg-paper text-ink text-[14px] placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss transition-colors disabled:opacity-60"
           />
 
           <div className="flex justify-between mt-1.5">
             <p className="text-[11px] text-stone">
-              Use a clear and unique category name.
+              {t("admin_cat_name_hint")}
             </p>
 
             <span className="text-[11px] text-stone">{name.length}/255</span>
@@ -102,7 +104,7 @@ export default function CategoryFormModal({
             disabled={saving}
             className="px-5 py-2.5 rounded-lg border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors disabled:opacity-50"
           >
-            Cancel
+            {t("admin_cat_cancel")}
           </button>
 
           <button
@@ -111,7 +113,7 @@ export default function CategoryFormModal({
             disabled={saving || !name.trim()}
             className="min-w-27.5 px-5 py-2.5 rounded-lg bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving…" : isEdit ? "Save Changes" : "Create"}
+            {saving ? t("admin_cat_saving") : isEdit ? t("admin_cat_save_btn") : t("admin_cat_create_btn")}
           </button>
         </div>
       </div>

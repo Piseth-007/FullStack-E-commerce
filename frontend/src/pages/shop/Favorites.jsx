@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FavoritesContext } from "../../context/FavoriteContext";
 import FavoriteButton from "../../components/storefront/FavoriteButton";
 import { ImageOff } from "lucide-react";
+import { useLanguage } from "../../context/useLanguage";
 
 function money(value) {
   const amount = Number(value);
@@ -16,6 +17,7 @@ function money(value) {
 
 export default function Favorites() {
   const { favorites = [], loading } = useContext(FavoritesContext);
+  const { t } = useLanguage();
 
   return (
     <main
@@ -28,15 +30,12 @@ export default function Favorites() {
       <div className="max-w-5xl mx-auto px-6 py-10">
         {/* Header */}
         <div className="mb-8">
-          <h1
-            className="text-2xl mb-1"
-            style={{ fontFamily: "Fraunces, serif" }}
-          >
-            Your favorites
+          <h1 className="font-display text-2xl mb-1">
+            {t("fav_title", "Your favorites")}
           </h1>
 
           <p className="text-sm" style={{ color: "var(--color-stone)" }}>
-            Products you've saved to come back to later.
+            {t("fav_desc", "Products you've saved to come back to later.")}
           </p>
         </div>
 
@@ -88,7 +87,7 @@ export default function Favorites() {
             </div>
 
             <p className="text-sm mb-4" style={{ color: "var(--color-stone)" }}>
-              Nothing saved yet. Tap the heart on any product to keep it here.
+              {t("fav_empty", "Nothing saved yet. Tap the heart on any product to keep it here.")}
             </p>
 
             <Link
@@ -96,7 +95,7 @@ export default function Favorites() {
               className="inline-block text-sm transition-opacity hover:opacity-70"
               style={{ color: "var(--color-moss)" }}
             >
-              Browse products →
+              {t("fav_browse", "Browse products")} →
             </Link>
           </div>
         ) : (
@@ -146,12 +145,7 @@ export default function Favorites() {
                     </div>
 
                     {/* Product Name */}
-                    <p
-                      className="text-sm leading-snug line-clamp-2"
-                      style={{
-                        fontFamily: "Fraunces, serif",
-                      }}
-                    >
+                    <p className="font-display text-sm leading-snug line-clamp-2">
                       {product.name}
                     </p>
 

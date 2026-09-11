@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function SkinTypeFormModal({ skinType, onClose, onSave, saving }) {
+  const { t } = useLanguage();
   const isEdit = Boolean(skinType);
 
   const [name, setName] = useState(skinType?.name || "");
@@ -48,11 +50,11 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
         <div className="flex items-start justify-between gap-4 border-b border-hairline px-6 py-5">
           <div>
             <p className="text-[10.5px] font-medium uppercase tracking-widest text-stone mb-1">
-              {isEdit ? "Edit" : "Create"}
+              {isEdit ? t("admin_cat_edit", "Edit") : t("admin_cat_create", "Create")}
             </p>
 
             <h2 className="font-display text-[19px] font-medium text-ink">
-              {isEdit ? `Edit ${skinType.name}` : "New Skin Type"}
+              {isEdit ? `${t("admin_cat_edit", "Edit")} ${skinType.name}` : t("admin_skin_new", "New Skin Type")}
             </h2>
           </div>
 
@@ -61,7 +63,7 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
             onClick={onClose}
             disabled={saving}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-stone hover:bg-paper hover:text-ink transition-colors disabled:opacity-50 shrink-0"
-            aria-label="Close form"
+            aria-label={t("admin_prod_cancel", "Close")}
           >
             <X size={17} strokeWidth={1.75} />
           </button>
@@ -71,7 +73,7 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
         <form id="skin-type-form" onSubmit={handleSubmit} className="px-6 py-5 space-y-4">
           <div>
             <label className="block text-[11px] font-medium uppercase tracking-[0.08em] text-stone mb-2">
-              Skin Type Name
+              {t("admin_skin_name_label", "Skin Type Name")}
             </label>
 
             <input
@@ -81,13 +83,13 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
               disabled={saving}
               maxLength={100}
               required
-              placeholder="Example: Oily, Dry, Combination"
+              placeholder={t("admin_skin_name_placeholder", "Example: Oily, Dry, Combination")}
               className="w-full px-3.5 py-2.5 rounded-lg border border-hairline bg-paper text-ink text-[14px] placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss transition-colors disabled:opacity-60"
             />
 
             <div className="flex justify-between mt-1.5">
               <p className="text-[11px] text-stone">
-                Use a clear and unique skin type name.
+                {t("admin_skin_name_hint", "Use a clear and unique skin type name.")}
               </p>
 
               <span className="text-[11px] text-stone">{name.length}/100</span>
@@ -96,9 +98,9 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
 
           <div>
             <label className="block text-[11px] font-medium uppercase tracking-[0.08em] text-stone mb-2">
-              Description
+              {t("admin_skin_desc_label", "Description")}
               <span className="ml-1.5 normal-case text-stone/70 tracking-normal">
-                (optional)
+                ({t("admin_skin_desc_optional", "optional")})
               </span>
             </label>
 
@@ -108,7 +110,7 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
               disabled={saving}
               maxLength={500}
               rows={3}
-              placeholder="Briefly describe this skin type..."
+              placeholder={t("admin_skin_desc_placeholder", "Briefly describe this skin type...")}
               className="w-full px-3.5 py-2.5 rounded-lg border border-hairline bg-paper text-ink text-[14px] placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss transition-colors disabled:opacity-60 resize-none"
             />
 
@@ -128,7 +130,7 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
             disabled={saving}
             className="px-5 py-2.5 rounded-lg border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors disabled:opacity-50"
           >
-            Cancel
+            {t("admin_prod_cancel", "Cancel")}
           </button>
 
           <button
@@ -137,7 +139,7 @@ export default function SkinTypeFormModal({ skinType, onClose, onSave, saving })
             disabled={saving || !name.trim()}
             className="min-w-27.5 px-5 py-2.5 rounded-lg bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving…" : isEdit ? "Save Changes" : "Create"}
+            {saving ? t("admin_prod_saving", "Saving…") : isEdit ? t("admin_prod_save_changes", "Save Changes") : t("admin_prod_create", "Create")}
           </button>
         </div>
       </div>

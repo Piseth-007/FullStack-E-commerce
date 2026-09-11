@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import {
   ArrowLeft,
   Check,
@@ -22,13 +22,20 @@ import api from "../../api/axios";
 import { useCart } from "../../context/useCard";
 import { useToast } from "../../context/useToast";
 import { useAuth } from "../../context/useAuth";
+import { useFavorites } from "../../context/useFavorites";
+import { useLanguage } from "../../context/useLanguage";
+import FavoriteButton from "../../components/storefront/FavoriteButton";
+import { fetchWithCache, getCached } from "../../utils/apiCache";
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
   const { user } = useAuth();
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const { isFavorited, toggleFavorite } = useFavorites();
+  const { t, isKhmer } = useLanguage();
 
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
@@ -46,13 +53,47 @@ export default function ProductDetail() {
   const [added, setAdded] = useState(false);
   const [showCartSheet, setShowCartSheet] = useState(false);
 
-  const [liked, setLiked] = useState(false);
+  const [favPending, setFavPending] = useState(false);
+  const favorited = isFavorited(product?.id);
+
+  const handleToggleFavorite = async () => {
+    if (!user) {
+      showToast?.("Please sign in to save favorites", "info");
+      navigate("/login");
+      return;
+    }
+
+    if (!product?.id || favPending) return;
+
+    const wasFavorited = favorited;
+    setFavPending(true);
+    try {
+      await toggleFavorite(product.id);
+      showToast?.(
+        wasFavorited ? "Removed from favorites" : "Added to favorites",
+        "success"
+      );
+    } catch {
+      showToast?.("Couldn't update favorites", "error");
+    } finally {
+      setFavPending(false);
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
 
     const loadProduct = async () => {
-      setLoading(true);
+      // Instant render from cache if available (e.g. from hover prefetch)
+      const cached = getCached(`/products/${id}`);
+      if (cached && !cached.isStale) {
+        const data = cached.data?.data || cached.data;
+        setProduct(data);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+
       setError(false);
       setActiveImage(0);
       setQuantity(1);
@@ -65,10 +106,10 @@ export default function ProductDetail() {
       });
 
       try {
-        const response = await api.get(`/products/${id}`);
+        const resData = await fetchWithCache(`/products/${id}`);
 
         if (mounted) {
-          const data = response.data?.data || response.data;
+          const data = resData.data || resData;
           setProduct(data);
         }
       } catch {
@@ -330,7 +371,7 @@ export default function ProductDetail() {
             className="mt-6 inline-flex items-center gap-2 rounded-lg bg-moss px-5 py-3 text-[13px] font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-moss-deep"
           >
             <ArrowLeft size={14} />
-            Back to shop
+            {t("product_back_to_shop", "Back to shop")}
           </Link>
         </div>
       </div>
@@ -452,7 +493,7 @@ export default function ProductDetail() {
       <div className="mx-auto max-w-6xl px-6 pt-7">
         <div className="flex items-center gap-2 text-[11px] text-stone">
           <Link to="/products" className="transition-colors hover:text-moss">
-            Shop
+            {t("shop_title", "Shop")}
           </Link>
 
           <span className="text-hairline">/</span>
@@ -597,18 +638,21 @@ export default function ProductDetail() {
 
               <button
                 type="button"
-                onClick={() => setLiked((value) => !value)}
-                aria-label={liked ? "Remove from wishlist" : "Add to wishlist"}
+                onClick={handleToggleFavorite}
+                disabled={favPending || loading || !product}
+                aria-label={favorited ? "Remove from favorites" : "Add to favorites"}
+                aria-pressed={favorited}
+                title={favorited ? "Remove from favorites" : "Add to favorites"}
                 className={`flex h-9 w-9 items-center justify-center rounded-none border transition-all duration-300 ${
-                  liked
-                    ? "border-moss/20 bg-moss-tint text-moss"
+                  favorited
+                    ? "border-moss/30 bg-moss-tint text-moss"
                     : "border-hairline bg-surface text-stone hover:border-moss/30 hover:text-moss"
-                }`}
+                } disabled:opacity-50`}
               >
                 <Heart
                   size={16}
                   strokeWidth={1.5}
-                  className={liked ? "fill-moss" : ""}
+                  className={favorited ? "fill-moss" : ""}
                 />
               </button>
             </div>
@@ -645,13 +689,13 @@ export default function ProductDetail() {
                 </span>
 
                 <span className="text-[12px] text-stone">
-                  {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+                  {reviewCount} {reviewCount === 1 ? t("product_review", "review") : t("product_reviews", "reviews")}
                 </span>
               </div>
             ) : (
               <div className="mt-5 flex items-center gap-2 text-[12px] text-stone">
                 <Star size={14} strokeWidth={1.5} />
-                No reviews yet
+                {t("product_no_reviews", "No reviews yet")}
               </div>
             )}
 
@@ -669,7 +713,7 @@ export default function ProductDetail() {
                   </span>
 
                   <span className="rounded-none border border-moss/20 bg-moss-tint px-2 py-1 text-[9px] font-mono font-medium uppercase tracking-[0.06em] text-moss">
-                    Save {discount}%
+                    {t("product_save", "Save")} {discount}%
                   </span>
                 </>
               )}
@@ -684,7 +728,7 @@ export default function ProductDetail() {
             {skinTypes.length > 0 && (
               <div className="mt-6">
                 <p className="mb-2.5 text-[10px] font-medium uppercase tracking-widest text-stone">
-                  Suits these skin types
+                  {t("product_suits_skin", "Suits these skin types")}
                 </p>
 
                 <div className="flex flex-wrap gap-2">
@@ -704,7 +748,7 @@ export default function ProductDetail() {
             {product.free_delivery && (
               <div className="mt-4 flex items-center gap-2 text-[12px] font-medium text-moss">
                 <Truck size={14} strokeWidth={1.75} />
-                Free delivery on this item
+                {t("product_free_delivery", "Free delivery on this item")}
               </div>
             )}
 
@@ -712,17 +756,17 @@ export default function ProductDetail() {
               {isOutOfStock ? (
                 <div className="flex items-center gap-2 text-[12px] font-medium text-clay">
                   <span className="h-1.5 w-1.5 rounded-none bg-clay" />
-                  Currently unavailable
+                  {t("product_out_of_stock", "Currently unavailable")}
                 </div>
               ) : isLowStock ? (
                 <div className="flex items-center gap-2 text-[12px] font-medium text-clay">
                   <span className="h-1.5 w-1.5 animate-pulse rounded-none bg-clay" />
-                  Only {stock} left in stock
+                  {t("product_only_left", `Only ${stock} left in stock`).replace("{count}", stock)}
                 </div>
               ) : (
                 <div className="flex items-center gap-2 text-[12px] font-medium text-moss">
                   <span className="h-1.5 w-1.5 rounded-none bg-moss" />
-                  In stock
+                  {t("product_in_stock", "In stock")}
                 </div>
               )}
             </div>
@@ -771,12 +815,12 @@ export default function ProductDetail() {
                 {added ? (
                   <>
                     <Check size={16} strokeWidth={2} />
-                    Added to cart
+                    {t("product_added_to_cart", "Added to cart")}
                   </>
                 ) : adding ? (
                   <>
                     <RefreshCw size={15} className="animate-spin" />
-                    Adding...
+                    {t("product_adding", "Adding...")}
                   </>
                 ) : (
                   <>
@@ -785,15 +829,35 @@ export default function ProductDetail() {
                       strokeWidth={1.7}
                       className="transition-transform duration-300 group-hover:-translate-y-0.5"
                     />
-                    Add to cart
+                    {t("product_add_to_cart", "Add to cart")}
                   </>
                 )}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleToggleFavorite}
+                disabled={favPending || loading || !product}
+                aria-label={favorited ? t("product_favorite_remove", "Remove from favorites") : t("product_favorite_add", "Add to favorites")}
+                aria-pressed={favorited}
+                title={favorited ? t("product_favorite_remove", "Remove from favorites") : t("product_favorite_add", "Add to favorites")}
+                className={`flex h-12.5 w-12.5 shrink-0 items-center justify-center rounded-none border transition-all duration-300 ${
+                  favorited
+                    ? "border-moss/30 bg-moss-tint text-moss"
+                    : "border-hairline bg-surface text-stone hover:border-moss/30 hover:text-moss hover:bg-paper"
+                } disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                <Heart
+                  size={18}
+                  strokeWidth={1.6}
+                  className={favorited ? "fill-moss text-moss" : ""}
+                />
               </button>
             </div>
 
             {!isOutOfStock && quantity > 1 && (
               <div className="mt-3 flex items-center justify-between text-[11px] text-stone">
-                <span>Quantity</span>
+                <span>{t("product_quantity", "Quantity")}</span>
 
                 <span className="font-mono text-ink">
                   ${formatPrice(totalPrice)}
@@ -804,24 +868,24 @@ export default function ProductDetail() {
             <div className="mt-8 grid grid-cols-1 divide-y divide-hairline border-y border-hairline">
               <ProductBenefit
                 icon={Truck}
-                title="Fast delivery"
+                title={t("product_fast_delivery", "Fast delivery")}
                 text={
                   product.free_delivery
-                    ? "Free delivery available"
-                    : "Fast delivery in Phnom Penh"
+                    ? t("product_free_delivery", "Free delivery available")
+                    : t("product_fast_delivery_desc", "Fast delivery in Phnom Penh")
                 }
               />
 
               <ProductBenefit
                 icon={ShieldCheck}
-                title="Verified quality"
-                text="Carefully selected skincare"
+                title={t("product_verified_quality", "Verified quality")}
+                text={t("product_verified_quality_desc", "Carefully selected skincare")}
               />
 
               <ProductBenefit
                 icon={Leaf}
-                title="Skin-conscious"
-                text="Thoughtfully selected formulas"
+                title={t("product_skin_conscious", "Skin-conscious")}
+                text={t("product_skin_conscious_desc", "Thoughtfully selected formulas")}
               />
             </div>
           </div>
@@ -831,11 +895,11 @@ export default function ProductDetail() {
           <div className="grid gap-12 lg:grid-cols-[260px_1fr]">
             <div>
               <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-moss">
-                Customer feedback
+                {t("product_customer_feedback", "Customer feedback")}
               </p>
 
               <h2 className="mt-2 font-display text-[27px] font-medium text-ink">
-                Reviews
+                {t("product_reviews", "Reviews")}
               </h2>
 
               {reviewCount > 0 ? (
@@ -862,16 +926,16 @@ export default function ProductDetail() {
                       </div>
 
                       <p className="mt-1 text-[10px] text-stone">
-                        Based on {reviewCount}{" "}
-                        {reviewCount === 1 ? "review" : "reviews"}
+                        {t("product_based_on_reviews", `Based on ${reviewCount} reviews`)
+                          .replace("{count}", reviewCount)
+                          .replace("{reviews}", reviewCount === 1 ? t("product_review", "review") : t("product_reviews", "reviews"))}
                       </p>
                     </div>
                   </div>
                 </div>
               ) : (
                 <p className="mt-5 text-[13px] leading-relaxed text-stone">
-                  No reviews yet. Be the first to share your experience with
-                  this product.
+                  {t("product_no_reviews_desc", "Be the first to share your experience with this product.")}
                 </p>
               )}
             </div>
@@ -890,11 +954,11 @@ export default function ProductDetail() {
                   </div>
 
                   <p className="mt-4 text-[13px] font-medium text-ink">
-                    No reviews yet
+                    {t("product_no_reviews", "No reviews yet")}
                   </p>
 
                   <p className="mt-1 text-[12px] text-stone">
-                    Your experience could be the first one shared here.
+                    {t("product_first_experience_prompt", "Your experience could be the first one shared here.")}
                   </p>
                 </div>
               ) : (
@@ -923,7 +987,7 @@ export default function ProductDetail() {
               size={13}
               className="transition-transform duration-300 group-hover:-translate-x-1"
             />
-            Continue shopping
+            {t("product_continue_shopping", "Continue shopping")}
           </Link>
         </div>
       </main>
@@ -952,7 +1016,7 @@ export default function ProductDetail() {
                   id="cart-sheet-title"
                   className="text-[18px] font-medium text-ink"
                 >
-                  Added to your cart
+                  {t("cart_item_added", "Added to your cart")}
                 </h2>
 
                 <p className="mt-1 text-[13px] text-stone">
@@ -967,7 +1031,7 @@ export default function ProductDetail() {
                 onClick={() => setShowCartSheet(false)}
                 className="rounded-xl border border-hairline px-4 py-3 text-[13px] font-medium text-ink transition-all duration-200 hover:bg-paper active:scale-[0.98]"
               >
-                Continue shopping
+                {t("product_continue_shopping", "Continue shopping")}
               </button>
 
               <Link
@@ -975,7 +1039,7 @@ export default function ProductDetail() {
                 className="flex items-center justify-center gap-2 rounded-xl bg-moss px-4 py-3 text-[13px] font-medium text-white transition-all duration-200 hover:-translate-y-0.5 hover:bg-moss-deep active:translate-y-0 active:scale-[0.98]"
               >
                 <ShoppingBag size={16} />
-                Go to checkout
+                {t("product_go_to_checkout", "Go to checkout")}
               </Link>
             </div>
           </div>
@@ -986,16 +1050,18 @@ export default function ProductDetail() {
 }
 
 function RelatedProducts({ products, loading, categoryId }) {
+  const { t } = useLanguage();
+
   if (loading) {
     return (
       <section className="mt-20 border-t border-hairline pt-14">
         <div className="mb-8">
           <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-moss">
-            You may also like
+            {t("product_you_may_also_like", "You may also like")}
           </p>
 
           <h2 className="mt-2 font-display text-[27px] font-medium text-ink">
-            More from this category
+            {t("product_more_from_category", "More from this category")}
           </h2>
         </div>
 
@@ -1025,11 +1091,11 @@ function RelatedProducts({ products, loading, categoryId }) {
       <div className="mb-8 flex items-end justify-between gap-4">
         <div>
           <p className="text-[10px] font-medium uppercase tracking-[0.16em] text-moss">
-            You may also like
+            {t("product_you_may_also_like", "You may also like")}
           </p>
 
           <h2 className="mt-2 font-display text-[27px] font-medium text-ink">
-            More from this category
+            {t("product_more_from_category", "More from this category")}
           </h2>
         </div>
 
@@ -1038,7 +1104,7 @@ function RelatedProducts({ products, loading, categoryId }) {
             to={`/products?category_id=${categoryId}`}
             className="hidden text-[11px] font-medium text-stone transition-colors hover:text-moss sm:block"
           >
-            View all
+            {t("home_section_view_all", "View all")}
           </Link>
         )}
       </div>
@@ -1067,52 +1133,67 @@ function RelatedProductCard({ product }) {
   const finalPrice = hasDiscount ? price - (price * discount) / 100 : price;
 
   return (
-    <Link to={`/products/${product.id}`} className="group block">
-      <div className="relative aspect-square overflow-hidden rounded-xl border border-hairline bg-surface">
-        {image ? (
-          <img
-            src={image}
-            alt={product.name || "Product"}
-            loading="lazy"
-            className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-stone">
-            <ImageOff size={22} strokeWidth={1.4} />
-          </div>
-        )}
-
-        {hasDiscount && (
-          <span className="absolute left-3 top-3 rounded-none border border-moss bg-moss px-2.5 py-1 text-[9px] font-mono font-medium text-white">
-            -{discount}%
-          </span>
-        )}
-      </div>
-
-      <div className="pt-3">
-        {product.brand?.name && (
-          <p className="truncate text-[10px] uppercase tracking-[0.08em] text-stone">
-            {product.brand.name}
-          </p>
-        )}
-
-        <h3 className="mt-1 line-clamp-2 text-[13px] leading-snug text-ink transition-colors duration-200 group-hover:text-moss">
-          {product.name}
-        </h3>
-
-        <div className="mt-2 flex items-center gap-2">
-          <span className="font-mono text-[12px] text-ink">
-            ${finalPrice.toFixed(2)}
-          </span>
+    <div className="group relative block">
+      <Link to={`/products/${product.id}`} className="block">
+        <div className="relative aspect-square overflow-hidden rounded-xl border border-hairline bg-surface">
+          {image ? (
+            <img
+              src={image}
+              alt={product.name || "Product"}
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-stone">
+              <ImageOff size={22} strokeWidth={1.4} />
+            </div>
+          )}
 
           {hasDiscount && (
-            <span className="font-mono text-[10px] text-stone/50 line-through">
-              ${price.toFixed(2)}
+            <span className="absolute left-3 top-3 rounded-none border border-moss bg-moss px-2.5 py-1 text-[9px] font-mono font-medium text-white">
+              -{discount}%
             </span>
           )}
         </div>
+
+        <div className="pt-3">
+          {product.brand?.name && (
+            <p className="truncate text-[10px] uppercase tracking-[0.08em] text-stone">
+              {product.brand.name}
+            </p>
+          )}
+
+          <h3 className="mt-1 line-clamp-2 text-[13px] leading-snug text-ink transition-colors duration-200 group-hover:text-moss">
+            {product.name}
+          </h3>
+
+          <div className="mt-2 flex items-center gap-2">
+            <span className="font-mono text-[12px] text-ink">
+              ${finalPrice.toFixed(2)}
+            </span>
+
+            {hasDiscount && (
+              <span className="font-mono text-[10px] text-stone/50 line-through">
+                ${price.toFixed(2)}
+              </span>
+            )}
+          </div>
+        </div>
+      </Link>
+
+      <div
+        className="absolute right-2 top-2 z-10"
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+        }}
+        onPointerDown={(event) => {
+          event.stopPropagation();
+        }}
+      >
+        <FavoriteButton productId={product.id} size={15} />
       </div>
-    </Link>
+    </div>
   );
 }
 

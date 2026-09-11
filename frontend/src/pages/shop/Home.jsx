@@ -17,6 +17,7 @@ import {
 import api from "../../api/axios";
 import ProductCard from "../../components/storefront/ProductCart";
 import FadeImage from "../../components/common/FadeImage";
+import { useLanguage } from "../../context/useLanguage";
 
 /* =========================================================
    CONSTANTS
@@ -285,6 +286,8 @@ function usePrefersReducedMotion() {
 ========================================================= */
 
 export default function Home() {
+  const { t, isKhmer } = useLanguage();
+
   /* =======================================================
      RESOURCES
   ======================================================= */
@@ -396,6 +399,17 @@ export default function Home() {
       };
     });
   }, [products]);
+
+  const getSlideTag = useCallback(
+    (tag) => {
+      if (tag === "Latest Arrival") return t("home_hero_tag_latest", "Latest Arrival");
+      if (tag === "Customer Loved") return t("home_trust_loved", "Customer Loved");
+      if (tag === "Pure Botanical") return t("home_trust_botanical", "Pure Botanical");
+      if (tag === "Popular") return t("home_hero_tag_popular", "Popular");
+      return t("home_hero_tag_featured", "Featured Product");
+    },
+    [t],
+  );
 
   const [activeSlide, setActiveSlide] = useState(0);
   const [isSliderHovered, setIsSliderHovered] = useState(false);
@@ -653,7 +667,7 @@ export default function Home() {
         `}
       >
         <RefreshCw size={12} className="animate-spin text-moss" />
-        Updating
+        {t("home_updating", "Updating")}
       </div>
 
       {/* ===================================================
@@ -680,22 +694,21 @@ export default function Home() {
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-moss-tint">
                   <Leaf size={13} strokeWidth={1.8} />
                 </span>
-                Clean, effective skincare
+                {t("home_badge_clean")}
               </div>
 
               {/* Heading */}
               <h1 className="font-display text-[40px] sm:text-[54px] lg:text-[64px] font-medium leading-[1.06] tracking-tight text-ink">
-                Skincare that respects{" "}
+                {t("home_hero_title")}{" "}
                 <span className="relative italic text-moss-deep">
-                  your skin's story.
+                  {t("home_hero_title_accent")}
                   <span className="absolute -bottom-1 left-0 h-px w-full bg-moss/30" />
                 </span>
               </h1>
 
               {/* Description */}
               <p className="mt-6 max-w-md text-[15.5px] leading-relaxed text-stone">
-                Thoughtfully formulated products for every skin type,
-                thoughtfully selected for your everyday ritual.
+                {t("home_hero_desc")}
               </p>
 
               {/* CTA Buttons */}
@@ -722,7 +735,7 @@ export default function Home() {
                     active:translate-y-0.5
                   "
                 >
-                  <span>Shop the collection</span>
+                  <span>{t("home_hero_cta_shop")}</span>
                   <ArrowRight
                     size={15}
                     className="transition-transform duration-200 group-hover:translate-x-1"
@@ -755,7 +768,7 @@ export default function Home() {
                     active:translate-y-0.5
                   "
                 >
-                  Explore products
+                  {t("home_hero_cta_explore")}
                   <MousePointer2
                     size={14}
                     className="text-stone transition-transform duration-200 group-hover:rotate-12 group-hover:text-moss"
@@ -767,21 +780,21 @@ export default function Home() {
               <div className="mt-9 flex flex-wrap items-center gap-x-6 gap-y-3 text-[11px] uppercase tracking-[0.08em] text-stone">
                 <span className="flex items-center gap-1.5">
                   <Sparkles size={12} className="text-moss" />
-                  Carefully selected
+                  {t("home_trust_carefully")}
                 </span>
 
                 <span className="h-1 w-1 rounded-full bg-hairline" />
 
                 <span className="flex items-center gap-1.5">
                   <Star size={12} className="text-moss" />
-                  Customer loved
+                  {t("home_trust_loved")}
                 </span>
 
                 <span className="h-1 w-1 rounded-full bg-hairline" />
 
                 <span className="flex items-center gap-1.5">
                   <ShieldCheck size={12} className="text-moss" />
-                  Pure botanical
+                  {t("home_trust_botanical")}
                 </span>
               </div>
             </div>
@@ -817,7 +830,7 @@ export default function Home() {
                     <div className="flex items-center gap-2">
                       <span className="inline-flex items-center gap-1.5 rounded-none border border-moss/20 bg-moss-tint px-3 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-moss">
                         <span className="h-1.5 w-1.5 rounded-none bg-moss" />
-                        {heroSlides[activeSlide]?.tag || "Featured Product"}
+                        {getSlideTag(heroSlides[activeSlide]?.tag)}
                       </span>
                       {Number(heroSlides[activeSlide]?.discount) > 0 && (
                         <span className="rounded-none border border-terracotta/20 bg-terracotta/10 px-2 py-0.5 text-[10.5px] font-semibold text-terracotta">
@@ -972,11 +985,20 @@ export default function Home() {
             sm:grid-cols-3
           "
         >
-          <TrustItem icon={Leaf} label="Clean formulations" />
+          <TrustItem
+            icon={Leaf}
+            label={t("home_trust_clean_formulations", "Clean formulations")}
+          />
 
-          <TrustItem icon={ShieldCheck} label="Verified reviews only" />
+          <TrustItem
+            icon={ShieldCheck}
+            label={t("home_trust_verified_reviews", "Verified reviews only")}
+          />
 
-          <TrustItem icon={Truck} label="Fast delivery in Phnom Penh" />
+          <TrustItem
+            icon={Truck}
+            label={t("home_trust_fast_delivery", "Fast delivery in Phnom Penh")}
+          />
         </div>
       </section>
 
@@ -1020,7 +1042,7 @@ export default function Home() {
                 text-moss
               "
             >
-              Explore
+              {t("home_section_explore")}
             </p>
 
             <div className="flex items-baseline gap-2">
@@ -1032,7 +1054,7 @@ export default function Home() {
                   text-ink
                 "
               >
-                Shop by category
+                {t("home_section_category")}
               </h2>
 
               {hasCategories && (
@@ -1064,7 +1086,7 @@ export default function Home() {
               sm:flex
             "
           >
-            Browse all
+            {t("home_section_browse_all")}
             <ArrowRight
               size={12}
               className="
@@ -1082,7 +1104,7 @@ export default function Home() {
           <CategorySkeleton />
         ) : categoriesError && categories.length === 0 ? (
           <ErrorState
-            message="Couldn't load categories."
+            message={t("home_error_categories", "Couldn't load categories.")}
             onRetry={() => refreshCategories()}
           />
         ) : categories.length === 0 ? (
@@ -1093,7 +1115,7 @@ export default function Home() {
               text-stone
             "
           >
-            No categories to show yet.
+            {t("home_no_categories")}
           </p>
         ) : (
           <div
@@ -1135,7 +1157,7 @@ export default function Home() {
             sm:hidden
           "
         >
-          Browse all
+          {t("home_section_browse_all")}
           <ArrowRight
             size={12}
             className="
@@ -1222,8 +1244,7 @@ export default function Home() {
               sm:text-[28px]
             "
           >
-            "Good skincare isn't about chasing trends — it's about listening to
-            what your skin needs today."
+            {t("home_journal_quote")}
           </p>
 
           <p
@@ -1236,7 +1257,7 @@ export default function Home() {
               text-stone
             "
           >
-            The Botaniq Journal
+            {t("home_journal_title")}
           </p>
         </div>
       </section>
@@ -1282,7 +1303,7 @@ export default function Home() {
                 text-moss
               "
             >
-              Freshly selected
+              {t("home_section_freshly_selected")}
             </p>
 
             <h2
@@ -1293,7 +1314,7 @@ export default function Home() {
                 text-ink
               "
             >
-              New arrivals
+              {t("home_section_new_arrivals")}
             </h2>
           </div>
 
@@ -1311,7 +1332,7 @@ export default function Home() {
               hover:text-moss
             "
           >
-            View all
+            {t("home_section_view_all")}
             <ArrowRight
               size={13}
               className="
@@ -1329,7 +1350,7 @@ export default function Home() {
           <ProductSkeletonGrid />
         ) : productsError && products.length === 0 ? (
           <ErrorState
-            message="Couldn't load new arrivals."
+            message={t("home_error_arrivals", "Couldn't load new arrivals.")}
             onRetry={() => refreshProducts()}
           />
         ) : products.length === 0 ? (
@@ -1341,7 +1362,7 @@ export default function Home() {
               text-stone
             "
           >
-            New products will appear here soon.
+            {t("home_no_products")}
           </p>
         ) : (
           <div
@@ -1387,7 +1408,7 @@ export default function Home() {
               "
           >
             <RefreshCw size={11} className="animate-spin" />
-            Updating products
+            {t("home_updating_products", "Updating products")}
           </div>
         )}
       </section>
@@ -1423,7 +1444,7 @@ export default function Home() {
               text-white/60
             "
           >
-            Your ritual starts here
+            {t("home_banner_sub")}
           </p>
 
           <h2
@@ -1434,8 +1455,8 @@ export default function Home() {
               sm:text-[42px]
             "
           >
-            Find what your skin
-            <span className="italic text-white/70"> needs.</span>
+            {t("home_banner_title")}{" "}
+            <span className="italic text-white/70">{t("home_banner_title_accent")}</span>
           </h2>
 
           <p
@@ -1448,8 +1469,7 @@ export default function Home() {
               text-white/65
             "
           >
-            Explore our carefully selected collection and build a skincare
-            routine that feels like yours.
+            {t("home_banner_desc")}
           </p>
 
           <Link
@@ -1476,7 +1496,7 @@ export default function Home() {
               hover:shadow-xl
             "
           >
-            Explore collection
+            {t("home_banner_cta")}
             <ArrowRight
               size={15}
               className="
@@ -1496,7 +1516,7 @@ export default function Home() {
       <button
         type="button"
         onClick={scrollToTop}
-        aria-label="Back to top"
+        aria-label={t("home_back_to_top", "Back to top")}
         className={`
           group
           fixed
@@ -1872,6 +1892,7 @@ function TrustItem({ icon: Icon, label }) {
 }
 
 function ErrorState({ message, onRetry }) {
+  const { t } = useLanguage();
   const [retrying, setRetrying] = useState(false);
 
   const handleRetry = async () => {
@@ -1929,7 +1950,7 @@ function ErrorState({ message, onRetry }) {
           className={retrying ? "animate-spin" : ""}
         />
 
-        {retrying ? "Retrying" : "Retry"}
+        {retrying ? t("retrying", "Retrying") : t("retry", "Retry")}
       </button>
     </div>
   );

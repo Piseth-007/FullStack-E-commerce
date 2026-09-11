@@ -12,9 +12,11 @@ import api from "../../api/axios";
 
 import { RowSkeleton } from "../../components/Skeleton";
 import { ToastContext } from "../../context/ToastContext";
+import { useLanguage } from "../../context/LanguageContext";
 import SkinTypeFormModal from "../../components/admin/SkinTypeFormModal";
 
 export default function SkinTypesPanel() {
+  const { t } = useLanguage();
   const [skinTypes, setSkinTypes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -89,7 +91,7 @@ export default function SkinTypesPanel() {
 
         setSkinTypes((prev) => [...prev, newSkinType]);
 
-        showToast("Skin type created successfully");
+        showToast(t("admin_skin_created_success", "Skin type created successfully"));
       } else {
         const res = await api.put(`/skin-types/${editing.id}`, payload);
 
@@ -101,7 +103,7 @@ export default function SkinTypesPanel() {
           ),
         );
 
-        showToast("Skin type updated successfully");
+        showToast(t("admin_skin_updated_success", "Skin type updated successfully"));
       }
 
       setEditing(null);
@@ -117,7 +119,9 @@ export default function SkinTypesPanel() {
 
   const handleDelete = async (skinType) => {
     const confirmed = window.confirm(
-      `Delete "${skinType.name}"? Products tagged with this skin type may be affected.`,
+      t("admin_skin_delete_confirm", 'Are you sure you want to delete "{name}"? Products using this skin type may be affected.', {
+        name: skinType.name,
+      }),
     );
 
     if (!confirmed) return;
@@ -129,7 +133,7 @@ export default function SkinTypesPanel() {
 
       setSkinTypes((prev) => prev.filter((item) => item.id !== skinType.id));
 
-      showToast(`"${skinType.name}" deleted successfully`);
+      showToast(t("admin_skin_deleted_success", "Skin type deleted successfully"));
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to delete skin type",
@@ -158,7 +162,7 @@ export default function SkinTypesPanel() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search skin types..."
+            placeholder={t("admin_skin_search_placeholder", "Search skin types...")}
             className="w-100 pl-10 pr-10 py-2.5 rounded-lg border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss"
           />
 
@@ -167,7 +171,7 @@ export default function SkinTypesPanel() {
               type="button"
               onClick={clearSearch}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone hover:text-ink"
-              aria-label="Clear search"
+              aria-label={t("admin_brand_clear_search", "Clear search")}
             >
               <X size={15} />
             </button>
@@ -180,7 +184,7 @@ export default function SkinTypesPanel() {
             onClick={() => loadSkinTypes(true)}
             disabled={refreshing || loading}
             className="w-10 h-10 rounded-lg border border-hairline bg-surface flex items-center justify-center text-stone hover:text-ink hover:bg-paper transition-colors disabled:opacity-50"
-            title="Refresh skin types"
+            title={t("admin_skin_refresh", "Refresh list")}
           >
             <RefreshCw
               size={16}
@@ -195,18 +199,16 @@ export default function SkinTypesPanel() {
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all whitespace-nowrap"
           >
             <Plus size={16} strokeWidth={2} />
-            New Skin Type
+            {t("admin_skin_new", "New Skin Type")}
           </button>
         </div>
       </div>
 
       {!loading && skinTypes.length > 0 && (
         <p className="text-[12.5px] text-stone mb-4">
-          Showing{" "}
-          <span className="font-medium text-ink">
-            {filteredSkinTypes.length}
-          </span>{" "}
-          of {skinTypes.length}
+          {t("admin_skin_showing", "Showing {count} skin types", {
+            count: `${filteredSkinTypes.length} / ${skinTypes.length}`,
+          })}
         </p>
       )}
 
@@ -224,11 +226,12 @@ export default function SkinTypesPanel() {
       ) : skinTypes.length === 0 ? (
         <EmptyState
           onAction={openNew}
-          label="New Skin Type"
-          message="Create skin types (e.g. Oily, Dry, Sensitive) so customers can filter products that suit them."
+          label={t("admin_skin_new", "New Skin Type")}
+          title={t("admin_skin_empty_title", "No skin types yet")}
+          message={t("admin_skin_empty_desc", "Create skin types to categorize products based on skin compatibility.")}
         />
       ) : filteredSkinTypes.length === 0 ? (
-        <SearchEmptyState search={search} onClear={clearSearch} />
+        <SearchEmptyState search={search} onClear={clearSearch} t={t} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {filteredSkinTypes.map((skinType) => {
@@ -253,8 +256,7 @@ export default function SkinTypesPanel() {
                   </p>
 
                   <p className="text-[11.5px] text-stone mt-0.5">
-                    {Number(skinType.products_count || 0)} product
-                    {Number(skinType.products_count) === 1 ? "" : "s"}
+                    {Number(skinType.products_count || 0)} {t("nav_products", "Products")}
                   </p>
                 </div>
 
@@ -264,7 +266,7 @@ export default function SkinTypesPanel() {
                     onClick={() => openEdit(skinType)}
                     disabled={isDeleting}
                     className="w-7 h-7 rounded-lg flex items-center justify-center text-stone hover:bg-paper hover:text-ink transition-colors"
-                    title="Edit skin type"
+                    title={t("admin_brand_edit", "Edit")}
                     aria-label={`Edit ${skinType.name}`}
                   >
                     <Pencil size={14} strokeWidth={1.75} />
@@ -275,7 +277,7 @@ export default function SkinTypesPanel() {
                     onClick={() => handleDelete(skinType)}
                     disabled={isDeleting}
                     className="w-7 h-7 rounded-lg flex items-center justify-center text-stone hover:bg-clay-tint hover:text-clay transition-colors"
-                    title="Delete skin type"
+                    title={t("admin_brand_delete", "Delete")}
                     aria-label={`Delete ${skinType.name}`}
                   >
                     {isDeleting ? (
@@ -304,14 +306,14 @@ export default function SkinTypesPanel() {
   );
 }
 
-function EmptyState({ onAction, label, message }) {
+function EmptyState({ onAction, label, title, message }) {
   return (
     <div className="bg-surface border border-dashed border-hairline rounded-xl py-20 px-6 flex flex-col items-center text-center">
       <div className="w-14 h-14 rounded-2xl bg-moss-tint flex items-center justify-center mb-4">
         <Sparkles size={22} className="text-moss" strokeWidth={1.75} />
       </div>
 
-      <p className="text-[15px] font-medium text-ink mb-1">No skin types yet</p>
+      <p className="text-[15px] font-medium text-ink mb-1">{title}</p>
 
       <p className="max-w-sm text-[13px] leading-6 text-stone mb-5">
         {message}
@@ -329,7 +331,7 @@ function EmptyState({ onAction, label, message }) {
   );
 }
 
-function SearchEmptyState({ search, onClear }) {
+function SearchEmptyState({ search, onClear, t }) {
   return (
     <div className="bg-surface border border-dashed border-hairline rounded-xl py-16 px-6 flex flex-col items-center text-center">
       <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-4">
@@ -337,12 +339,11 @@ function SearchEmptyState({ search, onClear }) {
       </div>
 
       <p className="text-[14px] font-medium text-ink mb-1">
-        No skin types found
+        {t("admin_skin_search_empty_title", "No matching skin types")}
       </p>
 
       <p className="text-[13px] text-stone mb-5">
-        No results found for{" "}
-        <span className="font-medium text-ink">"{search}"</span>
+        {t("admin_skin_search_empty_desc", 'No skin types match "{query}". Try a different search term.', { query: search })}
       </p>
 
       <button
@@ -350,7 +351,7 @@ function SearchEmptyState({ search, onClear }) {
         onClick={onClear}
         className="text-[13px] font-medium text-moss hover:text-moss-deep transition-colors"
       >
-        Clear search
+        {t("admin_brand_clear_search", "Clear search")}
       </button>
     </div>
   );

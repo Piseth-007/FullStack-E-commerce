@@ -317,7 +317,7 @@ class AuthController extends Controller
             $user = User::create([
                 'name' => $payload['name'] ?? $payload['email'],
                 'email' => $payload['email'],
-                'password' => Hash::make(Str::random(32)), // unusable password, Google-only login
+                'password' => Hash::make(Str::random(32)),
                 'email_verified_at' => now(),
                 'profile_image' => $payload['picture'] ?? null,
             ]);

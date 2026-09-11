@@ -23,6 +23,7 @@ import { ToastContext } from "../../context/ToastContext";
 import Receipt from "../../components/Receipt";
 import ReceiptModal from "../../components/admin/ReceiptModal";
 import { useAdminNotifications } from "../../context/AdminNotificationsContext";
+import { useLanguage } from "../../context/LanguageContext";
 const STATUSES = ["pending", "paid", "shipped", "completed", "cancelled"];
 const ORDERS_PER_PAGE = 10;
 const statusStyles = {
@@ -40,9 +41,21 @@ const statusIcons = {
   cancelled: XCircle,
 };
 export default function Orders() {
+  const { t } = useLanguage();
   const { markViewed } = useAdminNotifications();
   const [searchParams] = useSearchParams();
   const selectedOrderId = searchParams.get("order");
+
+  const getStatusLabel = (status) => {
+    const map = {
+      pending: t("dash_status_pending", "Pending"),
+      paid: t("dash_status_paid", "Paid"),
+      shipped: t("dash_status_shipped", "Shipped"),
+      completed: t("dash_status_completed", "Completed"),
+      cancelled: t("dash_status_cancelled", "Cancelled"),
+    };
+    return map[status] || status;
+  };
 
   useEffect(() => {
     markViewed("orders");
@@ -117,7 +130,7 @@ export default function Orders() {
       if (res.data?.deleted) {
         setOrders((prev) => prev.filter((order) => order.id !== orderId));
         setExpanded(null);
-        showToast(`Order #${orderId} was cancelled and removed`);
+        showToast(t("admin_orders_cancelled_removed", "Order #{id} was cancelled and removed", { id: orderId }));
         return;
       }
       const updatedOrder = res.data;
@@ -136,7 +149,10 @@ export default function Orders() {
         ),
       );
       showToast(
-        `Order #${orderId} updated to ${updatedOrder?.status || status}`,
+        t("admin_orders_updated_status", "Order #{id} updated to {status}", {
+          id: orderId,
+          status: getStatusLabel(updatedOrder?.status || status),
+        }),
       );
     } catch (err) {
       showToast(
@@ -196,7 +212,7 @@ export default function Orders() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="font-display text-[28px] font-medium text-ink">
-              Orders
+              {t("admin_orders_title", "Orders")}
             </h1>
             {!loading && (
               <span className="rounded-md bg-moss-tint px-2 py-0.5 text-[11px] font-medium text-moss">
@@ -210,8 +226,8 @@ export default function Orders() {
           onClick={() => loadOrders(filter, true)}
           disabled={loading || refreshing}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-hairline bg-surface text-stone transition-colors hover:bg-paper hover:text-ink disabled:opacity-50"
-          title="Refresh orders"
-          aria-label="Refresh orders"
+          title={t("admin_orders_refresh", "Refresh orders")}
+          aria-label={t("admin_orders_refresh", "Refresh orders")}
         >
           <RefreshCw
             size={16}
@@ -231,7 +247,7 @@ export default function Orders() {
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search order #, customer..."
+              placeholder={t("admin_orders_search_placeholder", "Search order #, customer...")}
               className="w-full rounded-lg border border-hairline bg-surface py-2 pl-9 pr-9 text-[13px] text-ink placeholder:text-stone/50 transition-colors focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20"
             />
             {search && (
@@ -239,7 +255,7 @@ export default function Orders() {
                 type="button"
                 onClick={clearSearch}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone hover:text-ink"
-                aria-label="Clear search"
+                aria-label={t("admin_orders_clear_search", "Clear search")}
               >
                 <X size={14} />
               </button>
@@ -247,7 +263,7 @@ export default function Orders() {
           </div>
           <div className="flex items-center gap-1.5 overflow-x-auto rounded-xl border border-hairline bg-surface p-1.5 lg:ml-auto">
             <FilterPill
-              label="All"
+              label={t("admin_orders_filter_all", "All")}
               active={filter === ""}
               onClick={() => {
                 setExpanded(null);
@@ -257,7 +273,7 @@ export default function Orders() {
             {STATUSES.map((status) => (
               <FilterPill
                 key={status}
-                label={status}
+                label={getStatusLabel(status)}
                 active={filter === status}
                 onClick={() => {
                   setExpanded(null);
@@ -270,11 +286,9 @@ export default function Orders() {
         {!loading && orders.length > 0 && (
           <div className="mt-3 flex items-center justify-between border-t border-hairline pt-3">
             <p className="text-[12px] text-stone">
-              Showing
-              <span className="font-medium text-ink">
-                {filteredOrders.length}
-              </span>
-              of {orders.length} orders
+              {t("admin_orders_showing", "Showing {count} orders", {
+                count: `${filteredOrders.length} / ${orders.length}`,
+              })}
             </p>
             {search && (
               <button
@@ -282,7 +296,7 @@ export default function Orders() {
                 onClick={clearSearch}
                 className="text-[12px] font-medium text-moss transition-colors hover:text-moss-deep"
               >
-                Clear search
+                {t("admin_orders_clear_search", "Clear search")}
               </button>
             )}
           </div>
@@ -296,14 +310,20 @@ export default function Orders() {
             onClick={() => loadOrders(filter)}
             className="text-[12.5px] font-medium underline"
           >
-            Try again
+            {t("admin_orders_try_again", "Try again")}
           </button>
         </div>
       )}
       {loading || refreshing ? (
         <div className="overflow-hidden rounded-xl border border-hairline bg-surface print:hidden">
           <div className="hidden border-b border-hairline px-5 py-3 md:grid md:grid-cols-[1.2fr_1.4fr_0.8fr_1fr_1fr]">
-            {["Order", "Customer", "Total", "Date", "Status"].map((item) => (
+            {[
+              t("admin_orders_th_order", "Order"),
+              t("admin_orders_th_customer", "Customer"),
+              t("admin_orders_th_total", "Total"),
+              t("admin_orders_th_date", "Date"),
+              t("admin_orders_th_status", "Status"),
+            ].map((item) => (
               <p
                 key={item}
                 className="text-[10.5px] font-medium uppercase tracking-widest text-stone"
@@ -327,12 +347,12 @@ export default function Orders() {
               <table className="w-full min-w-187.5 text-left">
                 <thead>
                   <tr className="border-b border-hairline bg-paper/30">
-                    <TableHead>Order</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Receipt</TableHead>
+                    <TableHead>{t("admin_orders_th_order", "Order")}</TableHead>
+                    <TableHead>{t("admin_orders_th_customer", "Customer")}</TableHead>
+                    <TableHead>{t("admin_orders_th_total", "Total")}</TableHead>
+                    <TableHead>{t("admin_orders_th_date", "Date")}</TableHead>
+                    <TableHead>{t("admin_orders_th_status", "Status")}</TableHead>
+                    <TableHead className="text-right">{t("admin_orders_th_receipt", "Receipt")}</TableHead>
                   </tr>
                 </thead>
                 <tbody>
@@ -345,6 +365,7 @@ export default function Orders() {
                         expanded={expanded === order.id}
                         updating={updatingId === order.id}
                         StatusIcon={StatusIcon}
+                        getStatusLabel={getStatusLabel}
                         onToggle={() => toggleOrder(order.id)}
                         onStatusChange={(status) =>
                           handleStatusChange(order.id, status)
@@ -395,17 +416,19 @@ function OrderRow({
   expanded,
   updating,
   StatusIcon,
+  getStatusLabel,
   onToggle,
   onStatusChange,
   onPrint,
 }) {
+  const { t } = useLanguage();
   const address = order.address || null;
   const addressName =
     address?.full_name ||
     address?.name ||
     address?.fullName ||
     order.user?.name ||
-    "Not provided";
+    t("admin_orders_no_address_details", "Not provided");
   const addressPhone =
     address?.telephone || address?.phone_number || address?.phoneNumber || "";
   const addressLine = [
@@ -446,7 +469,7 @@ function OrderRow({
             </div>
             <div className="min-w-0">
               <p className="max-w-45 truncate text-[13px] font-medium text-ink">
-                {order.user?.name || "Unknown customer"}
+                {order.user?.name || t("admin_orders_unknown_cust", "Unknown customer")}
               </p>
               {order.user?.email && (
                 <p className="max-w-45 truncate text-[11px] text-stone">
@@ -496,7 +519,7 @@ function OrderRow({
             >
               {STATUSES.map((status) => (
                 <option key={status} value={status}>
-                  {status}
+                  {getStatusLabel ? getStatusLabel(status) : status}
                 </option>
               ))}
             </select>
@@ -507,10 +530,10 @@ function OrderRow({
             type="button"
             onClick={onPrint}
             className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-hairline bg-surface hover:bg-paper text-stone hover:text-ink text-[12px] font-medium transition-colors shadow-2xs cursor-pointer"
-            title="Preview & Print Receipt"
+            title={t("admin_receipt_preview", "Preview & Print Receipt")}
           >
             <Printer size={13} strokeWidth={1.8} />
-            <span className="hidden sm:inline">Receipt</span>
+            <span className="hidden sm:inline">{t("admin_orders_btn_receipt", "Receipt")}</span>
           </button>
         </td>
       </tr>
@@ -527,7 +550,7 @@ function OrderRow({
                 className="inline-flex items-center gap-2 rounded-xl border border-hairline bg-surface px-4 py-2 text-[12.5px] font-medium text-ink transition-all hover:bg-paper shadow-2xs hover:shadow-xs cursor-pointer"
               >
                 <Printer size={15} strokeWidth={1.8} className="text-moss" />
-                <span>Print Receipt</span>
+                <span>{t("admin_orders_btn_print_receipt", "Print Receipt")}</span>
               </button>
             </div>
             <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -535,7 +558,7 @@ function OrderRow({
                 <div className="mb-3 flex items-center gap-2">
                   <MapPin size={16} className="text-moss" strokeWidth={1.75} />
                   <p className="text-[10.5px] font-medium uppercase tracking-widest text-stone">
-                    Shipping Address
+                    {t("admin_orders_shipping_address", "Shipping Address")}
                   </p>
                 </div>
                 {address ? (
@@ -548,14 +571,14 @@ function OrderRow({
                       <p className="mt-1"> {addressLine} </p>
                     ) : (
                       <p className="mt-1 text-stone">
-                        Address details not available
+                        {t("admin_orders_no_address_details", "Address details not available")}
                       </p>
                     )}
                   </div>
                 ) : (
                   <div className="rounded-lg bg-paper px-3 py-3">
                     <p className="text-[13px] text-stone">
-                      Shipping address not available.
+                      {t("admin_orders_no_address", "Shipping address not available.")}
                     </p>
                     <p className="mt-1 text-[11px] text-stone/70">
                       Address ID: {order.address_id || "—"}
@@ -572,11 +595,11 @@ function OrderRow({
                       strokeWidth={1.75}
                     />
                     <p className="text-[10.5px] font-medium uppercase tracking-widest text-stone">
-                      Order Items
+                      {t("admin_orders_order_items", "Order Items")}
                     </p>
                   </div>
                   <span className="text-[11.5px] text-stone">
-                    {items.length} items
+                    {t("admin_orders_items_count", "{count} items", { count: items.length })}
                   </span>
                 </div>
                 {items.length > 0 ? (
@@ -588,7 +611,7 @@ function OrderRow({
                       const productName =
                         item.product_name ||
                         item.product?.name ||
-                        "Unknown product";
+                        t("admin_orders_unknown_cust", "Unknown product");
 
                       return (
                         <div
@@ -628,7 +651,7 @@ function OrderRow({
                   </div>
                 ) : (
                   <p className="text-[13px] text-stone">
-                    No item details available.
+                    {t("admin_orders_no_items", "No item details available.")}
                   </p>
                 )}
               </div>
@@ -648,14 +671,13 @@ function Pagination({
   onPrevious,
   onNext,
 }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col gap-3 py-5 print:hidden sm:flex-row sm:items-center sm:justify-between">
       <p className="text-[12px] text-stone">
-        Showing
-        <span className="font-medium text-ink">
-          {startOrder}–{endOrder}
-        </span>
-        of {totalOrders} orders
+        {t("admin_orders_showing", "Showing {count} orders", {
+          count: `${startOrder}–${endOrder} / ${totalOrders}`,
+        })}
       </p>
       <div className="flex items-center gap-2">
         <button
@@ -663,20 +685,22 @@ function Pagination({
           onClick={onPrevious}
           disabled={currentPage === 1}
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline bg-surface text-stone transition-colors hover:bg-paper hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
-          aria-label="Previous page"
+          aria-label={t("admin_prod_prev", "Previous page")}
         >
           <ChevronLeft size={16} />
         </button>
         <span className="min-w-21.25 text-center text-[12px] text-stone">
-          Page <span className="font-medium text-ink">{currentPage}</span> of{" "}
-          {totalPages}
+          {t("admin_prod_page", "Page {current} of {total}", {
+            current: currentPage,
+            total: totalPages,
+          })}
         </span>
         <button
           type="button"
           onClick={onNext}
           disabled={currentPage === totalPages}
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline bg-surface text-stone hover:bg-paper hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
-          aria-label="Next page"
+          aria-label={t("admin_prod_next", "Next page")}
         >
           <ChevronRight size={16} />
         </button>
@@ -703,16 +727,17 @@ function FilterPill({ label, active, onClick }) {
   );
 }
 function EmptyState({ filter, onClear }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-20 text-center">
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-moss-tint">
         <ShoppingBag size={22} className="text-moss" strokeWidth={1.75} />
       </div>
-      <p className="mb-1 text-[15px] font-medium text-ink"> No orders found </p>
+      <p className="mb-1 text-[15px] font-medium text-ink">{t("admin_orders_empty_title", "No orders found")}</p>
       <p className="mb-5 max-w-sm text-[13px] leading-6 text-stone">
         {filter
-          ? `There are currently no ${filter} orders.`
-          : "Orders from your customers will appear here."}
+          ? t("admin_orders_empty_status_desc", "There are currently no {status} orders.", { status: filter })
+          : t("admin_orders_empty_desc", "Orders from your customers will appear here.")}
       </p>
       {filter && (
         <button
@@ -720,29 +745,29 @@ function EmptyState({ filter, onClear }) {
           onClick={onClear}
           className="rounded-lg border border-hairline bg-paper px-4 py-2 text-[13px] font-medium text-ink transition-colors hover:bg-hairline/30"
         >
-          Show all orders
+          {t("admin_orders_show_all", "Show all orders")}
         </button>
       )}
     </div>
   );
 }
 function SearchEmptyState({ search, onClear }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-2xl border border-dashed border-hairline bg-surface px-6 py-16 text-center print:hidden">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl border border-hairline bg-paper">
         <Search size={20} className="text-stone" strokeWidth={1.75} />
       </div>
-      <p className="mb-1 text-[14px] font-medium text-ink"> No orders found </p>
+      <p className="mb-1 text-[14px] font-medium text-ink">{t("admin_orders_search_empty_title", "No orders found")}</p>
       <p className="mb-5 text-[13px] text-stone">
-        No results found for
-        <span className="font-medium text-ink"> "{search}" </span>
+        {t("admin_orders_search_empty_desc", 'No results found for "{query}"', { query: search })}
       </p>
       <button
         type="button"
         onClick={onClear}
         className="text-[13px] font-medium text-moss transition-colors hover:text-moss-deep"
       >
-        Clear search
+        {t("admin_orders_clear_search", "Clear search")}
       </button>
     </div>
   );

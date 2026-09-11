@@ -17,6 +17,7 @@ import {
   Moon,
   ChevronDown,
   ArrowRight,
+  Languages,
 } from "lucide-react";
 
 import { useAuth } from "../../context/useAuth";
@@ -24,13 +25,16 @@ import { useCart } from "../../context/useCard";
 import { FavoritesContext } from "../../context/FavoriteContext";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
 import { useTheme } from "../../hooks/useTheme";
+import { useLanguage } from "../../context/useLanguage";
 import api from "../../api/axios";
+import { prefetchApi, fetchWithCache } from "../../utils/apiCache";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
   const { itemCount } = useCart();
   const { itemCount: favoriteCount } = useContext(FavoritesContext);
   const store = useStoreSettings();
+  const { language, setLanguage, toggleLanguage, t, isKhmer } = useLanguage();
 
   const navigate = useNavigate();
 
@@ -60,22 +64,22 @@ export default function Navbar() {
     const fetchNavbarData = async () => {
       try {
         const [categoriesResponse, brandsResponse] = await Promise.all([
-          api.get("/categories"),
-          api.get("/brands"),
+          fetchWithCache("/categories"),
+          fetchWithCache("/brands"),
         ]);
 
         if (!mounted) return;
 
-        const categoryData = Array.isArray(categoriesResponse.data?.data)
-          ? categoriesResponse.data.data
-          : Array.isArray(categoriesResponse.data)
-            ? categoriesResponse.data
+        const categoryData = Array.isArray(categoriesResponse?.data)
+          ? categoriesResponse.data
+          : Array.isArray(categoriesResponse)
+            ? categoriesResponse
             : [];
 
-        const brandData = Array.isArray(brandsResponse.data?.data)
-          ? brandsResponse.data.data
-          : Array.isArray(brandsResponse.data)
-            ? brandsResponse.data
+        const brandData = Array.isArray(brandsResponse?.data)
+          ? brandsResponse.data
+          : Array.isArray(brandsResponse)
+            ? brandsResponse
             : [];
 
         setCategories(categoryData);
@@ -305,11 +309,22 @@ export default function Navbar() {
         </Link>
 
         <nav className="hidden md:flex items-center justify-center gap-5 lg:gap-6 text-[13.5px] font-medium text-stone">
-          <Link to="/products" className="nav-link hover:text-ink">
-            Shop all
+          <Link
+            to="/products"
+            onMouseEnter={() => {
+              prefetchApi("/products", { page: "1" });
+              import("../../pages/shop/ProductList").catch(() => {});
+            }}
+            className="nav-link hover:text-ink"
+          >
+            {t("nav_shop_all", "Shop all")}
           </Link>
           <div
-            onMouseEnter={() => openDropdown("categories")}
+            onMouseEnter={() => {
+              openDropdown("categories");
+              prefetchApi("/categories");
+              import("../../pages/shop/Category").catch(() => {});
+            }}
             onMouseLeave={scheduleClose}
           >
             <Link
@@ -318,7 +333,7 @@ export default function Navbar() {
                 openMenu === "categories" ? "text-ink" : "hover:text-ink"
               }`}
             >
-              Categories
+              {t("nav_categories", "Categories")}
               <ChevronDown
                 size={13}
                 strokeWidth={2}
@@ -345,7 +360,11 @@ export default function Navbar() {
           </div>
 
           <div
-            onMouseEnter={() => openDropdown("brands")}
+            onMouseEnter={() => {
+              openDropdown("brands");
+              prefetchApi("/brands");
+              import("../../pages/shop/Brands").catch(() => {});
+            }}
             onMouseLeave={scheduleClose}
           >
             <Link
@@ -354,7 +373,7 @@ export default function Navbar() {
                 openMenu === "brands" ? "text-ink" : "hover:text-ink"
               }`}
             >
-              Brands
+              {t("nav_brands", "Brands")}
               <ChevronDown
                 size={13}
                 strokeWidth={2}
@@ -435,9 +454,9 @@ export default function Navbar() {
                       type="search"
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder="Search products..."
+                      placeholder={t("nav_search_placeholder", "Search products...")}
                       className="w-full pl-9 pr-3 py-2 rounded-lg border border-hairline bg-paper text-[13px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss"
-                      aria-label="Search products"
+                      aria-label={t("nav_search_aria", "Search products")}
                     />
                   </div>
                 </form>
@@ -447,6 +466,9 @@ export default function Navbar() {
 
           <Link
             to="/cart"
+            onMouseEnter={() => {
+              import("../../pages/shop/Cart").catch(() => {});
+            }}
             className="nav-action relative p-2 rounded-none text-stone hover:bg-paper hover:text-ink"
             aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
           >
@@ -464,6 +486,9 @@ export default function Navbar() {
 
           <Link
             to="/favorites"
+            onMouseEnter={() => {
+              import("../../pages/shop/Favorites").catch(() => {});
+            }}
             className="nav-action relative p-2 rounded-none text-stone hover:bg-paper hover:text-ink"
             aria-label={`Favorites${
               favoriteCount > 0 ? `, ${favoriteCount} items` : ""
@@ -572,9 +597,43 @@ export default function Navbar() {
               to="/login"
               className="nav-action ml-1 px-3 sm:px-4 py-2 rounded-lg bg-moss text-white text-[13px] font-medium hover:bg-moss-deep"
             >
-              Sign in
+              {t("nav_signin", "Sign in")}
             </Link>
           )}
+
+          {/* Font & Language Switcher (EN / ខ្មែរ) */}
+          <div
+            className="flex items-center rounded-none border border-hairline bg-surface p-0.5 text-[11px] font-medium shadow-2xs"
+            role="group"
+            aria-label={t("nav_language", "Language & Font")}
+          >
+            <button
+              type="button"
+              onClick={() => setLanguage("en")}
+              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 transition-all ${
+                language === "en"
+                  ? "bg-moss text-white font-semibold"
+                  : "text-stone hover:text-ink hover:bg-paper"
+              }`}
+              title="English Font (Inter & Fraunces)"
+              aria-label="Switch to English font"
+            >
+              EN
+            </button>
+            <button
+              type="button"
+              onClick={() => setLanguage("km")}
+              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 transition-all ${
+                language === "km"
+                  ? "bg-moss text-white font-semibold"
+                  : "text-stone hover:text-ink hover:bg-paper"
+              }`}
+              title="Khmer Font (Google Sans & Poppins)"
+              aria-label="Switch to Khmer font"
+            >
+              ខ្មែរ
+            </button>
+          </div>
 
           <button
             type="button"
@@ -619,7 +678,7 @@ export default function Navbar() {
             className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
           >
             <ShoppingBag size={15} strokeWidth={1.75} />
-            Shop all
+            {t("nav_shop_all", "Shop all")}
           </Link>
 
           <Link
@@ -628,7 +687,7 @@ export default function Navbar() {
             className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
           >
             <Tag size={15} strokeWidth={1.75} />
-            Categories
+            {t("nav_categories", "Categories")}
           </Link>
 
           <Link
@@ -637,7 +696,7 @@ export default function Navbar() {
             className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
           >
             <Award size={15} strokeWidth={1.75} />
-            Brands
+            {t("nav_brands", "Brands")}
           </Link>
 
           <Link
@@ -646,7 +705,7 @@ export default function Navbar() {
             className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
           >
             <Heart size={15} strokeWidth={1.75} />
-            Favorites
+            {t("nav_favorites", "Favorites")}
             {favoriteCount > 0 && (
               <span className="ml-auto rounded-none border border-clay bg-clay px-1.5 py-0.5 text-[10px] font-mono font-medium text-white">
                 {favoriteCount > 99 ? "99+" : favoriteCount}
@@ -660,7 +719,7 @@ export default function Navbar() {
             className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
           >
             <Award size={15} strokeWidth={1.75} />
-            Best rated
+            {t("shop_best_rated", "Best rated")}
           </Link>
 
           <Link
@@ -669,8 +728,41 @@ export default function Navbar() {
             className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
           >
             <Percent size={15} strokeWidth={1.75} />
-            Promotions
+            {t("shop_promotions", "Promotions")}
           </Link>
+
+          {/* Language & Font toggle in mobile drawer */}
+          <div className="mt-2 pt-2.5 border-t border-hairline flex items-center justify-between">
+            <span className="text-[12.5px] font-medium text-stone flex items-center gap-2">
+              <Languages size={15} strokeWidth={1.75} className="text-moss" />
+              {t("nav_language", "Language & Font")}
+            </span>
+
+            <div className="flex items-center rounded-none border border-hairline bg-surface p-0.5 text-[11px] font-medium">
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`px-2.5 py-1 transition-all ${
+                  language === "en"
+                    ? "bg-moss text-white font-semibold"
+                    : "text-stone hover:text-ink"
+                }`}
+              >
+                English
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("km")}
+                className={`px-2.5 py-1 transition-all ${
+                  language === "km"
+                    ? "bg-moss text-white font-semibold"
+                    : "text-stone hover:text-ink"
+                }`}
+              >
+                ភាសាខ្មែរ
+              </button>
+            </div>
+          </div>
 
           {user && (
             <div className="mt-2 pt-2 border-t border-hairline">
@@ -705,7 +797,7 @@ export default function Navbar() {
                 className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
               >
                 <Package size={15} strokeWidth={1.75} />
-                My orders
+                {t("nav_orders", "My orders")}
               </Link>
 
               <Link
@@ -714,7 +806,7 @@ export default function Navbar() {
                 className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-stone hover:text-ink"
               >
                 <User size={15} strokeWidth={1.75} />
-                My profile
+                {t("nav_profile", "My profile")}
               </Link>
 
               <button
@@ -723,7 +815,7 @@ export default function Navbar() {
                 className="flex items-center gap-2.5 w-full py-2 text-[13.5px] font-medium text-stone hover:text-clay"
               >
                 <LogOut size={15} strokeWidth={1.75} />
-                Log out
+                {t("nav_signout", "Log out")}
               </button>
             </div>
           )}

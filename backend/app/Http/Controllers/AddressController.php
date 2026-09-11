@@ -52,7 +52,15 @@ class AddressController extends Controller
     {
         $this->authorizeOwnership($request, $address);
 
+        $wasDefault = (bool) $address->is_default;
         $address->delete();
+
+        if ($wasDefault) {
+            $nextAddress = $request->user()->addresses()->first();
+            if ($nextAddress) {
+                $nextAddress->update(['is_default' => true]);
+            }
+        }
 
         return response()->json(['message' => 'Address deleted']);
     }

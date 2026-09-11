@@ -14,6 +14,7 @@ import api from "../../api/axios";
 import { useAuth } from "../../context/useAuth";
 import { useToast } from "../../context/useToast";
 import { ConfirmContext } from "../../context/ConfirmContext";
+import { useLanguage } from "../../context/LanguageContext";
 import { validateRealEmail } from "../../utils/emailValidation";
 
 const TABS = [
@@ -49,7 +50,9 @@ function TextInput(props) {
   );
 }
 
-function SaveButton({ saving, label = "Save changes" }) {
+function SaveButton({ saving, label }) {
+  const { t } = useLanguage();
+  const defaultLabel = label || t("admin_set_save_changes", "Save changes");
   return (
     <button
       type="submit"
@@ -61,12 +64,13 @@ function SaveButton({ saving, label = "Save changes" }) {
       ) : (
         <Save size={16} />
       )}
-      {saving ? "Saving..." : label}
+      {saving ? t("admin_set_saving", "Saving...") : defaultLabel}
     </button>
   );
 }
 
 function StoreTab({ initial, onSaved }) {
+  const { t } = useLanguage();
   const { showToast } = useToast();
   const [form, setForm] = useState({
     name: initial.name || "",
@@ -127,7 +131,7 @@ function StoreTab({ initial, onSaved }) {
       setLogoFile(null);
       if (preview) URL.revokeObjectURL(preview);
       setPreview(null);
-      showToast("Store profile updated", "success");
+      showToast(t("admin_set_store_updated", "Store profile updated"), "success");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to save store profile",
@@ -143,7 +147,7 @@ function StoreTab({ initial, onSaved }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <FieldLabel>Store logo</FieldLabel>
+        <FieldLabel>{t("admin_set_store_logo", "Store logo")}</FieldLabel>
         <div className="flex items-center gap-4">
           <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-xl border border-hairline bg-surface">
             {logoSrc ? (
@@ -163,7 +167,7 @@ function StoreTab({ initial, onSaved }) {
               className="inline-flex items-center gap-2 rounded-lg border border-hairline px-3 py-2 text-sm font-medium text-ink transition hover:bg-surface"
             >
               <Upload size={14} />
-              Upload
+              {t("admin_set_upload", "Upload")}
             </button>
             {logoSrc && (
               <button
@@ -172,7 +176,7 @@ function StoreTab({ initial, onSaved }) {
                 className="inline-flex items-center gap-2 rounded-lg border border-hairline px-3 py-2 text-sm font-medium text-clay transition hover:bg-surface"
               >
                 <X size={14} />
-                Remove
+                {t("admin_set_remove", "Remove")}
               </button>
             )}
           </div>
@@ -188,7 +192,7 @@ function StoreTab({ initial, onSaved }) {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <FieldLabel>Store name</FieldLabel>
+          <FieldLabel>{t("admin_set_store_name", "Store name")}</FieldLabel>
           <TextInput
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -196,7 +200,7 @@ function StoreTab({ initial, onSaved }) {
           />
         </div>
         <div>
-          <FieldLabel>Contact email</FieldLabel>
+          <FieldLabel>{t("admin_set_contact_email", "Contact email")}</FieldLabel>
           <TextInput
             type="email"
             value={form.contact_email}
@@ -206,7 +210,7 @@ function StoreTab({ initial, onSaved }) {
           />
         </div>
         <div>
-          <FieldLabel>Contact phone</FieldLabel>
+          <FieldLabel>{t("admin_set_contact_phone", "Contact phone")}</FieldLabel>
           <TextInput
             value={form.contact_phone}
             onChange={(e) =>
@@ -215,7 +219,7 @@ function StoreTab({ initial, onSaved }) {
           />
         </div>
         <div>
-          <FieldLabel>Address</FieldLabel>
+          <FieldLabel>{t("admin_set_address", "Address")}</FieldLabel>
           <TextInput
             value={form.address}
             onChange={(e) => setForm({ ...form, address: e.target.value })}
@@ -229,6 +233,7 @@ function StoreTab({ initial, onSaved }) {
 }
 
 function AccountTab() {
+  const { t } = useLanguage();
   const { user, updateProfile, updateProfileImage, removeProfileImage } =
     useAuth();
   const { showToast } = useToast();
@@ -261,7 +266,7 @@ function AccountTab() {
     setSaving(true);
     try {
       await updateProfile(form);
-      showToast("Account updated", "success");
+      showToast(t("admin_set_account_updated", "Account updated"), "success");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to update account",
@@ -279,7 +284,7 @@ function AccountTab() {
     setUploading(true);
     try {
       await updateProfileImage(file);
-      showToast("Profile photo updated", "success");
+      showToast(t("admin_set_photo_updated", "Profile photo updated"), "success");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to upload photo",
@@ -292,15 +297,15 @@ function AccountTab() {
   };
 
   const handleRemoveAvatar = async () => {
-    const ok = await confirm("Remove your profile photo?", {
-      title: "Remove photo",
+    const ok = await confirm(t("admin_set_remove_photo_confirm", "Remove your profile photo?"), {
+      title: t("admin_set_remove_photo_title", "Remove photo"),
     });
     if (!ok) return;
     try {
       await removeProfileImage();
       if (preview) URL.revokeObjectURL(preview);
       setPreview(null);
-      showToast("Profile photo removed", "success");
+      showToast(t("admin_set_photo_removed", "Profile photo removed"), "success");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to remove photo",
@@ -314,7 +319,7 @@ function AccountTab() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <FieldLabel>Profile photo</FieldLabel>
+        <FieldLabel>{t("admin_set_profile_photo", "Profile photo")}</FieldLabel>
         <div className="flex items-center gap-4">
           <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full border border-hairline bg-surface">
             {avatarSrc ? (
@@ -339,7 +344,7 @@ function AccountTab() {
               ) : (
                 <Upload size={14} />
               )}
-              Upload
+              {t("admin_set_upload", "Upload")}
             </button>
             {user?.profile_image && (
               <button
@@ -348,7 +353,7 @@ function AccountTab() {
                 className="inline-flex items-center gap-2 rounded-lg border border-hairline px-3 py-2 text-sm font-medium text-clay transition hover:bg-surface"
               >
                 <X size={14} />
-                Remove
+                {t("admin_set_remove", "Remove")}
               </button>
             )}
           </div>
@@ -364,7 +369,7 @@ function AccountTab() {
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <FieldLabel>Name</FieldLabel>
+          <FieldLabel>{t("admin_set_name", "Name")}</FieldLabel>
           <TextInput
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -372,7 +377,7 @@ function AccountTab() {
           />
         </div>
         <div>
-          <FieldLabel>Email</FieldLabel>
+          <FieldLabel>{t("admin_set_email", "Email")}</FieldLabel>
           <TextInput
             type="email"
             value={form.email}
@@ -381,7 +386,7 @@ function AccountTab() {
           />
         </div>
         <div>
-          <FieldLabel>Phone</FieldLabel>
+          <FieldLabel>{t("admin_set_phone", "Phone")}</FieldLabel>
           <TextInput
             value={form.phone}
             onChange={(e) => setForm({ ...form, phone: e.target.value })}
@@ -395,6 +400,7 @@ function AccountTab() {
 }
 
 function PaymentTab({ initial, onSaved }) {
+  const { t } = useLanguage();
   const { showToast } = useToast();
   const [form, setForm] = useState({
     bakong_account_id: initial.bakong_account_id || "",
@@ -409,7 +415,7 @@ function PaymentTab({ initial, onSaved }) {
       const res = await api.put("/admin/settings/payment", form);
       const data = res.data?.data || res.data;
       onSaved(data);
-      showToast("Payment settings updated", "success");
+      showToast(t("admin_set_payment_updated", "Payment settings updated"), "success");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to save payment settings",
@@ -432,13 +438,13 @@ function PaymentTab({ initial, onSaved }) {
         }`}
       >
         {isPending
-          ? "Bakong KHQR is not active yet. Add your developer token and account ID from NBC Cambodia to enable it."
-          : "Bakong KHQR credentials are set."}
+          ? t("admin_set_bakong_not_active", "Bakong KHQR is not active yet. Add your developer token and account ID from NBC Cambodia to enable it.")
+          : t("admin_set_bakong_active", "Bakong KHQR credentials are set.")}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div>
-          <FieldLabel>Bakong account ID</FieldLabel>
+          <FieldLabel>{t("admin_set_bakong_acc_id", "Bakong account ID")}</FieldLabel>
           <TextInput
             value={form.bakong_account_id}
             onChange={(e) =>
@@ -448,7 +454,7 @@ function PaymentTab({ initial, onSaved }) {
           />
         </div>
         <div>
-          <FieldLabel>Bakong developer token</FieldLabel>
+          <FieldLabel>{t("admin_set_bakong_token", "Bakong developer token")}</FieldLabel>
           <TextInput
             type="password"
             value={form.bakong_developer_token}
@@ -489,6 +495,7 @@ function Toggle({ checked, onChange, label }) {
 }
 
 function NotificationsTab({ initial, onSaved }) {
+  const { t } = useLanguage();
   const { showToast } = useToast();
   const [form, setForm] = useState({
     email_enabled: initial.email_enabled ?? true,
@@ -506,7 +513,7 @@ function NotificationsTab({ initial, onSaved }) {
       const res = await api.put("/admin/settings/notifications", form);
       const data = res.data?.data || res.data;
       onSaved(data);
-      showToast("Notification settings updated", "success");
+      showToast(t("admin_set_notif_updated", "Notification settings updated"), "success");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to save notification settings",
@@ -519,7 +526,7 @@ function NotificationsTab({ initial, onSaved }) {
 
   const handleTestTelegram = async () => {
     if (!form.telegram_bot_token || !form.telegram_chat_id) {
-      showToast("Please enter both Bot Token and Chat ID before testing", "error");
+      showToast(t("admin_set_telegram_req", "Please enter both Bot Token and Chat ID before testing"), "error");
       return;
     }
     setTesting(true);
@@ -528,7 +535,7 @@ function NotificationsTab({ initial, onSaved }) {
         telegram_bot_token: form.telegram_bot_token,
         telegram_chat_id: form.telegram_chat_id,
       });
-      showToast(res.data?.message || "Test message sent to Telegram!", "success");
+      showToast(t("admin_set_test_sent", "Test message sent to Telegram!"), "success");
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to send test message",
@@ -545,19 +552,19 @@ function NotificationsTab({ initial, onSaved }) {
         <Toggle
           checked={form.email_enabled}
           onChange={(v) => setForm({ ...form, email_enabled: v })}
-          label="Email notifications for new orders"
+          label={t("admin_set_notif_email", "Email notifications for new orders")}
         />
         <Toggle
           checked={form.telegram_enabled}
           onChange={(v) => setForm({ ...form, telegram_enabled: v })}
-          label="Telegram notifications for new orders"
+          label={t("admin_set_notif_telegram", "Telegram notifications for new orders")}
         />
       </div>
 
       {form.telegram_enabled && (
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <FieldLabel>Telegram bot token</FieldLabel>
+            <FieldLabel>{t("admin_set_telegram_token", "Telegram bot token")}</FieldLabel>
             <TextInput
               type="password"
               placeholder="e.g. 123456789:ABCdefGhIJKlmNoPQRsTUVwxyZ"
@@ -568,7 +575,7 @@ function NotificationsTab({ initial, onSaved }) {
             />
           </div>
           <div>
-            <FieldLabel>Telegram chat ID</FieldLabel>
+            <FieldLabel>{t("admin_set_telegram_chat_id", "Telegram chat ID")}</FieldLabel>
             <TextInput
               placeholder="e.g. -1001234567890 or 123456789"
               value={form.telegram_chat_id}
@@ -594,7 +601,7 @@ function NotificationsTab({ initial, onSaved }) {
             ) : (
               <Send size={16} />
             )}
-            Send test notification
+            {t("admin_set_send_test", "Send test notification")}
           </button>
         )}
       </div>
@@ -603,10 +610,26 @@ function NotificationsTab({ initial, onSaved }) {
 }
 
 export default function Settings() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("store");
   const [settings, setSettings] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  const getTabLabel = (id) => {
+    switch (id) {
+      case "store":
+        return t("admin_set_tab_store", "Store Profile");
+      case "account":
+        return t("admin_set_tab_account", "Account");
+      case "payment":
+        return t("admin_set_tab_payment", "Payment");
+      case "notifications":
+        return t("admin_set_tab_notifications", "Notifications");
+      default:
+        return id;
+    }
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -644,10 +667,12 @@ export default function Settings() {
 
   return (
     <div>
-      <h1 className="mb-6 font-serif text-2xl text-ink">Settings</h1>
+      <h1 className="mb-6 font-serif text-2xl text-ink">
+        {t("admin_set_title", "Settings")}
+      </h1>
 
       <div className="mb-6 flex gap-1 overflow-x-auto border-b border-hairline">
-        {TABS.map(({ id, label, icon: Icon }) => (
+        {TABS.map(({ id, icon: Icon }) => (
           <button
             key={id}
             onClick={() => setActiveTab(id)}
@@ -658,7 +683,7 @@ export default function Settings() {
             }`}
           >
             <Icon size={16} />
-            {label}
+            {getTabLabel(id)}
           </button>
         ))}
       </div>

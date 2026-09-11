@@ -11,12 +11,14 @@ import {
 } from "lucide-react";
 import api from "../../api/axios";
 import { useTheme } from "../../hooks/useTheme";
+import { useLanguage } from "../../context/useLanguage";
 
 const LOW_STOCK_THRESHOLD = 5;
 const POLL_INTERVAL_MS = 60000;
 
 export default function Navbar({ onMenuClick }) {
   const navigate = useNavigate();
+  const { language, setLanguage, t } = useLanguage();
 
   const { isDark: darkMode, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
@@ -132,7 +134,7 @@ export default function Navbar({ onMenuClick }) {
         </button>
 
         <p className="font-display text-[17px] font-medium text-ink">
-          Store Owner Panel
+          {t("admin_panel_title", "Store Owner Panel")}
         </p>
       </div>
 
@@ -143,7 +145,7 @@ export default function Navbar({ onMenuClick }) {
             type="button"
             onClick={toggleNotifications}
             className="relative flex h-9 w-9 items-center justify-center rounded-lg border border-hairline text-stone transition-colors hover:bg-paper hover:text-ink"
-            aria-label="Notifications"
+            aria-label={t("admin_notif_title", "Notifications")}
           >
             <Bell size={17} strokeWidth={1.75} />
 
@@ -159,12 +161,12 @@ export default function Navbar({ onMenuClick }) {
              
               <div className="flex items-center justify-between border-b border-hairline px-4 py-3">
                 <p className="text-[13px] font-medium text-ink">
-                  Notifications
+                  {t("admin_notif_title", "Notifications")}
                 </p>
 
                 {totalAlerts > 0 && (
                   <span className="rounded-md bg-clay-tint px-2 py-0.5 text-[10.5px] font-medium text-clay">
-                    {totalAlerts} new
+                    {totalAlerts} {t("admin_notif_new", "new")}
                   </span>
                 )}
               </div>
@@ -173,7 +175,7 @@ export default function Navbar({ onMenuClick }) {
               <div className="max-h-96 overflow-y-auto">
                 {loading ? (
                   <div className="px-4 py-6 text-center text-[12.5px] text-stone">
-                    Loading...
+                    {t("admin_notif_loading", "Loading...")}
                   </div>
                 ) : totalAlerts === 0 ? (
                   <div className="px-4 py-8 text-center">
@@ -183,7 +185,7 @@ export default function Navbar({ onMenuClick }) {
                       strokeWidth={1.5}
                     />
                     <p className="text-[12.5px] text-stone">
-                      You're all caught up
+                      {t("admin_notif_caught_up", "You're all caught up")}
                     </p>
                   </div>
                 ) : (
@@ -206,11 +208,11 @@ export default function Navbar({ onMenuClick }) {
 
                         <div className="min-w-0 flex-1">
                           <p className="text-[12.5px] font-medium text-ink">
-                            New order #{order.id}
+                            {t("admin_notif_new_order", "New order #{id}", { id: order.id })}
                           </p>
 
                           <p className="mt-0.5 truncate text-[11.5px] text-stone">
-                            {order.user?.name || "Customer"} · $
+                            {order.user?.name || t("dash_customer_default", "Customer")} · $
                             {Number(order.total || 0).toFixed(2)}
                           </p>
                         </div>
@@ -239,7 +241,7 @@ export default function Navbar({ onMenuClick }) {
                           </p>
 
                           <p className="mt-0.5 text-[11.5px] text-stone">
-                            Only {product.stock} left in stock
+                            {t("admin_notif_low_stock", "Only {stock} left in stock", { stock: product.stock })}
                           </p>
                         </div>
                       </button>
@@ -255,7 +257,7 @@ export default function Navbar({ onMenuClick }) {
                     onClick={goToOrders}
                     className="flex-1 rounded-lg py-1.5 text-center text-[11.5px] font-medium text-moss transition-colors hover:bg-moss-tint"
                   >
-                    View Orders
+                    {t("admin_notif_view_orders", "View Orders")}
                   </button>
 
                   <button
@@ -263,17 +265,17 @@ export default function Navbar({ onMenuClick }) {
                     onClick={goToProducts}
                     className="flex-1 rounded-lg py-1.5 text-center text-[11.5px] font-medium text-moss transition-colors hover:bg-moss-tint"
                   >
-                    View Stock
+                    {t("admin_notif_view_stock", "View Stock")}
                   </button>
 
                   <button
                     type="button"
                     onClick={clearNotifications}
                     className="flex items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-[11.5px] font-medium text-stone transition-colors hover:bg-paper hover:text-ink"
-                    title="Clear notifications"
+                    title={t("admin_notif_clear", "Clear")}
                   >
                     <X size={13} />
-                    Clear
+                    {t("admin_notif_clear", "Clear")}
                   </button>
                 </div>
               )}
@@ -281,12 +283,45 @@ export default function Navbar({ onMenuClick }) {
           )}
         </div>
 
- 
+        {/* Font & Language Switcher (EN / ខ្មែរ) */}
+        <div
+          className="flex items-center rounded-lg border border-hairline bg-surface p-0.5 text-[11px] font-medium shadow-2xs"
+          role="group"
+          aria-label={t("nav_language", "Language & Font")}
+        >
+          <button
+            type="button"
+            onClick={() => setLanguage("en")}
+            className={`rounded-md px-2 py-1 sm:px-2.5 sm:py-1 transition-all ${
+              language === "en"
+                ? "bg-moss text-white font-semibold"
+                : "text-stone hover:text-ink hover:bg-paper"
+            }`}
+            title="English Font (Inter & Fraunces)"
+            aria-label="Switch to English font"
+          >
+            EN
+          </button>
+          <button
+            type="button"
+            onClick={() => setLanguage("km")}
+            className={`rounded-md px-2 py-1 sm:px-2.5 sm:py-1 transition-all ${
+              language === "km"
+                ? "bg-moss text-white font-semibold"
+                : "text-stone hover:text-ink hover:bg-paper"
+            }`}
+            title="Khmer Font (Google Sans & Poppins)"
+            aria-label="Switch to Khmer font"
+          >
+            ខ្មែរ
+          </button>
+        </div>
+
         <button
           type="button"
           onClick={toggleTheme}
           className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline text-stone transition-colors hover:bg-paper hover:text-ink"
-          aria-label="Toggle dark mode"
+          aria-label={darkMode ? t("nav_theme_light", "Switch to light mode") : t("nav_theme_dark", "Switch to dark mode")}
         >
           {darkMode ? (
             <Sun size={17} strokeWidth={1.75} />

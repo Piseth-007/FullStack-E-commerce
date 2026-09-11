@@ -1,6 +1,8 @@
 import { Pencil, ImageOff, Trash2 } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ProductCard({ product, isDeleting, onEdit, onDelete }) {
+  const { t } = useLanguage();
   const stock = Number(product.stock || 0);
   const isActive = product.status !== "inactive" && product.is_active !== false;
 
@@ -27,14 +29,14 @@ export default function ProductCard({ product, isDeleting, onEdit, onDelete }) {
             isActive ? "bg-moss-tint text-moss" : "bg-clay-tint text-clay"
           }`}
         >
-          {isActive ? "Active" : "Inactive"}
+          {isActive ? t("admin_prod_status_active") : t("admin_prod_status_inactive")}
         </span>
       </div>
 
 
       <div className="p-4">
         <p className="mb-1.5 text-[11px] font-semibold uppercase tracking-[0.08em] text-clay">
-          {product.category?.name || "Uncategorized"}
+          {product.category?.name || t("admin_prod_uncategorized")}
         </p>
 
         <h3
@@ -49,7 +51,7 @@ export default function ProductCard({ product, isDeleting, onEdit, onDelete }) {
         </p>
 
         <div className="mb-4 flex items-center justify-between">
-          <span className="text-[13px] text-stone">Stock:</span>
+          <span className="text-[13px] text-stone">{t("admin_prod_th_stock")}:</span>
 
           <span className="rounded-md border border-hairline bg-paper px-2.5 py-1 font-mono text-[13px] text-ink">
             {stock}
@@ -65,15 +67,15 @@ export default function ProductCard({ product, isDeleting, onEdit, onDelete }) {
             className="flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border border-hairline text-[13px] font-medium text-ink transition-colors hover:bg-paper disabled:opacity-60"
           >
             <Pencil size={14} strokeWidth={1.75} />
-            Edit
+            {t("admin_prod_edit")}
           </button>
 
           <button
             type="button"
             onClick={onDelete}
             disabled={isDeleting}
-            title="Delete product"
-            aria-label={`Delete ${product.name}`}
+            title={t("admin_prod_delete")}
+            aria-label={`${t("admin_prod_delete")} ${product.name}`}
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-hairline text-clay transition-colors hover:bg-clay-tint disabled:opacity-60"
           >
             {isDeleting ? (

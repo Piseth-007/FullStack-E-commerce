@@ -1,0 +1,18 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" width="320" height="80" fill="none">
+  <!-- Botaniq Botanical Leaf Emblem -->
+  <g transform="translate(15, 10)">
+    <!-- Background Soft Badge -->
+    <rect x="0" y="0" width="60" height="60" rx="16" fill="#EBF2ED" />
+    <!-- Leaf Shapes -->
+    <path d="M30 48 C30 48 30 32 44 20 C32 20 22 28 22 38 C22 43 25 46 30 48 Z" fill="#3D5C45" />
+    <path d="M30 48 C30 48 30 34 16 26 C26 24 34 30 34 40 C34 44 32 46 30 48 Z" fill="#65886F" />
+    <!-- Central vein -->
+    <path d="M30 48 C30 40 33 30 40 22" stroke="#FFFFFF" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.8" />
+  </g>
+
+  <!-- Typography: Brand Name -->
+  <text x="92" y="44" font-family="'Playfair Display', 'Georgia', 'Times New Roman', serif" font-size="28" font-weight="600" fill="#1E2320" letter-spacing="1.5">BOTANIQ</text>
+
+  <!-- Typography: Sub-brand tagline -->
+  <text x="94" y="60" font-family="'-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', sans-serif" font-size="9" font-weight="600" fill="#6A7A6E" letter-spacing="3.5">BOTANICAL SKINCARE</text>
+</svg>

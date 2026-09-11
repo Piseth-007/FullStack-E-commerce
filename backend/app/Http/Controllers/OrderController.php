@@ -8,6 +8,7 @@ use App\Models\OrderItem;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class OrderController extends Controller
@@ -58,7 +59,7 @@ class OrderController extends Controller
             'address_id' => [
                 'required',
                 'integer',
-                'exists:addresses,id',
+                Rule::exists('addresses', 'id')->whereNull('deleted_at'),
             ],
         ]);
 

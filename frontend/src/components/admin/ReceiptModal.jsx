@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Printer, X, Receipt as ReceiptIcon, FileText, Check } from "lucide-react";
 import Receipt from "../Receipt";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function ReceiptModal({
   order,
@@ -9,6 +10,7 @@ export default function ReceiptModal({
   onClose,
   initialFormat = "pos",
 }) {
+  const { t } = useLanguage();
   const [format, setFormat] = useState(initialFormat);
 
   // Sync initial format when modal opens
@@ -63,10 +65,10 @@ export default function ReceiptModal({
               </div>
               <div>
                 <h3 className="text-[15px] font-semibold text-ink leading-none">
-                  Receipt Preview
+                  {t("admin_receipt_preview", "Receipt Preview")}
                 </h3>
                 <p className="text-[11.5px] text-stone mt-0.5">
-                  Order #{order.id} · {order.user?.name || "Customer"}
+                  Order #{order.id} · {order.user?.name || t("admin_orders_unknown_cust", "Customer")}
                 </p>
               </div>
             </div>
@@ -83,7 +85,7 @@ export default function ReceiptModal({
                 }`}
               >
                 <ReceiptIcon size={14} />
-                <span>POS Slip (80mm)</span>
+                <span>{t("admin_receipt_pos", "POS Slip (80mm)")}</span>
               </button>
 
               <button
@@ -96,7 +98,7 @@ export default function ReceiptModal({
                 }`}
               >
                 <FileText size={14} />
-                <span>Standard Invoice (A4)</span>
+                <span>{t("admin_receipt_invoice", "Standard Invoice (A4)")}</span>
               </button>
             </div>
 
@@ -108,14 +110,14 @@ export default function ReceiptModal({
                 className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-moss hover:bg-moss-deep text-white text-[13px] font-medium shadow-sm transition-all active:scale-[0.98] cursor-pointer"
               >
                 <Printer size={14} strokeWidth={2} />
-                <span>Print Receipt</span>
+                <span>{t("admin_receipt_print_btn", "Print Receipt")}</span>
               </button>
 
               <button
                 type="button"
                 onClick={onClose}
                 className="w-8 h-8 rounded-xl flex items-center justify-center text-stone hover:text-ink hover:bg-paper transition-colors"
-                aria-label="Close modal"
+                aria-label={t("admin_prod_cancel", "Close")}
               >
                 <X size={18} />
               </button>
@@ -136,16 +138,14 @@ export default function ReceiptModal({
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-500" />
               <span>
-                Ready to print in{" "}
-                <strong className="text-ink">
-                  {format === "pos" ? "80mm POS Thermal" : "A4 Full Invoice"}
-                </strong>{" "}
-                format.
+                {t("admin_receipt_ready_to_print", "Ready to print in {format} format.", {
+                  format: format === "pos" ? "80mm POS Thermal" : "A4 Full Invoice",
+                })}
               </span>
             </div>
 
             <p className="text-[11px] text-stone/80">
-              Tip: In your browser print settings, enable <em>Background graphics</em> for crisp logos and accents.
+              {t("admin_receipt_tip", "Tip: In your browser print settings, enable Background graphics for crisp logos and accents.")}
             </p>
           </div>
         </motion.div>

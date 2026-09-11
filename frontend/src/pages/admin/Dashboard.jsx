@@ -29,6 +29,7 @@ import {
 import api from "../../api/axios";
 import { StatSkeleton } from "../../components/Skeleton";
 import { ToastContext } from "../../context/ToastContext";
+import { useLanguage } from "../../context/useLanguage";
 
 const RANGES = [
   { key: "7d", label: "Last 7 days" },
@@ -71,6 +72,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const isDark = useDarkMode();
   const { showToast } = useContext(ToastContext);
+  const { t, isKhmer } = useLanguage();
 
   const [summary, setSummary] = useState(null);
   const [orders, setOrders] = useState([]);
@@ -80,6 +82,12 @@ export default function Dashboard() {
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [trendLoading, setTrendLoading] = useState(true);
+
+  const ranges = [
+    { key: "7d", label: t("dash_range_7d", "Last 7 days") },
+    { key: "30d", label: t("dash_range_30d", "Last 30 days") },
+    { key: "12m", label: t("dash_range_12m", "Last 12 months") },
+  ];
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -104,7 +112,7 @@ export default function Dashboard() {
         setOrders([]);
 
         showToast(
-          err.response?.data?.message || "Failed to load dashboard",
+          err.response?.data?.message || t("dash_err_load", "Failed to load dashboard"),
           "error",
         );
       } finally {
@@ -114,7 +122,7 @@ export default function Dashboard() {
     };
 
     loadDashboard();
-  }, [showToast]);
+  }, [showToast, t]);
 
   useEffect(() => {
     const loadTrend = async () => {
@@ -132,7 +140,7 @@ export default function Dashboard() {
         setTrend([]);
 
         showToast(
-          err.response?.data?.message || "Failed to load sales trend",
+          err.response?.data?.message || t("dash_err_trend", "Failed to load sales trend"),
           "error",
         );
       } finally {
@@ -141,7 +149,7 @@ export default function Dashboard() {
     };
 
     loadTrend();
-  }, [range, showToast]);
+  }, [range, showToast, t]);
 
   const recentOrders = useMemo(() => {
     if (!Array.isArray(orders)) {
@@ -289,22 +297,22 @@ export default function Dashboard() {
 
     return [
       {
-        name: "Completed",
+        name: t("dash_status_completed", "Completed"),
         value: completed,
         color: PIE_COLORS.completed,
       },
       {
-        name: "Pending",
+        name: t("dash_status_pending", "Pending"),
         value: pending,
         color: PIE_COLORS.pending,
       },
       {
-        name: "Cancelled",
+        name: t("dash_status_cancelled", "Cancelled"),
         value: cancelled,
         color: PIE_COLORS.cancelled,
       },
     ];
-  }, [orders]);
+  }, [orders, t]);
 
   const totalBreakdownOrders = orderBreakdown.reduce(
     (total, item) => total + item.value,
@@ -336,7 +344,7 @@ export default function Dashboard() {
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
           <h1 className="font-display text-[28px] font-medium text-ink">
-            Dashboard
+            {t("dash_title", "Dashboard")}
           </h1>
         </div>
       </div>
@@ -351,7 +359,7 @@ export default function Dashboard() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           <DashboardStatCard
             icon={DollarSign}
-            label="Store Revenue"
+            label={t("dash_stat_revenue", "Store Revenue")}
             value={`$${Number(summary.total_sales || 0).toFixed(2)}`}
             change={summary.sales_growth || summary.revenue_growth}
             iconClass="bg-emerald-500/10 text-emerald-500 dark:bg-emerald-500/15"
@@ -359,7 +367,7 @@ export default function Dashboard() {
 
           <DashboardStatCard
             icon={ShoppingBag}
-            label="Total Orders"
+            label={t("dash_stat_orders", "Total Orders")}
             value={Number(summary.total_orders || 0).toLocaleString()}
             change={summary.orders_growth}
             iconClass="bg-orange-500/10 text-orange-500 dark:bg-orange-500/15"
@@ -367,7 +375,7 @@ export default function Dashboard() {
 
           <DashboardStatCard
             icon={Users}
-            label="Total Shoppers"
+            label={t("dash_stat_customers", "Total Shoppers")}
             value={Number(summary.total_customers || 0).toLocaleString()}
             change={summary.customers_growth}
             iconClass="bg-stone-500/10 text-stone-500 dark:bg-stone-500/15 dark:text-stone-300"
@@ -375,7 +383,7 @@ export default function Dashboard() {
 
           <DashboardStatCard
             icon={Package}
-            label="Total Catalog"
+            label={t("dash_stat_products", "Total Catalog")}
             value={Number(summary.total_products || 0).toLocaleString()}
             change={summary.products_growth}
             iconClass="bg-orange-600/10 text-orange-600 dark:bg-orange-600/15"
@@ -389,7 +397,7 @@ export default function Dashboard() {
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <p className="mb-1 text-[10.5px] font-medium uppercase tracking-widest text-stone">
-                  Sales Overview
+                  {t("dash_sales_overview", "Sales Overview")}
                 </p>
 
                 <div className="flex items-center gap-3">
@@ -407,7 +415,7 @@ export default function Dashboard() {
               </div>
 
               <div className="flex items-center rounded-lg border border-hairline bg-paper p-1">
-                {RANGES.map((item) => (
+                {ranges.map((item) => (
                   <button
                     key={item.key}
                     type="button"
@@ -430,7 +438,7 @@ export default function Dashboard() {
             ) : trend.length === 0 ? (
               <div className="flex h-75 items-center justify-center">
                 <p className="text-[13px] text-stone">
-                  No sales data available
+                  {t("dash_no_sales", "No sales data available")}
                 </p>
               </div>
             ) : (
@@ -492,7 +500,7 @@ export default function Dashboard() {
                     }}
                     formatter={(value) => [
                       `$${Number(value).toFixed(2)}`,
-                      "Sales",
+                      t("dash_sales_tooltip", "Sales"),
                     ]}
                   />
 
@@ -511,11 +519,11 @@ export default function Dashboard() {
             <div className="flex items-center justify-between border-b border-hairline px-5 py-5 sm:px-6">
               <div>
                 <h2 className="font-display text-[18px] font-medium text-ink">
-                  Recent Orders
+                  {t("dash_recent_orders", "Recent Orders")}
                 </h2>
 
                 <p className="mt-1 text-[12px] text-stone">
-                  Latest 5 orders from your customers
+                  {t("dash_recent_orders_sub", "Latest 5 orders from your customers")}
                 </p>
               </div>
 
@@ -524,7 +532,7 @@ export default function Dashboard() {
                 onClick={() => navigate("/admin/orders")}
                 className="flex items-center gap-1.5 text-[12.5px] font-medium text-moss transition-colors hover:text-ink"
               >
-                View All
+                {t("dash_view_all", "View All")}
                 <ArrowRight size={15} />
               </button>
             </div>
@@ -540,7 +548,7 @@ export default function Dashboard() {
                   />
 
                   <p className="text-[13px] text-stone">
-                    No recent orders available
+                    {t("dash_no_orders", "No recent orders available")}
                   </p>
                 </div>
               </div>
@@ -549,12 +557,12 @@ export default function Dashboard() {
                 <table className="w-full min-w-180">
                   <thead>
                     <tr className="border-b border-hairline bg-paper/40">
-                      <TableHeader>Order ID</TableHeader>
-                      <TableHeader>Customer</TableHeader>
-                      <TableHeader>Date</TableHeader>
-                      <TableHeader>Payment</TableHeader>
-                      <TableHeader>Amount</TableHeader>
-                      <TableHeader>Status</TableHeader>
+                      <TableHeader>{t("dash_col_order_id", "Order ID")}</TableHeader>
+                      <TableHeader>{t("dash_col_customer", "Customer")}</TableHeader>
+                      <TableHeader>{t("dash_col_date", "Date")}</TableHeader>
+                      <TableHeader>{t("dash_col_payment", "Payment")}</TableHeader>
+                      <TableHeader>{t("dash_col_amount", "Amount")}</TableHeader>
+                      <TableHeader>{t("dash_col_status", "Status")}</TableHeader>
                     </tr>
                   </thead>
 
@@ -565,7 +573,7 @@ export default function Dashboard() {
                         order.customerName ||
                         order.user?.name ||
                         order.customer?.name ||
-                        "Customer";
+                        t("dash_customer_default", "Customer");
 
                       const payment =
                         order.payment_method ||
@@ -611,7 +619,7 @@ export default function Dashboard() {
                               {Array.isArray(items) && items.length > 0 && (
                                 <p className="mt-0.5 text-[11px] text-stone">
                                   {items.length}{" "}
-                                  {items.length === 1 ? "item" : "items"}
+                                  {items.length === 1 ? t("dash_item_single", "item") : t("dash_item_plural", "items")}
                                 </p>
                               )}
                             </div>
@@ -619,7 +627,7 @@ export default function Dashboard() {
 
                           <TableCell>
                             <span className="text-[12px] text-stone">
-                              {formatDate(date)}
+                              {formatDate(date, isKhmer)}
                             </span>
                           </TableCell>
 
@@ -636,7 +644,7 @@ export default function Dashboard() {
                           </TableCell>
 
                           <TableCell>
-                            <OrderStatus status={status} />
+                            <OrderStatus status={status} t={t} />
                           </TableCell>
                         </tr>
                       );
@@ -653,11 +661,11 @@ export default function Dashboard() {
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="font-display text-[18px] font-medium text-ink">
-                  Order Breakdown
+                  {t("dash_breakdown_title", "Order Breakdown")}
                 </h2>
 
                 <p className="text-[12px] text-stone">
-                  Current order status
+                  {t("dash_breakdown_sub", "Current order status")}
                 </p>
               </div>
             </div>
@@ -703,7 +711,7 @@ export default function Dashboard() {
 
                   <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
                     <span className="text-[11px] text-stone">
-                      Total Orders
+                      {t("dash_breakdown_total", "Total Orders")}
                     </span>
 
                     <span className="mt-1 font-mono text-[26px] font-medium text-ink">
@@ -745,11 +753,11 @@ export default function Dashboard() {
             <div className="mb-5 flex items-center justify-between">
               <div>
                 <h2 className="font-display text-[18px] font-medium text-ink">
-                  Top Selling Products
+                  {t("dash_top_products", "Top Selling Products")}
                 </h2>
 
                 <p className="mt-1 text-[12px] text-stone">
-                  Products with the most orders
+                  {t("dash_top_products_sub", "Products with the most orders")}
                 </p>
               </div>
             </div>
@@ -765,7 +773,7 @@ export default function Dashboard() {
                   />
 
                   <p className="text-[13px] text-stone">
-                    No product data available
+                    {t("dash_no_products", "No product data available")}
                   </p>
                 </div>
               </div>
@@ -797,7 +805,7 @@ export default function Dashboard() {
                       </p>
 
                       <p className="mt-0.5 text-[11px] text-stone">
-                        {Number(product.sold).toLocaleString()} sold
+                        {t("dash_sold_count", "{count} sold", { count: Number(product.sold).toLocaleString() })}
                       </p>
                     </div>
 
@@ -816,7 +824,7 @@ export default function Dashboard() {
               onClick={() => navigate("/admin/products")}
               className="mt-5 flex w-full items-center justify-center gap-2 rounded-lg border border-hairline py-2.5 text-[12.5px] font-medium text-ink transition-colors hover:bg-paper"
             >
-              View Products
+              {t("dash_view_products", "View Products")}
               <ArrowUpRight size={15} />
             </button>
           </div>
@@ -907,7 +915,7 @@ function TableCell({ children }) {
   return <td className="px-5 py-3 sm:px-6">{children}</td>;
 }
 
-function OrderStatus({ status }) {
+function OrderStatus({ status, t }) {
   const normalizedStatus = String(status).toLowerCase();
 
   const config = {
@@ -915,48 +923,48 @@ function OrderStatus({ status }) {
       icon: CheckCircle2,
       className:
         "bg-moss-tint text-moss dark:bg-emerald-500/15 dark:text-emerald-400",
-      label: "Completed",
+      label: t ? t("dash_status_completed", "Completed") : "Completed",
     },
 
     delivered: {
       icon: CheckCircle2,
       className:
         "bg-moss-tint text-moss dark:bg-emerald-500/15 dark:text-emerald-400",
-      label: "Delivered",
+      label: t ? t("dash_status_delivered", "Delivered") : "Delivered",
     },
 
     pending: {
       icon: Clock3,
       className:
         "bg-amber-50 text-amber-600 dark:bg-amber-500/15 dark:text-amber-400",
-      label: "Pending",
+      label: t ? t("dash_status_pending", "Pending") : "Pending",
     },
 
     processing: {
       icon: Clock3,
       className:
         "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
-      label: "Processing",
+      label: t ? t("dash_status_processing", "Processing") : "Processing",
     },
 
     paid: {
       icon: CheckCircle2,
       className:
         "bg-blue-50 text-blue-600 dark:bg-blue-500/15 dark:text-blue-400",
-      label: "Paid",
+      label: t ? t("dash_status_paid", "Paid") : "Paid",
     },
 
     shipped: {
       icon: Package,
       className:
         "bg-purple-50 text-purple-600 dark:bg-purple-500/15 dark:text-purple-400",
-      label: "Shipped",
+      label: t ? t("dash_status_shipped", "Shipped") : "Shipped",
     },
 
     cancelled: {
       icon: XCircle,
       className: "bg-red-50 text-clay dark:bg-red-500/15 dark:text-red-400",
-      label: "Cancelled",
+      label: t ? t("dash_status_cancelled", "Cancelled") : "Cancelled",
     },
   };
 
@@ -1046,11 +1054,11 @@ function ChartSkeleton() {
   );
 }
 
-function formatDate(date) {
+function formatDate(date, isKhmer) {
   if (!date) return "—";
 
   try {
-    return new Date(date).toLocaleDateString("en-US", {
+    return new Date(date).toLocaleDateString(isKhmer ? "km-KH" : "en-US", {
       day: "numeric",
       month: "short",
       year: "numeric",

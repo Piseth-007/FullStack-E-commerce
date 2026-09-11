@@ -13,9 +13,11 @@ import {
 import api from "../../api/axios";
 import { RowSkeleton } from "../../components/Skeleton";
 import { ToastContext } from "../../context/ToastContext";
+import { useLanguage } from "../../context/LanguageContext";
 import BrandFormModal from "../../components/admin/BrandFormModal";
 
 export default function Brands() {
+  const { t } = useLanguage();
   const [brands, setBrands] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -91,7 +93,7 @@ export default function Brands() {
 
         setBrands((prev) => [...prev, newBrand]);
 
-        showToast("Brand created successfully");
+        showToast(t("admin_brand_created_success", "Brand created successfully"));
       } else {
         const res = await api.put(`/brands/${editing.id}`, payload);
 
@@ -101,7 +103,7 @@ export default function Brands() {
           prev.map((brand) => (brand.id === editing.id ? updatedBrand : brand)),
         );
 
-        showToast("Brand updated successfully");
+        showToast(t("admin_brand_updated_success", "Brand updated successfully"));
       }
 
       setEditing(null);
@@ -114,7 +116,9 @@ export default function Brands() {
 
   const handleDelete = async (brand) => {
     const confirmed = window.confirm(
-      `Delete "${brand.name}"? This action cannot be undone.`,
+      t("admin_brand_delete_confirm", 'Are you sure you want to delete "{name}"? This action cannot be undone.', {
+        name: brand.name,
+      }),
     );
 
     if (!confirmed) return;
@@ -126,7 +130,7 @@ export default function Brands() {
 
       setBrands((prev) => prev.filter((item) => item.id !== brand.id));
 
-      showToast(`"${brand.name}" deleted successfully`);
+      showToast(t("admin_brand_deleted_success", "Brand deleted successfully"));
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to delete brand",
@@ -164,7 +168,7 @@ export default function Brands() {
         prev.map((item) => (item.id === brand.id ? updatedBrand : item)),
       );
 
-      showToast("Brand logo uploaded successfully");
+      showToast(t("admin_brand_logo_success", "Brand logo uploaded successfully"));
     } catch (err) {
       showToast(err.response?.data?.message || "Logo upload failed", "error");
     } finally {
@@ -181,7 +185,7 @@ export default function Brands() {
       {/* Header */}
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-[28px] font-medium text-ink">
-          Brands
+          {t("admin_brand_title", "Brands")}
         </h1>
       </div>
 
@@ -197,7 +201,7 @@ export default function Brands() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search brands..."
+            placeholder={t("admin_brand_search_placeholder", "Search brands...")}
             className="w-100 pl-10 pr-10 py-2.5 rounded-lg border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss"
           />
 
@@ -206,7 +210,7 @@ export default function Brands() {
               type="button"
               onClick={clearSearch}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone hover:text-ink"
-              aria-label="Clear search"
+              aria-label={t("admin_brand_clear_search", "Clear search")}
             >
               <X size={15} />
             </button>
@@ -219,7 +223,7 @@ export default function Brands() {
             onClick={() => loadBrands(true)}
             disabled={loading || refreshing}
             className="w-10 h-10 rounded-lg border border-hairline bg-surface flex items-center justify-center text-stone hover:text-ink hover:bg-paper transition-colors disabled:opacity-50"
-            title="Refresh brands"
+            title={t("admin_brand_refresh", "Refresh brands")}
           >
             <RefreshCw
               size={16}
@@ -234,7 +238,7 @@ export default function Brands() {
             className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all whitespace-nowrap"
           >
             <Plus size={16} strokeWidth={2} />
-            New Brand
+            {t("admin_brand_new", "New Brand")}
           </button>
         </div>
       </div>
@@ -242,9 +246,9 @@ export default function Brands() {
       {/* Result count */}
       {!loading && brands.length > 0 && (
         <p className="text-[12.5px] text-stone mb-4">
-          Showing{" "}
-          <span className="font-medium text-ink">{filteredBrands.length}</span>{" "}
-          of {brands.length} brands
+          {t("admin_brand_showing", "Showing {count} brands", {
+            count: `${filteredBrands.length} / ${brands.length}`,
+          })}
         </p>
       )}
 
@@ -301,6 +305,8 @@ function BrandCard({
   onDelete,
   onUpload,
 }) {
+  const { t } = useLanguage();
+
   return (
     <div
       className={`group bg-surface border border-hairline rounded-xl p-4 flex items-center gap-3 transition-all hover:border-moss/30 hover:shadow-[0_4px_16px_rgba(33,31,27,0.05)] ${
@@ -312,7 +318,7 @@ function BrandCard({
         className={`relative w-11 h-11 rounded-xl bg-paper border border-hairline overflow-hidden shrink-0 flex items-center justify-center transition-colors ${
           isUploading ? "cursor-wait" : "cursor-pointer hover:border-moss/40"
         }`}
-        title="Upload brand logo"
+        title={t("admin_brand_upload_logo", "Upload brand logo")}
       >
         {brand.logo_url ? (
           <img
@@ -364,7 +370,7 @@ function BrandCard({
         </p>
 
         <p className="text-[11.5px] text-stone mt-0.5">
-          {brand.logo_url ? "Logo uploaded" : "No logo"}
+          {brand.logo_url ? t("admin_brand_logo_uploaded", "Logo uploaded") : t("admin_brand_no_logo", "No logo")}
         </p>
       </div>
 
@@ -375,7 +381,7 @@ function BrandCard({
           onClick={onEdit}
           disabled={isDeleting || isUploading}
           className="w-7 h-7 rounded-lg flex items-center justify-center text-stone hover:bg-paper hover:text-ink transition-colors disabled:opacity-50"
-          title="Edit brand"
+          title={t("admin_brand_edit", "Edit brand")}
         >
           <Pencil size={14} strokeWidth={1.75} />
         </button>
@@ -385,7 +391,7 @@ function BrandCard({
           onClick={onDelete}
           disabled={isDeleting || isUploading}
           className="w-7 h-7 rounded-lg flex items-center justify-center text-stone hover:bg-clay-tint hover:text-clay transition-colors disabled:opacity-50"
-          title="Delete brand"
+          title={t("admin_brand_delete", "Delete brand")}
         >
           {isDeleting ? (
             <span className="w-3.5 h-3.5 border-2 border-stone border-t-transparent rounded-full animate-spin" />
@@ -399,17 +405,18 @@ function BrandCard({
 }
 
 function EmptyState({ onAction }) {
+  const { t } = useLanguage();
+
   return (
     <div className="bg-surface border border-dashed border-hairline rounded-xl py-20 px-6 flex flex-col items-center text-center">
       <div className="w-14 h-14 rounded-2xl bg-moss-tint flex items-center justify-center mb-4">
         <Award size={22} className="text-moss" strokeWidth={1.75} />
       </div>
 
-      <p className="text-[15px] font-medium text-ink mb-1">No brands yet</p>
+      <p className="text-[15px] font-medium text-ink mb-1">{t("admin_brand_empty_title", "No brands yet")}</p>
 
       <p className="max-w-sm text-[13px] leading-6 text-stone mb-5">
-        Add brands to organize your products and make your catalog easier to
-        manage.
+        {t("admin_brand_empty_desc", "Add brands to organize your products and make your catalog easier to manage.")}
       </p>
 
       <button
@@ -418,24 +425,25 @@ function EmptyState({ onAction }) {
         className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all"
       >
         <Plus size={16} strokeWidth={2} />
-        New Brand
+        {t("admin_brand_new", "New Brand")}
       </button>
     </div>
   );
 }
 
 function SearchEmptyState({ search, onClear }) {
+  const { t } = useLanguage();
+
   return (
     <div className="bg-surface border border-dashed border-hairline rounded-xl py-16 px-6 flex flex-col items-center text-center">
       <div className="w-12 h-12 rounded-full bg-paper flex items-center justify-center mb-4">
         <Search size={20} className="text-stone" strokeWidth={1.75} />
       </div>
 
-      <p className="text-[14px] font-medium text-ink mb-1">No brands found</p>
+      <p className="text-[14px] font-medium text-ink mb-1">{t("admin_brand_search_empty_title", "No brands found")}</p>
 
       <p className="text-[13px] text-stone mb-5">
-        No results found for{" "}
-        <span className="font-medium text-ink">"{search}"</span>
+        {t("admin_brand_search_empty_desc", 'No brands match "{query}". Try a different search term.', { query: search })}
       </p>
 
       <button
@@ -443,7 +451,7 @@ function SearchEmptyState({ search, onClear }) {
         onClick={onClear}
         className="text-[13px] font-medium text-moss hover:text-moss-deep transition-colors"
       >
-        Clear search
+        {t("admin_brand_clear_search", "Clear search")}
       </button>
     </div>
   );

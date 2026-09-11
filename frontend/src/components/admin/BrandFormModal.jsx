@@ -1,7 +1,9 @@
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function BrandFormModal({ brand, onClose, onSave, saving }) {
+  const { t } = useLanguage();
   const isEdit = Boolean(brand);
 
   const [name, setName] = useState(brand?.name || "");
@@ -44,11 +46,11 @@ export default function BrandFormModal({ brand, onClose, onSave, saving }) {
         <div className="flex items-start justify-between gap-4 border-b border-hairline px-6 py-5">
           <div>
             <p className="text-[10.5px] font-medium uppercase tracking-widest text-stone mb-1">
-              {isEdit ? "Edit" : "Create"}
+              {isEdit ? t("admin_cat_edit", "Edit") : t("admin_cat_create", "Create")}
             </p>
 
             <h2 className="font-display text-[19px] font-medium text-ink">
-              {isEdit ? `Edit ${brand.name}` : "New Brand"}
+              {isEdit ? `${t("admin_cat_edit", "Edit")} ${brand.name}` : t("admin_brand_new", "New Brand")}
             </h2>
           </div>
 
@@ -57,7 +59,7 @@ export default function BrandFormModal({ brand, onClose, onSave, saving }) {
             onClick={onClose}
             disabled={saving}
             className="w-8 h-8 rounded-lg flex items-center justify-center text-stone hover:bg-paper hover:text-ink transition-colors disabled:opacity-50 shrink-0"
-            aria-label="Close form"
+            aria-label={t("admin_prod_cancel", "Close")}
           >
             <X size={17} strokeWidth={1.75} />
           </button>
@@ -66,7 +68,7 @@ export default function BrandFormModal({ brand, onClose, onSave, saving }) {
         
         <form id="brand-form" onSubmit={handleSubmit} className="px-6 py-5">
           <label className="block text-[11px] font-medium uppercase tracking-[0.08em] text-stone mb-2">
-            Brand Name
+            {t("admin_brand_name_label", "Brand Name")}
           </label>
 
           <input
@@ -76,13 +78,13 @@ export default function BrandFormModal({ brand, onClose, onSave, saving }) {
             disabled={saving}
             required
             maxLength={255}
-            placeholder="Example: Nike"
+            placeholder={t("admin_brand_name_placeholder", "Example: Nike")}
             className="w-full px-3.5 py-2.5 rounded-lg border border-hairline bg-paper text-ink text-[14px] placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss transition-colors disabled:opacity-60"
           />
 
           <div className="flex justify-between mt-1.5">
             <p className="text-[11px] text-stone">
-              Use a clear and unique brand name.
+              {t("admin_brand_name_hint", "Use a clear and unique brand name.")}
             </p>
 
             <span className="text-[11px] text-stone">{name.length}/255</span>
@@ -90,8 +92,7 @@ export default function BrandFormModal({ brand, onClose, onSave, saving }) {
 
           {!isEdit && (
             <p className="text-[11px] text-stone mt-4">
-              You can upload a logo after creating the brand, from its card in
-              the list.
+              {t("admin_brand_logo_hint", "You can upload a logo after creating the brand, from its card in the list.")}
             </p>
           )}
         </form>
@@ -104,7 +105,7 @@ export default function BrandFormModal({ brand, onClose, onSave, saving }) {
             disabled={saving}
             className="px-5 py-2.5 rounded-lg border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors disabled:opacity-50"
           >
-            Cancel
+            {t("admin_prod_cancel", "Cancel")}
           </button>
 
           <button
@@ -113,7 +114,7 @@ export default function BrandFormModal({ brand, onClose, onSave, saving }) {
             disabled={saving || !name.trim()}
             className="min-w-30 px-5 py-2.5 rounded-lg bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? "Saving…" : isEdit ? "Save Changes" : "Create Brand"}
+            {saving ? t("admin_prod_saving", "Saving…") : isEdit ? t("admin_prod_save_changes", "Save Changes") : t("admin_brand_create_btn", "Create Brand")}
           </button>
         </div>
       </div>

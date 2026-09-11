@@ -10,37 +10,40 @@ import {
   Package,
   Star,
 } from "lucide-react";
-
-const VALUES = [
-  {
-    icon: Leaf,
-    title: "Thoughtfully sourced",
-    text: "We select formulas with clear ingredient lists and real skincare science behind them.",
-  },
-  {
-    icon: ShieldCheck,
-    title: "Verified quality",
-    text: "Every brand we carry is vetted before it ever reaches our shelves.",
-  },
-  {
-    icon: Heart,
-    title: "Skin-conscious",
-    text: "We tag products by skin type so you can shop for what actually works for you.",
-  },
-  {
-    icon: Sparkles,
-    title: "Honest recommendations",
-    text: "No filler, no gimmicks — just skincare that does what it says.",
-  },
-];
-
-const STATS = [
-  { icon: Package, value: "500+", label: "Products curated" },
-  { icon: Users, value: "10k+", label: "Happy customers" },
-  { icon: Star, value: "4.8", label: "Average rating" },
-];
+import { useLanguage } from "../../context/useLanguage";
 
 export default function About() {
+  const { t } = useLanguage();
+
+  const values = [
+    {
+      icon: Leaf,
+      title: t("about_val_sourced_title"),
+      text: t("about_val_sourced_desc"),
+    },
+    {
+      icon: ShieldCheck,
+      title: t("about_val_quality_title"),
+      text: t("about_val_quality_desc"),
+    },
+    {
+      icon: Heart,
+      title: t("about_val_conscious_title"),
+      text: t("about_val_conscious_desc"),
+    },
+    {
+      icon: Sparkles,
+      title: t("about_val_recommendations_title"),
+      text: t("about_val_recommendations_desc"),
+    },
+  ];
+
+  const stats = [
+    { icon: Package, value: "500+", label: t("about_stat_curated") },
+    { icon: Users, value: "10k+", label: t("about_stat_customers") },
+    { icon: Star, value: "4.8", label: t("about_stat_rating") },
+  ];
+
   return (
     <div className="overflow-hidden bg-paper text-ink">
       <style>{`
@@ -73,17 +76,15 @@ export default function About() {
 
         <Reveal>
           <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss mb-3">
-            Our story
+            {t("about_story_badge")}
           </p>
 
           <h1 className="mx-auto max-w-2xl font-display text-[38px] sm:text-[48px] font-medium leading-[1.08] tracking-[-0.02em] text-ink">
-            Skincare that respects your skin — and your intelligence.
+            {t("about_hero_title")}
           </h1>
 
           <p className="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-stone">
-            Botaniq began with a simple frustration: too many skincare shelves
-            are full of noise. We built the store we wished existed — curated,
-            honest, and organized around real skin needs.
+            {t("about_hero_desc")}
           </p>
         </Reveal>
       </section>
@@ -91,7 +92,7 @@ export default function About() {
 
       <section className="px-6 pb-20">
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
-          {STATS.map((stat, index) => (
+          {stats.map((stat, index) => (
             <Reveal key={stat.label} delay={index * 100}>
               <div className="rounded-2xl border border-hairline bg-surface p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(33,31,27,0.06)]">
                 <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-moss-tint">
@@ -127,23 +128,19 @@ export default function About() {
 
           <Reveal delay={150}>
             <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss mb-2">
-              Why we started
+              {t("about_why_badge")}
             </p>
 
             <h2 className="font-display text-[28px] sm:text-[32px] font-medium leading-tight text-ink mb-4">
-              Less noise, more skin science
+              {t("about_why_title")}
             </h2>
 
             <p className="text-[14px] leading-[1.8] text-stone mb-4">
-              We were tired of shelves overflowing with trends and buzzwords. So
-              we built Botaniq around a simpler idea: every product should earn
-              its place — through ingredients, formulation, and real results.
+              {t("about_why_p1")}
             </p>
 
             <p className="text-[14px] leading-[1.8] text-stone">
-              Every item in our catalog is organized by category, brand, and
-              skin type, so you spend less time guessing and more time caring
-              for your skin the way it actually needs.
+              {t("about_why_p2")}
             </p>
           </Reveal>
         </div>
@@ -156,17 +153,17 @@ export default function About() {
         <Reveal>
           <div className="mx-auto max-w-xl text-center mb-14">
             <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss mb-2">
-              What guides us
+              {t("about_values_badge")}
             </p>
 
             <h2 className="font-display text-[30px] sm:text-[34px] font-medium text-ink">
-              Our values
+              {t("about_values_title")}
             </h2>
           </div>
         </Reveal>
 
         <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2">
-          {VALUES.map((value, index) => (
+          {values.map((value, index) => (
             <Reveal key={value.title} delay={index * 100}>
               <div className="group flex gap-4 rounded-2xl border border-hairline bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-moss/30 hover:shadow-[0_16px_32px_rgba(33,31,27,0.06)]">
                 <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-moss-tint transition-all duration-300 group-hover:scale-105 group-hover:bg-moss">
@@ -199,19 +196,18 @@ export default function About() {
             <div className="about-pulse pointer-events-none absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
 
             <h2 className="relative font-display text-[26px] sm:text-[32px] font-medium leading-tight text-white">
-              Ready to find your routine?
+              {t("about_cta_title")}
             </h2>
 
             <p className="relative mt-3 text-[14px] text-white/80 max-w-md mx-auto">
-              Browse our curated catalog, filtered by category, brand, and skin
-              type.
+              {t("about_cta_desc")}
             </p>
 
             <Link
               to="/products"
               className="relative mt-7 inline-flex items-center gap-2 rounded-xl bg-surface border border-hairline/20 px-6 py-3 text-[13.5px] font-medium text-ink transition-all duration-300 hover:-translate-y-0.5 hover:bg-paper hover:text-ink hover:shadow-[0_14px_30px_rgba(0,0,0,0.2)]"
             >
-              Shop now
+              {t("about_cta_btn")}
               <ArrowRight
                 size={15}
                 strokeWidth={2}

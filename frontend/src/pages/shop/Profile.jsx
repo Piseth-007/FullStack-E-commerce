@@ -66,10 +66,7 @@ function SectionCard({ title, description, children }) {
   return (
     <section className="mb-10">
       <div className="mb-7">
-        <h2
-          className="text-xl md:text-2xl"
-          style={{ fontFamily: "Fraunces, serif" }}
-        >
+        <h2 className="font-display text-xl md:text-2xl">
           {title}
         </h2>
 
@@ -536,12 +533,7 @@ export default function Profile() {
                             className="w-full h-full object-cover"
                           />
                         ) : (
-                          <span
-                            className="text-2xl"
-                            style={{
-                              fontFamily: "Fraunces, serif",
-                            }}
-                          >
+                          <span className="font-display text-2xl">
                             {initial}
                           </span>
                         )}

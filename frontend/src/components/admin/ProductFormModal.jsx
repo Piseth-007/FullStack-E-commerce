@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Loader2, Save, Upload, X } from "lucide-react";
 import api from "../../api/axios";
+import { useLanguage } from "../../context/LanguageContext";
 
 const initialForm = {
   category_id: "",
@@ -14,6 +15,7 @@ const initialForm = {
 };
 
 export default function ProductFormModal({ productId, onClose, onSuccess }) {
+  const { t } = useLanguage();
   const isEdit = Boolean(productId);
   const fileInputRef = useRef(null);
   const panelRef = useRef(null);
@@ -353,17 +355,17 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
         <div className="flex items-center justify-between gap-4 border-b border-hairline px-6 py-4">
           <div>
             <p className="text-[11px] text-stone">
-              Catalog
+              {t("admin_prod_modal_catalog")}
               <span className="mx-1.5">/</span>
-              Products
+              {t("admin_prod_modal_products")}
               <span className="mx-1.5">/</span>
               <span className="text-ink">
-                {isEdit ? "Edit Product" : "New Product"}
+                {isEdit ? t("admin_prod_modal_edit") : t("admin_prod_modal_new")}
               </span>
             </p>
 
             <h2 className="font-display text-[20px] font-medium text-ink mt-0.5">
-              {isEdit ? "Edit Product" : "New Product"}
+              {isEdit ? t("admin_prod_modal_edit") : t("admin_prod_modal_new")}
             </h2>
           </div>
 
@@ -384,7 +386,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
             <div className="min-h-75 flex items-center justify-center">
               <div className="flex flex-col items-center">
                 <Loader2 size={24} className="animate-spin text-moss" />
-                <p className="text-[13px] text-stone mt-3">Loading...</p>
+                <p className="text-[13px] text-stone mt-3">{t("admin_prod_modal_loading")}</p>
               </div>
             </div>
           ) : (
@@ -402,7 +404,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                   className="space-y-5"
                 >
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Category" required>
+                    <Field label={t("admin_prod_modal_category")} required>
                       <select
                         name="category_id"
                         value={form.category_id}
@@ -411,7 +413,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                         required
                         className={inputClass}
                       >
-                        <option value="">Select category</option>
+                        <option value="">{t("admin_prod_modal_select_cat")}</option>
 
                         {categories.map((category) => (
                           <option key={category.id} value={category.id}>
@@ -421,7 +423,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                       </select>
                     </Field>
 
-                    <Field label="Brand">
+                    <Field label={t("admin_prod_modal_brand")}>
                       <select
                         name="brand_id"
                         value={form.brand_id}
@@ -429,7 +431,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                         disabled={busy}
                         className={inputClass}
                       >
-                        <option value="">No brand</option>
+                        <option value="">{t("admin_prod_modal_no_brand")}</option>
 
                         {brands.map((brand) => (
                           <option key={brand.id} value={brand.id}>
@@ -440,13 +442,13 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                     </Field>
                   </div>
 
-                  <Field label="Name" required>
+                  <Field label={t("admin_prod_modal_name")} required>
                     <input
                       type="text"
                       name="name"
                       value={form.name}
                       onChange={handleChange}
-                      placeholder="Enter product name"
+                      placeholder={t("admin_prod_modal_name_placeholder")}
                       maxLength={255}
                       disabled={busy}
                       required
@@ -454,20 +456,20 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                     />
                   </Field>
 
-                  <Field label="Description">
+                  <Field label={t("admin_prod_modal_desc")}>
                     <textarea
                       name="description"
                       value={form.description}
                       onChange={handleChange}
                       rows={5}
-                      placeholder="Write a short product description..."
+                      placeholder={t("admin_prod_modal_desc_placeholder")}
                       disabled={busy}
                       className={`${inputClass} resize-none`}
                     />
                   </Field>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Price (USD)" required>
+                    <Field label={t("admin_prod_modal_price")} required>
                       <input
                         type="number"
                         name="price"
@@ -482,7 +484,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                       />
                     </Field>
 
-                    <Field label="Stock" required>
+                    <Field label={t("admin_prod_modal_stock")} required>
                       <input
                         type="number"
                         name="stock"
@@ -499,7 +501,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <Field label="Discount (%)">
+                    <Field label={t("admin_prod_modal_discount")}>
                       <input
                         type="number"
                         name="discount"
@@ -514,7 +516,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                       />
                     </Field>
 
-                    <Field label="Delivery">
+                    <Field label={t("admin_prod_modal_delivery")}>
                       <label
                         className={`flex items-center gap-2.5 h-full px-3.5 py-2.5 rounded-lg border border-hairline bg-paper cursor-pointer select-none ${
                           busy ? "opacity-60 cursor-not-allowed" : ""
@@ -530,17 +532,16 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                         />
 
                         <span className="text-[14px] text-ink">
-                          Free delivery
+                          {t("admin_prod_modal_free_delivery")}
                         </span>
                       </label>
                     </Field>
                   </div>
 
-                  <Field label="Skin Types">
+                  <Field label={t("admin_prod_modal_skin_types")}>
                     {skinTypes.length === 0 ? (
                       <p className="text-[12.5px] text-stone">
-                        No skin types available yet. Add some from the
-                        Categories page.
+                        {t("admin_prod_modal_no_skin_types")}
                       </p>
                     ) : (
                       <div className="flex flex-wrap gap-2">
@@ -570,7 +571,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                     )}
 
                     <p className="text-[11px] text-stone mt-2">
-                      Select all skin types this product suits.
+                      {t("admin_prod_modal_skin_types_hint")}
                     </p>
                   </Field>
                 </form>
@@ -579,11 +580,11 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                   <div className="bg-paper/60 border border-hairline rounded-xl p-5">
                     <div className="mb-4">
                       <h3 className="font-display text-[16px] font-medium text-ink">
-                        Product Images
+                        {t("admin_prod_modal_images")}
                       </h3>
 
                       <p className="text-[11.5px] text-stone mt-1">
-                        Add clear images to help customers.
+                        {t("admin_prod_modal_images_hint")}
                       </p>
                     </div>
 
@@ -608,7 +609,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
 
                             {img.is_primary && (
                               <span className="absolute top-2 left-2 text-[9px] font-medium uppercase tracking-wide bg-moss text-white px-1.5 py-0.5 rounded">
-                                Primary
+                                {t("admin_prod_modal_primary")}
                               </span>
                             )}
 
@@ -643,7 +644,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                             />
 
                             <span className="absolute top-2 left-2 text-[9px] font-medium uppercase tracking-wide bg-moss text-white px-1.5 py-0.5 rounded">
-                              New
+                              {t("admin_prod_modal_new_tag")}
                             </span>
 
                             <button
@@ -679,11 +680,11 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                       />
 
                       <p className="text-[13px] font-medium text-ink">
-                        Drag & drop images
+                        {t("admin_prod_modal_drag_drop")}
                       </p>
 
                       <p className="text-[11px] text-stone mt-3">
-                        JPG, PNG, WEBP up to 5MB
+                        {t("admin_prod_modal_formats")}
                       </p>
 
                       <button
@@ -692,7 +693,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
                         disabled={busy}
                         className="mt-3 px-4 py-1.5 rounded-lg border border-moss/40 text-moss text-[12.5px] font-medium hover:bg-moss-tint transition-colors disabled:opacity-50"
                       >
-                        Choose Files
+                        {t("admin_prod_modal_choose_files")}
                       </button>
 
                       <input
@@ -709,16 +710,16 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
 
                   <div className="bg-paper/60 border border-hairline rounded-xl p-5">
                     <h3 className="font-display text-[16px] font-medium text-ink mb-3">
-                      Tips
+                      {t("admin_prod_modal_tips")}
                     </h3>
 
                     <div className="space-y-2.5">
                       {[
-                        "Use a clear and descriptive name",
-                        "Set a competitive price",
-                        "Add high quality images",
-                        "Tag applicable skin types",
-                        "Keep stock updated",
+                        t("admin_prod_modal_tip1"),
+                        t("admin_prod_modal_tip2"),
+                        t("admin_prod_modal_tip3"),
+                        t("admin_prod_modal_tip4"),
+                        t("admin_prod_modal_tip5"),
                       ].map((tip) => (
                         <div key={tip} className="flex items-center gap-3">
                           <div className="w-4 h-4 rounded-full bg-moss-tint flex items-center justify-center shrink-0">
@@ -749,7 +750,7 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
               disabled={busy}
               className="px-5 py-2.5 rounded-lg border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors disabled:opacity-50"
             >
-              Cancel
+              {t("admin_prod_modal_cancel")}
             </button>
 
             <button
@@ -765,12 +766,12 @@ export default function ProductFormModal({ productId, onClose, onSuccess }) {
               )}
 
               {uploading
-                ? "Uploading Images..."
+                ? t("admin_prod_modal_uploading")
                 : saving
-                  ? "Saving..."
+                  ? t("admin_prod_modal_saving")
                   : isEdit
-                    ? "Save Changes"
-                    : "Create Product"}
+                    ? t("admin_prod_modal_save")
+                    : t("admin_prod_modal_create")}
             </button>
           </div>
         )}

@@ -1,25 +1,29 @@
 import { useState } from "react";
 import { Tag as TagIcon, Sparkles } from "lucide-react";
+import { useLanguage } from "../../context/LanguageContext";
 import CategoriesPanel from "./CategoriesPanel";
 import SkinTypesPanel from "./SkinTypesPanel";
 
-const TABS = [
-  { key: "categories", label: "Categories", icon: TagIcon },
-  { key: "skin-types", label: "Skin Types", icon: Sparkles },
-];
-
 export default function Categories() {
+  const { t } = useLanguage();
   const [activeTab, setActiveTab] = useState("categories");
+
+  const tabs = [
+    { key: "categories", label: t("admin_cat_tab_categories"), icon: TagIcon },
+    { key: "skin-types", label: t("admin_cat_tab_skin_types"), icon: Sparkles },
+  ];
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className="flex items-center justify-between gap-4 mb-6">
         <h1 className="font-display text-[28px] font-medium text-ink">
-          {activeTab === "categories" ? "Categories" : "Skin Types"}
+          {activeTab === "categories"
+            ? t("admin_cat_tab_categories")
+            : t("admin_cat_tab_skin_types")}
         </h1>
 
         <div className="inline-flex items-center gap-1 rounded-lg border border-hairline bg-surface p-1">
-          {TABS.map(({ key, label, icon: Icon }) => (
+          {tabs.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               type="button"

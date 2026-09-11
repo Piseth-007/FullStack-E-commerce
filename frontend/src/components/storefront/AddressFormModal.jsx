@@ -95,7 +95,7 @@ export default function AddressFormModal({
         }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="text-xl mb-5" style={{ fontFamily: "Fraunces, serif" }}>
+        <h2 className="font-display text-xl mb-5">
           {initialData ? "Edit address" : "Add address"}
         </h2>
 

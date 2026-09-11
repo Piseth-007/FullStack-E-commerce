@@ -16,11 +16,13 @@ import api from "../../api/axios";
 import { RowSkeleton, StatSkeleton } from "../../components/Skeleton";
 import { ToastContext } from "../../context/ToastContext";
 import { useAdminNotifications } from "../../context/AdminNotificationsContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 const RATINGS = [5, 4, 3, 2, 1];
 const PER_PAGE = 10;
 
 export default function Reviews() {
+  const { t } = useLanguage();
   const { markViewed } = useAdminNotifications();
 
   useEffect(() => {
@@ -191,7 +193,7 @@ export default function Reviews() {
 
   const handleDelete = async (review) => {
     const confirmed = window.confirm(
-      "Delete this review? This action cannot be undone.",
+      t("admin_rev_delete_confirm", "Delete this review? This action cannot be undone."),
     );
 
     if (!confirmed) {
@@ -223,7 +225,7 @@ export default function Reviews() {
         };
       });
 
-      showToast("Review deleted successfully.");
+      showToast(t("admin_rev_deleted_success", "Review deleted successfully."));
 
       setPage((currentPage) => {
         const remaining = Math.max(0, filteredReviews.length - 1);
@@ -246,12 +248,12 @@ export default function Reviews() {
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="mb-1 text-[11px] font-medium uppercase tracking-[0.12em] text-stone">
-            Moderation
+            {t("admin_rev_moderation", "Moderation")}
           </p>
 
           <div className="flex items-center gap-3">
             <h1 className="font-display text-[28px] font-medium text-ink">
-              Reviews
+              {t("admin_rev_title", "Reviews")}
             </h1>
 
             {!loading && (
@@ -267,8 +269,8 @@ export default function Reviews() {
           onClick={handleRefresh}
           disabled={loading || refreshing}
           className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-hairline bg-surface text-stone transition-colors hover:bg-paper hover:text-ink disabled:cursor-not-allowed disabled:opacity-50"
-          title="Refresh reviews"
-          aria-label="Refresh reviews"
+          title={t("admin_rev_refresh", "Refresh reviews")}
+          aria-label={t("admin_rev_refresh", "Refresh reviews")}
         >
           <RefreshCw
             size={16}
@@ -288,22 +290,22 @@ export default function Reviews() {
         <div className="mb-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             icon={MessageSquare}
-            label="Total Reviews"
+            label={t("admin_rev_stat_total", "Total Reviews")}
             value={stats.total}
           />
 
           <StatCard
             icon={Star}
-            label="Average Rating"
+            label={t("admin_rev_stat_avg", "Average Rating")}
             value={`${Number(stats.average || 0).toFixed(1)}/5`}
             valueClass="text-moss"
           />
 
-          <StatCard icon={Star} label="5 Star Reviews" value={stats.fiveStar} />
+          <StatCard icon={Star} label={t("admin_rev_stat_five", "5 Star Reviews")} value={stats.fiveStar} />
 
           <StatCard
             icon={AlertTriangle}
-            label="Low Ratings"
+            label={t("admin_rev_stat_low", "Low Ratings")}
             value={stats.lowRating}
             valueClass={stats.lowRating > 0 ? "text-clay" : "text-ink"}
           />
@@ -324,7 +326,7 @@ export default function Reviews() {
                 type="search"
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
-                placeholder="Search reviews..."
+                placeholder={t("admin_rev_search_placeholder", "Search reviews...")}
                 className="w-full rounded-lg border border-hairline bg-paper py-2 pl-9 pr-9 text-[13px] text-ink placeholder:text-stone/50 transition-colors focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20"
               />
 
@@ -333,7 +335,7 @@ export default function Reviews() {
                   type="button"
                   onClick={() => setSearch("")}
                   className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center justify-center text-stone transition-colors hover:text-ink"
-                  aria-label="Clear search"
+                  aria-label={t("admin_rev_clear_search", "Clear search")}
                 >
                   <X size={15} />
                 </button>
@@ -342,7 +344,7 @@ export default function Reviews() {
 
             <div className="flex min-w-0 flex-1 items-center gap-1.5 overflow-x-auto pb-1 lg:pb-0">
               <FilterPill
-                label="All"
+                label={t("admin_rev_filter_all", "All")}
                 active={ratingFilter === ""}
                 onClick={() => handleRatingFilter("")}
               />
@@ -350,7 +352,7 @@ export default function Reviews() {
               {RATINGS.map((rating) => (
                 <FilterPill
                   key={rating}
-                  label={`${rating} Star`}
+                  label={t("admin_rev_filter_star", "{rating} Star", { rating })}
                   rating={rating}
                   active={ratingFilter === String(rating)}
                   onClick={() => handleRatingFilter(String(rating))}
@@ -362,7 +364,9 @@ export default function Reviews() {
               <span className="font-medium text-ink">
                 {filteredReviews.length}
               </span>{" "}
-              {filteredReviews.length === 1 ? "review" : "reviews"}
+              {filteredReviews.length === 1
+                ? t("admin_rev_count_singular", "review", { count: 1 })
+                : t("admin_rev_count_plural", "reviews", { count: filteredReviews.length })}
             </p>
           </div>
         </div>
@@ -377,7 +381,7 @@ export default function Reviews() {
             onClick={handleRefresh}
             className="shrink-0 text-[12.5px] font-medium underline"
           >
-            Try again
+            {t("admin_orders_try_again", "Try again")}
           </button>
         </div>
       )}
@@ -434,12 +438,11 @@ export default function Reviews() {
 
           <div className="mt-5 flex items-center justify-between">
             <p className="text-[12px] text-stone">
-              Showing{" "}
-              <span className="font-medium text-ink">{paginationStart}</span> to{" "}
-              <span className="font-medium text-ink">{paginationEnd}</span> of{" "}
-              <span className="font-medium text-ink">
-                {filteredReviews.length}
-              </span>
+              {t("admin_rev_showing", "Showing {start} to {end} of {total}", {
+                start: paginationStart,
+                end: paginationEnd,
+                total: filteredReviews.length,
+              })}
             </p>
 
             {totalPages > 1 && (
@@ -486,6 +489,7 @@ function calculateStats(reviews) {
 }
 
 function ReviewCard({ review, isDeleting, onDelete }) {
+  const { t } = useLanguage();
   const rating = Number(review.rating || 0);
 
   return (
@@ -511,7 +515,7 @@ function ReviewCard({ review, isDeleting, onDelete }) {
           <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[12.5px] text-stone">
             <span className="inline-flex items-center gap-1">
               <User size={12} strokeWidth={1.75} />
-              {review.user?.name || "Unknown customer"}
+              {review.user?.name || t("admin_orders_unknown_cust", "Unknown customer")}
             </span>
 
             {review.user?.email && (
@@ -527,7 +531,7 @@ function ReviewCard({ review, isDeleting, onDelete }) {
               <Package size={12} strokeWidth={1.75} />
 
               <span className="truncate font-medium text-ink">
-                {review.product?.name || "Unknown product"}
+                {review.product?.name || t("admin_orders_unknown_cust", "Unknown product")}
               </span>
             </span>
 
@@ -548,8 +552,8 @@ function ReviewCard({ review, isDeleting, onDelete }) {
           onClick={onDelete}
           disabled={isDeleting}
           className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-stone transition-colors hover:bg-clay-tint hover:text-clay disabled:opacity-50"
-          title="Delete review"
-          aria-label="Delete review"
+          title={t("admin_rev_delete_btn", "Delete review")}
+          aria-label={t("admin_rev_delete_btn", "Delete review")}
         >
           {isDeleting ? (
             <span className="h-4 w-4 animate-spin rounded-full border-2 border-clay border-t-transparent" />
@@ -661,6 +665,7 @@ function FilterPill({ label, rating, active, onClick }) {
 }
 
 function Pagination({ currentPage, totalPages, onPrevious, onNext }) {
+  const { t } = useLanguage();
   return (
     <div className="flex items-center justify-center gap-2">
       <button
@@ -668,23 +673,24 @@ function Pagination({ currentPage, totalPages, onPrevious, onNext }) {
         onClick={onPrevious}
         disabled={currentPage === 1}
         className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline bg-surface text-stone transition-colors hover:bg-paper hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
-        aria-label="Previous page"
+        aria-label={t("admin_prod_prev", "Previous page")}
       >
         <ChevronLeft size={16} strokeWidth={1.75} />
       </button>
 
-      <div className="flex h-9 min-w-9 items-center justify-center rounded-lg bg-ink px-3 text-[12px] font-medium text-white">
-        {currentPage}
-      </div>
-
-      <span className="text-[12px] text-stone">of {totalPages}</span>
+      <span className="min-w-21.25 text-center text-[12px] text-stone">
+        {t("admin_prod_page", "Page {current} of {total}", {
+          current: currentPage,
+          total: totalPages,
+        })}
+      </span>
 
       <button
         type="button"
         onClick={onNext}
         disabled={currentPage === totalPages}
         className="flex h-9 w-9 items-center justify-center rounded-lg border border-hairline bg-surface text-stone transition-colors hover:bg-paper hover:text-ink disabled:cursor-not-allowed disabled:opacity-40"
-        aria-label="Next page"
+        aria-label={t("admin_prod_next", "Next page")}
       >
         <ChevronRight size={16} strokeWidth={1.75} />
       </button>
@@ -693,18 +699,19 @@ function Pagination({ currentPage, totalPages, onPrevious, onNext }) {
 }
 
 function EmptyState({ ratingFilter, onClear }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-20 text-center">
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-moss-tint">
         <MessageSquare size={22} className="text-moss" strokeWidth={1.75} />
       </div>
 
-      <p className="mb-1 text-[15px] font-medium text-ink">No reviews found</p>
+      <p className="mb-1 text-[15px] font-medium text-ink">{t("admin_rev_empty_title", "No reviews found")}</p>
 
       <p className="mb-5 max-w-sm text-[13px] leading-6 text-stone">
         {ratingFilter
-          ? `There are currently no ${ratingFilter}-star reviews.`
-          : "Customer reviews will appear here when products receive feedback."}
+          ? t("admin_rev_empty_filter_desc", "There are currently no {rating}-star reviews.", { rating: ratingFilter })
+          : t("admin_rev_empty_desc", "Customer reviews will appear here when products receive feedback.")}
       </p>
 
       {ratingFilter && (
@@ -713,7 +720,7 @@ function EmptyState({ ratingFilter, onClear }) {
           onClick={onClear}
           className="rounded-lg border border-hairline bg-paper px-4 py-2.5 text-[13px] font-medium text-ink transition-colors hover:bg-hairline/30"
         >
-          Show all reviews
+          {t("admin_rev_show_all", "Show all reviews")}
         </button>
       )}
     </div>
@@ -721,6 +728,7 @@ function EmptyState({ ratingFilter, onClear }) {
 }
 
 function SearchEmptyState({ search, onClear }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-16 text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-paper">
@@ -728,12 +736,11 @@ function SearchEmptyState({ search, onClear }) {
       </div>
 
       <p className="mb-1 text-[14px] font-medium text-ink">
-        No reviews match your search
+        {t("admin_rev_search_empty_title", "No reviews match your search")}
       </p>
 
       <p className="mb-5 text-[13px] text-stone">
-        No results found for{" "}
-        <span className="font-medium text-ink">"{search}"</span>
+        {t("admin_rev_search_empty_desc", 'No results found for "{query}"', { query: search })}
       </p>
 
       <button
@@ -741,7 +748,7 @@ function SearchEmptyState({ search, onClear }) {
         onClick={onClear}
         className="text-[13px] font-medium text-moss transition-colors hover:text-moss-deep"
       >
-        Clear search
+        {t("admin_rev_clear_search", "Clear search")}
       </button>
     </div>
   );

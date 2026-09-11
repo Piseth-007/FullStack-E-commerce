@@ -27,9 +27,14 @@ export default function FavoriteButton({
       return;
     }
 
+    const wasFavorited = favorited;
     setPending(true);
     try {
       await toggleFavorite(productId);
+      showToast?.(
+        wasFavorited ? "Removed from favorites" : "Added to favorites",
+        "success"
+      );
     } catch {
       showToast?.("Couldn't update favorites", "error");
     } finally {

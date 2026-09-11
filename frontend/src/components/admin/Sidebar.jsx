@@ -15,32 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../../context/useAuth";
 import { useAdminNotifications } from "../../context/AdminNotificationsContext";
-
-const links = [
-  { to: "/admin/dashboard", label: "Overview", icon: LayoutDashboard },
-  { to: "/admin/products", label: "Products", icon: Package },
-  { to: "/admin/categories", label: "Categories", icon: Tag },
-  { to: "/admin/brands", label: "Brands", icon: Award },
-  {
-    to: "/admin/orders",
-    label: "Orders",
-    icon: ShoppingBag,
-    notifyKey: "orders",
-  },
-  {
-    to: "/admin/contacts",
-    label: "Contacts",
-    icon: Mail,
-    notifyKey: "contacts",
-  },
-  {
-    to: "/admin/reviews",
-    label: "Reviews",
-    icon: MessageSquare,
-    notifyKey: "reviews",
-  },
-  { to: "/admin/settings", label: "Settings", icon: SettingsIcon },
-];
+import { useLanguage } from "../../context/useLanguage";
 
 function NotifyBadge({ count, isActive }) {
   if (!count) return null;
@@ -58,6 +33,33 @@ function NotifyBadge({ count, isActive }) {
 export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
   const { user, logout } = useAuth();
   const { counts } = useAdminNotifications();
+  const { t } = useLanguage();
+
+  const links = [
+    { to: "/admin/dashboard", label: t("admin_nav_overview", "Overview"), icon: LayoutDashboard },
+    { to: "/admin/products", label: t("admin_nav_products", "Products"), icon: Package },
+    { to: "/admin/categories", label: t("admin_nav_categories", "Categories"), icon: Tag },
+    { to: "/admin/brands", label: t("admin_nav_brands", "Brands"), icon: Award },
+    {
+      to: "/admin/orders",
+      label: t("admin_nav_orders", "Orders"),
+      icon: ShoppingBag,
+      notifyKey: "orders",
+    },
+    {
+      to: "/admin/contacts",
+      label: t("admin_nav_contacts", "Contacts"),
+      icon: Mail,
+      notifyKey: "contacts",
+    },
+    {
+      to: "/admin/reviews",
+      label: t("admin_nav_reviews", "Reviews"),
+      icon: MessageSquare,
+      notifyKey: "reviews",
+    },
+    { to: "/admin/settings", label: t("admin_nav_settings", "Settings"), icon: SettingsIcon },
+  ];
 
   const userInitial = user?.name?.charAt(0)?.toUpperCase() || "A";
 
@@ -90,7 +92,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
             <div>
               <span className="block font-display text-[17px] font-medium tracking-tight text-ink">
-                Store Admin
+                {t("admin_side_brand", "Store Admin")}
               </span>
             </div>
           </div>
@@ -99,7 +101,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             type="button"
             onClick={() => setSidebarOpen(false)}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-stone transition-colors hover:bg-paper hover:text-ink lg:hidden"
-            aria-label="Close menu"
+            aria-label={t("nav_menu_close", "Close menu")}
           >
             <X size={18} strokeWidth={1.75} />
           </button>
@@ -173,7 +175,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
 
             <div className="min-w-0 flex-1">
               <p className="truncate text-[13px] font-medium text-ink">
-                {user?.name || "Administrator"}
+                {user?.name || t("admin_user_role", "Administrator")}
               </p>
 
               <p className="truncate text-[11.5px] text-stone">
@@ -188,7 +190,7 @@ export default function Sidebar({ sidebarOpen, setSidebarOpen }) {
             className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium text-stone transition-colors hover:bg-clay-tint hover:text-clay"
           >
             <LogOut size={16} strokeWidth={1.75} />
-            Log out
+            {t("admin_logout", "Log out")}
           </button>
         </div>
       </aside>

@@ -21,6 +21,7 @@ import api from "../../api/axios";
 import { CardSkeleton, StatSkeleton } from "../../components/Skeleton";
 import { ToastContext } from "../../context/ToastContext";
 import { ConfirmContext } from "../../context/ConfirmContext";
+import { useLanguage } from "../../context/LanguageContext";
 import ProductCard from "../../components/admin/ProductCard";
 import ProductFormModal from "../../components/admin/ProductFormModal";
 
@@ -34,6 +35,7 @@ const STOCK_FILTERS = [
 const PRODUCTS_PER_PAGE = 20;
 
 export default function Products() {
+  const { t } = useLanguage();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -213,10 +215,10 @@ export default function Products() {
 
   const handleDelete = async (product) => {
     const confirmed = await confirm(
-      `Delete "${product.name}"? This action cannot be undone.`,
+      t("admin_prod_delete_confirm_msg", { name: product.name }),
       {
-        title: "Delete product?",
-        confirmLabel: "Delete",
+        title: t("admin_prod_delete_confirm_title"),
+        confirmLabel: t("admin_prod_delete_confirm_btn"),
       },
     );
 
@@ -229,7 +231,7 @@ export default function Products() {
 
       setProducts((prev) => prev.filter((item) => item.id !== product.id));
 
-      showToast(`"${product.name}" deleted successfully`);
+      showToast(t("admin_prod_deleted_success", { name: product.name }));
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to delete product",
@@ -250,7 +252,7 @@ export default function Products() {
 
   const exportProducts = () => {
     if (sortedProducts.length === 0) {
-      showToast("No products available to export", "error");
+      showToast(t("admin_prod_export_empty"), "error");
       return;
     }
 
@@ -308,7 +310,7 @@ export default function Products() {
 
     URL.revokeObjectURL(url);
 
-    showToast("Products exported successfully");
+    showToast(t("admin_prod_export_success"));
   };
 
   const totalStock = useMemo(
@@ -362,7 +364,7 @@ export default function Products() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="font-display text-[28px] font-medium text-ink">
-              Products
+              {t("admin_prod_title")}
             </h1>
 
             {!loading && (
@@ -379,8 +381,8 @@ export default function Products() {
             onClick={() => loadProducts(true)}
             disabled={refreshing || loading}
             className="flex h-10 w-10 items-center justify-center rounded-lg border border-hairline bg-surface text-stone transition-colors hover:bg-paper hover:text-ink disabled:opacity-50"
-            title="Refresh products"
-            aria-label="Refresh products"
+            title={t("admin_prod_refresh")}
+            aria-label={t("admin_prod_refresh")}
           >
             <RefreshCw
               size={16}
@@ -395,7 +397,7 @@ export default function Products() {
             className="flex items-center gap-2 rounded-lg bg-moss px-4 py-2.5 text-[13.5px] font-medium text-white transition-all hover:bg-moss-deep active:scale-[0.98]"
           >
             <Plus size={16} strokeWidth={2} />
-            New Product
+            {t("admin_prod_new")}
           </button>
         </div>
       </div>
@@ -410,26 +412,26 @@ export default function Products() {
         <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <StatCard
             icon={Package}
-            label="Total Products"
+            label={t("admin_prod_stat_total")}
             value={products.length}
           />
 
           <StatCard
             icon={Boxes}
-            label="Units in Stock"
+            label={t("admin_prod_stat_units")}
             value={totalStock.toLocaleString()}
           />
 
           <StatCard
             icon={AlertTriangle}
-            label="Low Stock"
+            label={t("admin_prod_stat_low")}
             value={lowStockCount}
             valueClass={lowStockCount > 0 ? "text-clay" : "text-ink"}
           />
 
           <StatCard
             icon={Package}
-            label="Inventory Value"
+            label={t("admin_prod_stat_value")}
             value={`$${totalValue.toLocaleString(undefined, {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2,
@@ -451,7 +453,7 @@ export default function Products() {
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search products or categories..."
+                placeholder={t("admin_prod_search_placeholder")}
                 className="w-full rounded-lg border border-hairline bg-surface py-2.5 pl-10 pr-10 text-[13.5px] text-ink placeholder:text-stone/50 transition-colors focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20"
               />
 
@@ -460,7 +462,7 @@ export default function Products() {
                   type="button"
                   onClick={() => setSearch("")}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone hover:text-ink"
-                  aria-label="Clear search"
+                  aria-label={t("admin_prod_clear_search")}
                 >
                   <X size={15} />
                 </button>
@@ -472,7 +474,7 @@ export default function Products() {
               onChange={(e) => setCategoryFilter(e.target.value)}
               className="min-w-45 rounded-lg border border-hairline bg-surface px-3 py-2.5 text-[13px] text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20"
             >
-              <option value="all">All Categories</option>
+              <option value="all">{t("admin_prod_all_categories")}</option>
 
               {categories.map((category) => (
                 <option key={category.id} value={category.id}>
@@ -486,11 +488,19 @@ export default function Products() {
               onChange={(e) => setStockFilter(e.target.value)}
               className="min-w-40 rounded-lg border border-hairline bg-surface px-3 py-2.5 text-[13px] text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20"
             >
-              {STOCK_FILTERS.map((filter) => (
-                <option key={filter.key} value={filter.key}>
-                  {filter.label}
-                </option>
-              ))}
+              {STOCK_FILTERS.map((filter) => {
+                const labelMap = {
+                  all: t("admin_prod_stock_all"),
+                  "in-stock": t("admin_prod_stock_in"),
+                  "low-stock": t("admin_prod_stock_low"),
+                  "out-of-stock": t("admin_prod_stock_out"),
+                };
+                return (
+                  <option key={filter.key} value={filter.key}>
+                    {labelMap[filter.key] || filter.label}
+                  </option>
+                );
+              })}
             </select>
 
             <select
@@ -498,13 +508,13 @@ export default function Products() {
               onChange={(e) => setSortBy(e.target.value)}
               className="min-w-43.75 rounded-lg border border-hairline bg-surface px-3 py-2.5 text-[13px] text-ink focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20"
             >
-              <option value="newest">Newest First</option>
-              <option value="name-asc">Name: A–Z</option>
-              <option value="name-desc">Name: Z–A</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="stock-low">Stock: Low to High</option>
-              <option value="stock-high">Stock: High to Low</option>
+              <option value="newest">{t("admin_prod_sort_newest")}</option>
+              <option value="name-asc">{t("admin_prod_sort_name_asc")}</option>
+              <option value="name-desc">{t("admin_prod_sort_name_desc")}</option>
+              <option value="price-low">{t("admin_prod_sort_price_low")}</option>
+              <option value="price-high">{t("admin_prod_sort_price_high")}</option>
+              <option value="stock-low">{t("admin_prod_sort_stock_low")}</option>
+              <option value="stock-high">{t("admin_prod_sort_stock_high")}</option>
             </select>
 
             <button
@@ -513,7 +523,7 @@ export default function Products() {
               className="flex items-center justify-center gap-2 rounded-lg border border-hairline bg-surface px-3.5 py-2.5 text-[13px] font-medium text-ink transition-colors hover:bg-paper"
             >
               <Download size={15} />
-              Export
+              {t("admin_prod_export")}
             </button>
 
             <div className="flex items-center rounded-lg border border-hairline bg-surface p-1">
@@ -521,14 +531,14 @@ export default function Products() {
                 active={viewMode === "card"}
                 onClick={() => changeViewMode("card")}
                 icon={LayoutGrid}
-                label="Card view"
+                label={t("admin_prod_view_card")}
               />
 
               <ViewButton
                 active={viewMode === "table"}
                 onClick={() => changeViewMode("table")}
                 icon={List}
-                label="Table view"
+                label={t("admin_prod_view_table")}
               />
             </div>
 
@@ -538,30 +548,29 @@ export default function Products() {
                 onClick={clearFilters}
                 className="rounded-lg px-3 py-2.5 text-[13px] font-medium text-stone transition-colors hover:bg-paper hover:text-ink"
               >
-                Clear
+                {t("admin_prod_clear_filters")}
               </button>
             )}
           </div>
 
           <div className="mt-3 flex flex-col gap-2 border-t border-hairline pt-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[12px] text-stone">
-              Showing{" "}
-              <span className="font-medium text-ink">
-                {sortedProducts.length}
-              </span>{" "}
-              of {products.length} products
+              {t("admin_prod_showing", {
+                count: sortedProducts.length,
+                total: products.length,
+              })}
             </p>
 
             <div className="flex items-center gap-3">
               {lowStockCount > 0 && (
                 <span className="text-[11px] font-medium text-clay">
-                  {lowStockCount} low stock
+                  {t("admin_prod_low_stock_tag", { count: lowStockCount })}
                 </span>
               )}
 
               {outOfStockCount > 0 && (
                 <span className="text-[11px] font-medium text-clay">
-                  {outOfStockCount} out of stock
+                  {t("admin_prod_out_stock_tag", { count: outOfStockCount })}
                 </span>
               )}
             </div>
@@ -655,19 +664,20 @@ function CardView({ products, deletingId, onEdit, onDelete }) {
 }
 
 function TableView({ products, deletingId, onEdit, onDelete }) {
+  const { t } = useLanguage();
   return (
     <div className="overflow-hidden rounded-xl border border-hairline bg-surface">
       <div className="overflow-x-auto">
         <table className="w-full min-w-212.5 text-left">
           <thead>
             <tr className="border-b border-hairline bg-paper/30">
-              <TableHead>Product</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Price</TableHead>
-              <TableHead>Stock</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead align="right">Actions</TableHead>
+              <TableHead>{t("admin_prod_th_product")}</TableHead>
+              <TableHead>{t("admin_prod_th_category")}</TableHead>
+              <TableHead>{t("admin_prod_th_price")}</TableHead>
+              <TableHead>{t("admin_prod_th_stock")}</TableHead>
+              <TableHead>{t("admin_prod_th_status")}</TableHead>
+              <TableHead>{t("admin_prod_th_created")}</TableHead>
+              <TableHead align="right">{t("admin_prod_th_actions")}</TableHead>
             </tr>
           </thead>
 
@@ -689,12 +699,13 @@ function TableView({ products, deletingId, onEdit, onDelete }) {
 }
 
 function ProductTableRow({ product, deleting, onEdit, onDelete }) {
+  const { t } = useLanguage();
   const stock = Number(product.stock || 0);
   const price = Number(product.price || 0);
   const image = product.images?.[0]?.url;
 
   const status =
-    stock === 0 ? "Out of Stock" : stock <= 5 ? "Low Stock" : "In Stock";
+    stock === 0 ? t("admin_prod_stock_out") : stock <= 5 ? t("admin_prod_stock_low") : t("admin_prod_stock_in");
 
   const statusClass =
     stock === 0
@@ -733,7 +744,7 @@ function ProductTableRow({ product, deleting, onEdit, onDelete }) {
 
       <td className="px-5 py-3.5">
         <span className="text-[12.5px] text-stone">
-          {product.category?.name || "Uncategorized"}
+          {product.category?.name || t("admin_prod_uncategorized")}
         </span>
       </td>
 
@@ -775,8 +786,8 @@ function ProductTableRow({ product, deleting, onEdit, onDelete }) {
             type="button"
             onClick={onEdit}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-stone transition-colors hover:bg-moss-tint hover:text-moss"
-            title="Edit product"
-            aria-label="Edit product"
+            title={t("admin_prod_edit")}
+            aria-label={t("admin_prod_edit")}
           >
             <Pencil size={14} strokeWidth={1.75} />
           </button>
@@ -786,8 +797,8 @@ function ProductTableRow({ product, deleting, onEdit, onDelete }) {
             onClick={onDelete}
             disabled={deleting}
             className="flex h-8 w-8 items-center justify-center rounded-lg text-stone transition-colors hover:bg-clay-tint hover:text-clay disabled:cursor-not-allowed disabled:opacity-50"
-            title="Delete product"
-            aria-label="Delete product"
+            title={t("admin_prod_delete")}
+            aria-label={t("admin_prod_delete")}
           >
             {deleting ? (
               <RefreshCw size={14} className="animate-spin" />
@@ -810,14 +821,14 @@ function Pagination({
   onPrevious,
   onNext,
 }) {
+  const { t } = useLanguage();
   return (
     <div className="mt-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-[12px] text-stone">
-        Showing{" "}
-        <span className="font-medium text-ink">
-          {startProduct}–{endProduct}
-        </span>{" "}
-        of {totalProducts} products
+        {t("admin_prod_showing", {
+          count: `${startProduct}–${endProduct}`,
+          total: totalProducts,
+        })}
       </p>
 
       <div className="flex items-center gap-2">
@@ -832,8 +843,7 @@ function Pagination({
         </button>
 
         <span className="px-2 text-[12px] text-stone">
-          Page <span className="font-medium text-ink">{currentPage}</span> of{" "}
-          {totalPages}
+          {t("admin_prod_page", { page: currentPage, total: totalPages })}
         </span>
 
         <button
@@ -879,16 +889,17 @@ function StatCard({ icon: Icon, label, value, valueClass = "text-ink" }) {
 }
 
 function EmptyState({ onCreate }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-20 text-center">
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-moss-tint">
         <Package size={22} className="text-moss" strokeWidth={1.75} />
       </div>
 
-      <p className="mb-1 text-[15px] font-medium text-ink">No products yet</p>
+      <p className="mb-1 text-[15px] font-medium text-ink">{t("admin_prod_empty_title")}</p>
 
       <p className="mb-5 max-w-sm text-[13px] leading-6 text-stone">
-        Add your first product to start building your product catalog.
+        {t("admin_prod_empty_desc")}
       </p>
 
       <button
@@ -897,23 +908,24 @@ function EmptyState({ onCreate }) {
         className="flex items-center gap-2 rounded-lg bg-moss px-4 py-2.5 text-[13.5px] font-medium text-white transition-colors hover:bg-moss-deep"
       >
         <Plus size={16} strokeWidth={2} />
-        New Product
+        {t("admin_prod_new")}
       </button>
     </div>
   );
 }
 
 function SearchEmptyState({ onClear }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-16 text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-paper">
         <Filter size={20} className="text-stone" strokeWidth={1.75} />
       </div>
 
-      <p className="mb-1 text-[14px] font-medium text-ink">No products found</p>
+      <p className="mb-1 text-[14px] font-medium text-ink">{t("admin_prod_search_empty_title")}</p>
 
       <p className="mb-5 text-[13px] text-stone">
-        Try changing your search or filter options.
+        {t("admin_prod_search_empty_desc")}
       </p>
 
       <button
@@ -921,7 +933,7 @@ function SearchEmptyState({ onClear }) {
         onClick={onClear}
         className="text-[13px] font-medium text-moss transition-colors hover:text-moss-deep"
       >
-        Clear all filters
+        {t("admin_prod_clear_all_filters")}
       </button>
     </div>
   );

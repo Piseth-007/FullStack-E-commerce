@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import {
   SlidersHorizontal,
@@ -16,6 +16,8 @@ import {
 import api from "../../api/axios";
 import ProductCard from "../../components/storefront/ProductCart";
 import { ProductSkeleton } from "../../components/Skeleton";
+import { fetchWithCache, prefetchApi, getCached } from "../../utils/apiCache";
+import { useLanguage } from "../../context/useLanguage";
 
 const SORTS = [
   { value: "", label: "Newest" },
@@ -59,7 +61,19 @@ function writeFiltersCache(data) {
 }
 
 export default function ProductList() {
+  const { t } = useLanguage();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  const sorts = useMemo(
+    () => [
+      { value: "", label: t("shop_sort_newest", "Newest") },
+      { value: "latest_updated", label: t("shop_sort_updated", "Recently Updated") },
+      { value: "price_asc", label: t("shop_sort_price_low", "Price: Low to High") },
+      { value: "price_desc", label: t("shop_sort_price_high", "Price: High to Low") },
+      { value: "rating", label: t("shop_sort_rating", "Top Rated") },
+    ],
+    [t],
+  );
 
   const [products, setProducts] = useState([]);
   const [meta, setMeta] = useState(null);
@@ -157,13 +171,51 @@ export default function ProductList() {
      PRODUCTS
   ======================================================= */
 
+  const queryParams = useMemo(
+    () => ({
+      page: String(page),
+      search: search || undefined,
+      category_id: categoryId || undefined,
+      brand_id: brandId || undefined,
+      skin_type_id: skinTypeId || undefined,
+      has_discount: hasDiscount ? "1" : undefined,
+      has_rating: hasRating ? "1" : undefined,
+      sort: sort || undefined,
+      min_price: minPrice || undefined,
+      max_price: maxPrice || undefined,
+    }),
+    [
+      page,
+      search,
+      categoryId,
+      brandId,
+      skinTypeId,
+      hasDiscount,
+      hasRating,
+      sort,
+      minPrice,
+      maxPrice,
+    ],
+  );
+
   const fetchProducts = useCallback(async () => {
     productsControllerRef.current?.abort();
 
     const controller = new AbortController();
     productsControllerRef.current = controller;
 
-    if (hasLoadedOnceRef.current) {
+    // Instant in-memory cache check: 0ms page transitions
+    const cached = getCached("/products", queryParams);
+    if (cached && !cached.isStale) {
+      setProducts(cached.data?.data || []);
+      setMeta(cached.data);
+      setLoading(false);
+      setFetching(false);
+      hasLoadedOnceRef.current = true;
+      return;
+    }
+
+    if (hasLoadedOnceRef.current && products.length > 0) {
       setFetching(true);
     } else {
       setLoading(true);
@@ -172,26 +224,14 @@ export default function ProductList() {
     setError(false);
 
     try {
-      const res = await api.get("/products", {
-        params: {
-          page,
-          search: search || undefined,
-          category_id: categoryId || undefined,
-          brand_id: brandId || undefined,
-          skin_type_id: skinTypeId || undefined,
-          has_discount: hasDiscount || undefined,
-          has_rating: hasRating || undefined,
-          sort: sort || undefined,
-          min_price: minPrice || undefined,
-          max_price: maxPrice || undefined,
-        },
+      const data = await fetchWithCache("/products", queryParams, {
         signal: controller.signal,
       });
 
       if (!mountedRef.current) return;
 
-      setProducts(res.data.data || []);
-      setMeta(res.data);
+      setProducts(data.data || []);
+      setMeta(data);
       hasLoadedOnceRef.current = true;
     } catch (err) {
       if (err?.name === "CanceledError" || err?.name === "AbortError") return;
@@ -204,22 +244,27 @@ export default function ProductList() {
         setFetching(false);
       }
     }
-  }, [
-    page,
-    search,
-    categoryId,
-    brandId,
-    skinTypeId,
-    hasDiscount,
-    hasRating,
-    sort,
-    minPrice,
-    maxPrice,
-  ]);
+  }, [queryParams, products.length]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
+
+  // Background Predictive Prefetching: prefetch next page into memory
+  useEffect(() => {
+    if (meta && Number(page) < meta.last_page) {
+      prefetchApi("/products", {
+        ...queryParams,
+        page: String(Number(page) + 1),
+      });
+    }
+    if (Number(page) > 1) {
+      prefetchApi("/products", {
+        ...queryParams,
+        page: String(Number(page) - 1),
+      });
+    }
+  }, [page, meta, queryParams]);
 
   const updateParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
@@ -249,27 +294,27 @@ export default function ProductList() {
     search && { key: "search", label: `"${search}"`, onClear: clearSearch },
     categoryId && {
       key: "category",
-      label: categoryName || "Category",
+      label: categoryName || t("shop_category", "Category"),
       onClear: () => updateParam("category_id", ""),
     },
     brandId && {
       key: "brand",
-      label: brandName || "Brand",
+      label: brandName || t("shop_brand", "Brand"),
       onClear: () => updateParam("brand_id", ""),
     },
     skinTypeId && {
       key: "skinType",
-      label: skinTypeName || "Skin type",
+      label: skinTypeName || t("shop_skin_type", "Skin type"),
       onClear: () => updateParam("skin_type_id", ""),
     },
     hasDiscount && {
       key: "discount",
-      label: "Promotions",
+      label: t("shop_promotions", "Promotions"),
       onClear: () => updateParam("has_discount", ""),
     },
     hasRating && {
       key: "rating",
-      label: "Best rated",
+      label: t("shop_best_rated", "Best rated"),
       onClear: () => {
         const next = new URLSearchParams(searchParams);
         next.delete("has_rating");
@@ -302,6 +347,7 @@ export default function ProductList() {
   ].filter(Boolean).length;
 
   const isLoading = loading || fetching;
+  const showSkeleton = loading && products.length === 0;
 
   return (
     <div className="max-w-6xl mx-auto px-6 py-10">
@@ -309,17 +355,17 @@ export default function ProductList() {
       <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
         <div>
           <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-moss mb-1">
-            Shop
+            {t("shop_title", "Shop")}
           </p>
 
           <h1 className="font-display text-[30px] font-medium text-ink">
             {search
-              ? `Results for "${search}"`
+              ? `${t("shop_results_for", "Results for")} "${search}"`
               : hasDiscount
-                ? "Promotions"
+                ? t("shop_promotions", "Promotions")
                 : hasRating
-                  ? "Best Rated"
-                  : "All Products"}
+                  ? t("shop_best_rated", "Best Rated")
+                  : t("shop_all_products", "All Products")}
           </h1>
         </div>
 
@@ -332,7 +378,7 @@ export default function ProductList() {
           }`}
         >
           <SlidersHorizontal size={14} strokeWidth={1.75} />
-          Filters
+          {t("shop_filters", "Filters")}
           {activeFilterCount > 0 && (
             <span className="w-4.5 h-4.5 rounded-full bg-moss text-white text-[10px] font-medium flex items-center justify-center">
               {activeFilterCount}
@@ -342,16 +388,16 @@ export default function ProductList() {
       </div>
 
       <div className="flex items-center gap-2 mb-4">
-        {meta && !isLoading && (
+        {meta && (
           <p className="text-[13px] text-stone">
-            {meta.total} {meta.total === 1 ? "product" : "products"}
+            {meta.total} {meta.total === 1 ? t("shop_product_count", "product") : t("shop_products_count", "products")}
           </p>
         )}
 
         {isLoading && (
           <span className="flex items-center gap-1.5 text-[11px] uppercase tracking-widest text-stone/60">
             <RefreshCw size={11} className="animate-spin" />
-            Loading products...
+            {products.length > 0 ? t("shop_updating", "Updating...") : t("shop_loading", "Loading products...")}
           </span>
         )}
       </div>
@@ -374,7 +420,7 @@ export default function ProductList() {
             onClick={clearFilters}
             className="text-[12px] font-medium text-stone hover:text-clay transition-colors px-1"
           >
-            Clear all
+            {t("shop_clear_all", "Clear all")}
           </button>
         </div>
       )}
@@ -384,7 +430,7 @@ export default function ProductList() {
           <aside className="w-64 shrink-0 rounded-xl border border-hairline bg-surface p-5 space-y-6 lg:sticky lg:top-24">
             <div className="flex items-center justify-between">
               <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone">
-                Filters
+                {t("shop_filters", "Filters")}
               </p>
 
               <button
@@ -396,9 +442,9 @@ export default function ProductList() {
               </button>
             </div>
 
-            <FilterGroup icon={Tag} label="Category">
+            <FilterGroup icon={Tag} label={t("shop_category", "Category")}>
               {categories.length === 0 ? (
-                <p className="text-[12.5px] text-stone">No categories yet.</p>
+                <p className="text-[12.5px] text-stone">{t("shop_no_categories", "No categories yet.")}</p>
               ) : (
                 categories.map((c) => (
                   <FilterOption
@@ -416,9 +462,9 @@ export default function ProductList() {
               )}
             </FilterGroup>
 
-            <FilterGroup icon={Award} label="Brand">
+            <FilterGroup icon={Award} label={t("shop_brand", "Brand")}>
               {brands.length === 0 ? (
-                <p className="text-[12.5px] text-stone">No brands yet.</p>
+                <p className="text-[12.5px] text-stone">{t("shop_no_brands", "No brands yet.")}</p>
               ) : (
                 brands.map((b) => (
                   <FilterOption
@@ -437,7 +483,7 @@ export default function ProductList() {
             </FilterGroup>
 
             {skinTypes.length > 0 && (
-              <FilterGroup icon={Sparkles} label="Skin Type">
+              <FilterGroup icon={Sparkles} label={t("shop_skin_type", "Skin Type")}>
                 {skinTypes.map((s) => (
                   <FilterOption
                     key={s.id}
@@ -454,7 +500,7 @@ export default function ProductList() {
               </FilterGroup>
             )}
 
-            <FilterGroup icon={Wallet} label="Price">
+            <FilterGroup icon={Wallet} label={t("shop_price", "Price")}>
               <div className="flex items-center gap-2">
                 <div className="relative flex-1">
                   <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-stone">
@@ -463,7 +509,7 @@ export default function ProductList() {
                   <input
                     type="number"
                     min="0"
-                    placeholder="Min"
+                    placeholder={t("filter_min", "Min")}
                     defaultValue={minPrice}
                     onBlur={(e) => updateParam("min_price", e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
@@ -480,7 +526,7 @@ export default function ProductList() {
                   <input
                     type="number"
                     min="0"
-                    placeholder="Max"
+                    placeholder={t("filter_max", "Max")}
                     defaultValue={maxPrice}
                     onBlur={(e) => updateParam("max_price", e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
@@ -499,7 +545,7 @@ export default function ProductList() {
               onChange={(e) => updateParam("sort", e.target.value)}
               className="px-3 py-2 rounded-lg border border-hairline bg-surface text-[13px] font-medium text-ink focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss"
             >
-              {SORTS.map((s) => (
+              {sorts.map((s) => (
                 <option key={s.value} value={s.value}>
                   {s.label}
                 </option>
@@ -507,7 +553,7 @@ export default function ProductList() {
             </select>
           </div>
 
-          {isLoading ? (
+          {showSkeleton ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 mb-10">
               {Array.from({ length: 6 }).map((_, i) => (
                 <ProductSkeleton key={i} />
@@ -516,14 +562,14 @@ export default function ProductList() {
           ) : error && products.length === 0 ? (
             <div className="flex flex-col items-center text-center py-20 border border-dashed border-clay/20 rounded-none bg-surface">
               <p className="text-[14px] text-clay mb-3">
-                Couldn't load products.
+                {t("shop_error", "Couldn't load products.")}
               </p>
               <button
                 onClick={fetchProducts}
                 className="flex items-center gap-1.5 text-[13px] font-medium text-moss hover:text-moss-deep transition-colors"
               >
                 <RefreshCw size={13} />
-                Retry
+                {t("retry", "Retry")}
               </button>
             </div>
           ) : products.length === 0 ? (
@@ -533,13 +579,13 @@ export default function ProductList() {
               </div>
 
               <p className="font-display text-[20px] font-medium text-ink mb-1">
-                No products found
+                {t("shop_no_products", "No products found")}
               </p>
 
               <p className="text-[13.5px] text-stone mb-6 max-w-md">
                 {search
                   ? `We couldn't find any products matching "${search}". Try checking your spelling or clearing filters.`
-                  : "No products matched your selected filters. Try adjusting or clearing your criteria."}
+                  : t("shop_try_filters", "Try adjusting your filters or search terms.")}
               </p>
 
               {(activeFilterCount > 0 || search) && (
@@ -547,13 +593,24 @@ export default function ProductList() {
                   onClick={clearFilters}
                   className="rounded-none border border-moss bg-moss px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-moss-deep shadow-xs"
                 >
-                  Clear all filters
+                  {t("shop_reset_filters", "Clear all filters")}
                 </button>
               )}
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 mb-10">
+              {/* Subtle top indicator during background pagination refetch */}
+              {fetching && (
+                <div className="h-0.5 w-full bg-moss-tint overflow-hidden rounded-full mb-4">
+                  <div className="h-full bg-moss animate-[pulse_0.8s_ease-in-out_infinite] w-1/2 mx-auto" />
+                </div>
+              )}
+
+              <div
+                className={`grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 mb-10 transition-opacity duration-200 ${
+                  fetching ? "opacity-60 pointer-events-none" : ""
+                }`}
+              >
                 {products.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
@@ -563,6 +620,14 @@ export default function ProductList() {
                 <div className="flex items-center justify-center gap-1.5">
                   <button
                     onClick={() => updateParam("page", Number(page) - 1)}
+                    onMouseEnter={() => {
+                      if (Number(page) > 1) {
+                        prefetchApi("/products", {
+                          ...queryParams,
+                          page: String(Number(page) - 1),
+                        });
+                      }
+                    }}
                     disabled={Number(page) === 1}
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-stone hover:bg-paper hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     aria-label="Previous page"
@@ -575,6 +640,12 @@ export default function ProductList() {
                       <button
                         key={p}
                         onClick={() => updateParam("page", p)}
+                        onMouseEnter={() =>
+                          prefetchApi("/products", {
+                            ...queryParams,
+                            page: String(p),
+                          })
+                        }
                         className={`w-8 h-8 rounded-lg text-[13px] font-medium transition-colors ${
                           Number(page) === p
                             ? "bg-moss text-white"
@@ -588,6 +659,14 @@ export default function ProductList() {
 
                   <button
                     onClick={() => updateParam("page", Number(page) + 1)}
+                    onMouseEnter={() => {
+                      if (Number(page) < meta.last_page) {
+                        prefetchApi("/products", {
+                          ...queryParams,
+                          page: String(Number(page) + 1),
+                        });
+                      }
+                    }}
                     disabled={Number(page) === meta.last_page}
                     className="w-8 h-8 rounded-lg flex items-center justify-center text-stone hover:bg-paper hover:text-ink transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                     aria-label="Next page"

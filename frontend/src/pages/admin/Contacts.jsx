@@ -15,8 +15,10 @@ import api from "../../api/axios";
 import { RowSkeleton } from "../../components/Skeleton";
 import { useAdminNotifications } from "../../context/AdminNotificationsContext";
 import { ToastContext } from "../../context/ToastContext";
+import { useLanguage } from "../../context/LanguageContext";
 
 export default function Contacts() {
+  const { t } = useLanguage();
   const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -72,7 +74,7 @@ export default function Contacts() {
 
   const handleDelete = async (contactId) => {
     const confirmed = window.confirm(
-      "Are you sure you want to delete this message?",
+      t("admin_contacts_delete_confirm", "Are you sure you want to delete this message?"),
     );
 
     if (!confirmed) return;
@@ -88,7 +90,7 @@ export default function Contacts() {
         setExpanded(null);
       }
 
-      showToast("Contact message deleted successfully.");
+      showToast(t("admin_contacts_deleted_success", "Contact message deleted successfully."));
     } catch (err) {
       showToast(
         err.response?.data?.message || "Failed to delete contact message.",
@@ -144,7 +146,7 @@ export default function Contacts() {
         <div>
           <div className="flex items-center gap-3">
             <h1 className="font-display text-[28px] font-medium text-ink">
-              Contacts
+              {t("admin_contacts_title", "Contacts")}
             </h1>
 
             {!loading && (
@@ -155,7 +157,7 @@ export default function Contacts() {
           </div>
 
           <p className="mt-1 text-[13px] text-stone">
-            Messages from your customers.
+            {t("admin_contacts_sub", "Messages from your customers.")}
           </p>
         </div>
 
@@ -164,7 +166,7 @@ export default function Contacts() {
           onClick={() => loadContacts(true)}
           disabled={loading || refreshing}
           className="flex h-10 w-10 items-center justify-center rounded-lg border border-hairline bg-surface text-stone transition-colors hover:bg-paper hover:text-ink disabled:opacity-50"
-          title="Refresh contacts"
+          title={t("admin_contacts_refresh", "Refresh contacts")}
         >
           <RefreshCw
             size={16}
@@ -187,7 +189,7 @@ export default function Contacts() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search customer or message..."
+            placeholder={t("admin_contacts_search_placeholder", "Search customer or message...")}
             className="w-full rounded-lg border border-hairline bg-surface py-2 pl-9 pr-9 text-[13px] text-ink placeholder:text-stone/50 transition-colors focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20"
           />
 
@@ -196,7 +198,7 @@ export default function Contacts() {
               type="button"
               onClick={clearSearch}
               className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-stone hover:text-ink"
-              aria-label="Clear search"
+              aria-label={t("admin_contacts_clear_search", "Clear search")}
             >
               <X size={14} />
             </button>
@@ -215,7 +217,7 @@ export default function Contacts() {
             onClick={() => loadContacts()}
             className="text-[12.5px] font-medium underline"
           >
-            Try again
+            {t("admin_orders_try_again", "Try again")}
           </button>
         </div>
       )}
@@ -225,7 +227,12 @@ export default function Contacts() {
       {loading ? (
         <div className="overflow-hidden rounded-xl border border-hairline bg-surface">
           <div className="hidden border-b border-hairline px-5 py-3 md:grid md:grid-cols-[0.8fr_1.5fr_1.8fr_1fr]">
-            {["ID", "Customer", "Message", "Date"].map((item) => (
+            {[
+              t("admin_contacts_th_id", "ID"),
+              t("admin_contacts_th_customer", "Customer"),
+              t("admin_contacts_th_message", "Message"),
+              t("admin_contacts_th_date", "Date"),
+            ].map((item) => (
               <p
                 key={item}
                 className="text-[10.5px] font-medium uppercase tracking-widest text-stone"
@@ -249,10 +256,10 @@ export default function Contacts() {
             <table className="w-full min-w-175 text-left">
               <thead>
                 <tr className="border-b border-hairline bg-paper/30">
-                  <TableHead>ID</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Message</TableHead>
-                  <TableHead>Date</TableHead>
+                  <TableHead>{t("admin_contacts_th_id", "ID")}</TableHead>
+                  <TableHead>{t("admin_contacts_th_customer", "Customer")}</TableHead>
+                  <TableHead>{t("admin_contacts_th_message", "Message")}</TableHead>
+                  <TableHead>{t("admin_contacts_th_date", "Date")}</TableHead>
                 </tr>
               </thead>
 
@@ -279,7 +286,8 @@ export default function Contacts() {
 
 
 function ContactRow({ contact, expanded, deleting, onToggle, onDelete }) {
-  const name = contact.name || contact.user?.name || "Unknown customer";
+  const { t } = useLanguage();
+  const name = contact.name || contact.user?.name || t("admin_orders_unknown_cust", "Unknown customer");
 
   const email = contact.email || contact.user?.email || "";
 
@@ -340,7 +348,7 @@ function ContactRow({ contact, expanded, deleting, onToggle, onDelete }) {
           <p
             className={`text-[13px] text-ink ${expanded ? "" : "line-clamp-2"}`}
           >
-            {contact.message || "No message"}
+            {contact.message || t("admin_orders_no_items", "No message")}
           </p>
         </td>
 
@@ -377,7 +385,7 @@ function ContactRow({ contact, expanded, deleting, onToggle, onDelete }) {
                   <Mail size={16} className="text-moss" strokeWidth={1.75} />
 
                   <p className="text-[10.5px] font-medium uppercase tracking-widest text-stone">
-                    Customer Message
+                    {t("admin_contacts_modal_title", "Customer Message")}
                   </p>
                 </div>
 
@@ -391,7 +399,7 @@ function ContactRow({ contact, expanded, deleting, onToggle, onDelete }) {
 
                 <div className="rounded-lg bg-paper p-4">
                   <p className="whitespace-pre-wrap text-[13.5px] leading-6 text-ink">
-                    {contact.message || "No message available."}
+                    {contact.message || t("admin_orders_no_items", "No message available.")}
                   </p>
                 </div>
 
@@ -416,7 +424,7 @@ function ContactRow({ contact, expanded, deleting, onToggle, onDelete }) {
                     className="flex items-center justify-center gap-2 rounded-lg border border-hairline bg-surface px-4 py-2.5 text-[12.5px] font-medium text-ink transition-colors hover:bg-paper"
                   >
                     <Mail size={14} strokeWidth={1.75} />
-                    Email customer
+                    {t("admin_contacts_email_btn", "Email customer")}
                   </a>
                 )}
 
@@ -430,7 +438,7 @@ function ContactRow({ contact, expanded, deleting, onToggle, onDelete }) {
                   className="flex items-center justify-center gap-2 rounded-lg bg-moss px-4 py-2.5 text-[12.5px] font-medium text-white transition-colors hover:bg-moss-deep"
                 >
                   <MessageCircle size={14} strokeWidth={1.75} />
-                  Contact via Telegram
+                  {t("admin_contacts_tg_btn", "Contact via Telegram")}
                 </a>
 
                 {/* Delete */}
@@ -449,7 +457,7 @@ function ContactRow({ contact, expanded, deleting, onToggle, onDelete }) {
                   ) : (
                     <Trash2 size={14} strokeWidth={1.75} />
                   )}
-                  Delete message
+                  {t("admin_contacts_delete_btn", "Delete message")}
                 </button>
               </div>
             </div>
@@ -473,6 +481,7 @@ function TableHead({ children }) {
 
 
 function EmptyState() {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-20 text-center">
       <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-moss-tint">
@@ -480,11 +489,11 @@ function EmptyState() {
       </div>
 
       <p className="mb-1 text-[15px] font-medium text-ink">
-        No contact messages
+        {t("admin_contacts_empty_title", "No contact messages")}
       </p>
 
       <p className="max-w-sm text-[13px] leading-6 text-stone">
-        Messages from your customers will appear here.
+        {t("admin_contacts_empty_desc", "Messages from your customers will appear here.")}
       </p>
     </div>
   );
@@ -493,17 +502,19 @@ function EmptyState() {
 
 
 function SearchEmptyState({ search, onClear }) {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col items-center rounded-xl border border-dashed border-hairline bg-surface px-6 py-16 text-center">
       <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-paper">
         <Search size={20} className="text-stone" strokeWidth={1.75} />
       </div>
 
-      <p className="mb-1 text-[14px] font-medium text-ink">No messages found</p>
+      <p className="mb-1 text-[14px] font-medium text-ink">
+        {t("admin_contacts_search_empty_title", "No messages found")}
+      </p>
 
       <p className="mb-5 text-[13px] text-stone">
-        No results found for{" "}
-        <span className="font-medium text-ink">"{search}"</span>
+        {t("admin_contacts_search_empty_desc", 'No results found for "{query}"', { query: search })}
       </p>
 
       <button
@@ -511,7 +522,7 @@ function SearchEmptyState({ search, onClear }) {
         onClick={onClear}
         className="text-[13px] font-medium text-moss transition-colors hover:text-moss-deep"
       >
-        Clear search
+        {t("admin_contacts_clear_search", "Clear search")}
       </button>
     </div>
   );

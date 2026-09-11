@@ -3,8 +3,11 @@ import { Star, ImageOff, ShoppingBag, ArrowUpRight, Truck } from "lucide-react";
 
 import FavoriteButton from "./FavoriteButton";
 import FadeImage from "../common/FadeImage";
+import { prefetchApi } from "../../utils/apiCache";
+import { useLanguage } from "../../context/useLanguage";
 
 export default function ProductCard({ product }) {
+  const { t } = useLanguage();
   const productId = product?.id;
   const image = product?.images?.[0]?.url || "";
   const productName = product?.name || "Product";
@@ -45,8 +48,18 @@ export default function ProductCard({ product }) {
 
   const roundedRating = Math.round(rating);
 
+  const handlePrefetch = () => {
+    if (!productId) return;
+    prefetchApi(`/products/${productId}`);
+    prefetchApi(`/products/${productId}/reviews`);
+    prefetchApi(`/products/${productId}/related`);
+    import("../../pages/shop/ProductDetail").catch(() => {});
+  };
+
   return (
     <article
+      onMouseEnter={handlePrefetch}
+      onFocus={handlePrefetch}
       className={`
         group
         relative
@@ -193,7 +206,7 @@ export default function ProductCard({ product }) {
                   "
                 >
                   <Truck size={10} strokeWidth={1.8} />
-                  Free delivery
+                  {t("product_free_delivery_badge", "Free delivery")}
                 </span>
               )}
             </div>
@@ -247,7 +260,7 @@ export default function ProductCard({ product }) {
                   shadow-xs
                 "
               >
-                Out of stock
+                {t("product_out_of_stock_badge", "Out of stock")}
               </span>
             </div>
           )}
@@ -462,7 +475,7 @@ export default function ProductCard({ product }) {
                   text-clay
                 "
               >
-                {stock} left
+                {stock} {t("product_left", "left")}
               </span>
             )}
           </div>
@@ -503,7 +516,7 @@ export default function ProductCard({ product }) {
                   text-stone
                 "
               >
-                {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
+                {reviewCount} {t("product_reviews", "reviews")}
               </span>
             </div>
           )}
@@ -532,7 +545,7 @@ export default function ProductCard({ product }) {
                   group-hover:text-moss
                 "
               >
-                View product
+                {t("product_view", "View product")}
               </span>
 
               <ShoppingBag

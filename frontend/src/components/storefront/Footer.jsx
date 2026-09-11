@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Leaf, ArrowRight, ShieldCheck, Check } from "lucide-react";
+import { Leaf, ArrowRight, ShieldCheck, Check, Languages } from "lucide-react";
 import { createElement } from "react";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
+import { useLanguage } from "../../context/useLanguage";
 import { validateRealEmail } from "../../utils/emailValidation";
 const SOCIAL_ICONS = {
   instagram: (
@@ -47,6 +48,7 @@ const SOCIAL_ICONS = {
 
 export default function Footer() {
   const store = useStoreSettings();
+  const { t, language, setLanguage } = useLanguage();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
   const [error, setError] = useState("");
@@ -72,11 +74,10 @@ export default function Footer() {
         <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
             <p className="font-display text-[20px] font-medium text-ink mb-1">
-              Skincare notes, in your inbox
+              {t("footer_newsletter_title", "Skincare notes, in your inbox")}
             </p>
             <p className="text-[13px] text-stone">
-              New arrivals, restocks, and the occasional ingredient deep-dive.
-              No spam.
+              {t("footer_newsletter_desc", "New arrivals, restocks, and the occasional ingredient deep-dive. No spam.")}
             </p>
           </div>
 
@@ -85,7 +86,7 @@ export default function Footer() {
               <span className="w-6 h-6 rounded-full bg-surface flex items-center justify-center">
                 <Check size={13} strokeWidth={2.5} />
               </span>
-              You're on the list
+              {t("footer_subscribed", "You're on the list")}
             </div>
           ) : (
             <div className="w-full lg:w-auto max-w-sm">
@@ -108,7 +109,7 @@ export default function Footer() {
                   type="submit"
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-moss text-white text-[13px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all shrink-0"
                 >
-                  Subscribe
+                  {t("footer_subscribe", "Subscribe")}
                   <ArrowRight size={14} strokeWidth={2} />
                 </button>
               </form>
@@ -154,9 +155,9 @@ export default function Footer() {
         <FooterColumn
           title="Shop"
           links={[
-            { label: "All products", to: "/products" },
-            { label: "Categories", to: "/categories" },
-            { label: "Brands", to: "/brands" },
+            { label: t("nav_shop_all", "All products"), to: "/products" },
+            { label: t("nav_categories", "Categories"), to: "/categories" },
+            { label: t("nav_brands", "Brands"), to: "/brands" },
             {
               label: "Best rated",
               to: "/products?has_rating=1&sort=rating",
@@ -167,17 +168,17 @@ export default function Footer() {
         <FooterColumn
           title="Company"
           links={[
-            { label: "About us", to: "/about" },
-            { label: "Contact", to: "/contact" },
+            { label: t("nav_about", "About us"), to: "/about" },
+            { label: t("nav_contact", "Contact"), to: "/contact" },
           ]}
         />
 
         <FooterColumn
           title="Account"
           links={[
-            { label: "My orders", to: "/orders" },
-            { label: "My profile", to: "/profile" },
-            { label: "Sign in", to: "/login" },
+            { label: t("nav_orders", "My orders"), to: "/orders" },
+            { label: t("nav_profile", "My profile"), to: "/profile" },
+            { label: t("nav_signin", "Sign in"), to: "/login" },
           ]}
         />
       </div>
@@ -186,11 +187,36 @@ export default function Footer() {
       <div className="border-t border-hairline">
         <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
           <p className="text-[12px] text-stone font-mono">
-            © {new Date().getFullYear()} {store.name || "Botaniq"}. All rights
-            reserved.
+            © {new Date().getFullYear()} {store.name || "Botaniq"}. {t("footer_rights", "All rights reserved.")}
           </p>
 
-          <div className="flex items-center gap-5">
+          <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+            {/* Language switch */}
+            <div className="flex items-center rounded-none border border-hairline bg-paper p-0.5 text-[11px] font-medium">
+              <button
+                type="button"
+                onClick={() => setLanguage("en")}
+                className={`px-2 py-0.5 transition-all ${
+                  language === "en"
+                    ? "bg-moss text-white font-semibold"
+                    : "text-stone hover:text-ink"
+                }`}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage("km")}
+                className={`px-2 py-0.5 transition-all ${
+                  language === "km"
+                    ? "bg-moss text-white font-semibold"
+                    : "text-stone hover:text-ink"
+                }`}
+              >
+                ខ្មែរ
+              </button>
+            </div>
+
             <Link
               to="/privacy"
               className="text-[12px] text-stone hover:text-ink transition-colors"

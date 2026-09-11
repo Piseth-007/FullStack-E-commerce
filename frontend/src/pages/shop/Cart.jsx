@@ -2,10 +2,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Minus, Plus, X, ShoppingBag } from "lucide-react";
 import { useCart } from "../../context/useCard";
 import { useToast } from "../../context/useToast";
+import { useLanguage } from "../../context/useLanguage";
 
 export default function Cart() {
   const { cart, subtotal, updateItem, removeItem } = useCart();
   const { showToast } = useToast();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const items = cart?.items || [];
@@ -16,7 +18,7 @@ export default function Cart() {
       await updateItem(itemId, quantity);
     } catch (err) {
       showToast(
-        err.response?.data?.message || "Could not update quantity",
+        err.response?.data?.message || t("cart_update_error", "Could not update quantity"),
         "error",
       );
     }
@@ -25,9 +27,9 @@ export default function Cart() {
   const handleRemove = async (itemId) => {
     try {
       await removeItem(itemId);
-      showToast("Item removed");
+      showToast(t("cart_item_removed", "Item removed"));
     } catch {
-      showToast("Failed to remove item", "error");
+      showToast(t("cart_failed_remove", "Failed to remove item"), "error");
     }
   };
 
@@ -38,16 +40,16 @@ export default function Cart() {
           <ShoppingBag size={22} className="text-moss" strokeWidth={1.75} />
         </div>
         <h1 className="font-display text-[24px] font-medium text-ink mb-2">
-          Your cart is empty
+          {t("cart_empty", "Your cart is empty")}
         </h1>
         <p className="text-[13.5px] text-stone mb-6">
-          Start browsing to find your next favorite product.
+          {t("cart_empty_desc", "Start browsing to find your next favorite product.")}
         </p>
         <Link
           to="/products"
           className="inline-block px-6 py-3 rounded-none border border-moss bg-moss text-white text-[14px] font-medium hover:bg-moss-deep transition-colors shadow-xs"
         >
-          Shop all products
+          {t("cart_shop_all", "Shop all products")}
         </Link>
       </div>
     );
@@ -56,7 +58,7 @@ export default function Cart() {
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
       <h1 className="font-display text-[28px] font-medium text-ink mb-8">
-        Your cart
+        {t("cart_title", "Your cart")}
       </h1>
 
       <div className="grid grid-cols-3 gap-10">
@@ -126,20 +128,20 @@ export default function Cart() {
 
         <div className="bg-surface border border-hairline rounded-none p-5 h-fit sticky top-24 shadow-xs">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-4">
-            Order Summary
+            {t("cart_order_summary", "Order Summary")}
           </p>
           <div className="flex justify-between text-[13.5px] text-ink mb-2">
-            <span>Subtotal</span>
+            <span>{t("cart_subtotal", "Subtotal")}</span>
             <span className="font-mono">${subtotal.toFixed(2)}</span>
           </div>
           <p className="text-[12px] text-stone mb-5">
-            Shipping calculated at checkout
+            {t("cart_shipping_calc", "Shipping calculated at checkout")}
           </p>
           <button
             onClick={() => navigate("/checkout")}
             className="w-full py-3 rounded-none border border-moss bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep transition-colors shadow-xs"
           >
-            Checkout
+            {t("cart_checkout", "Checkout")}
           </button>
         </div>
       </div>

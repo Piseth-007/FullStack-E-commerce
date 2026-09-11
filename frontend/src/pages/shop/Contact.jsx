@@ -11,22 +11,8 @@ import {
 } from "lucide-react";
 import api from "../../api/axios";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
+import { useLanguage } from "../../context/useLanguage";
 import { validateRealEmail } from "../../utils/emailValidation";
-
-const FAQS = [
-  {
-    q: "How long does delivery take?",
-    a: "Most orders in Phnom Penh arrive within 1–2 business days. Products marked free delivery ship at no extra cost.",
-  },
-  {
-    q: "Can I return a product?",
-    a: "Reach out within 7 days of delivery and we'll help sort out a return or exchange for unopened items.",
-  },
-  {
-    q: "Do you ship outside Phnom Penh?",
-    a: "Yes — contact us with your location and we'll confirm delivery options and timing.",
-  },
-];
 
 const initialForm = {
   name: "",
@@ -35,23 +21,40 @@ const initialForm = {
 };
 
 export default function Contact() {
+  const { t } = useLanguage();
   const store = useStoreSettings();
+
+  const faqs = [
+    {
+      q: t("contact_faq_1_q"),
+      a: t("contact_faq_1_a"),
+    },
+    {
+      q: t("contact_faq_2_q"),
+      a: t("contact_faq_2_a"),
+    },
+    {
+      q: t("contact_faq_3_q"),
+      a: t("contact_faq_3_a"),
+    },
+  ];
+
   const contactInfo = [
     {
       icon: Mail,
-      label: "Email us",
+      label: t("contact_email_us"),
       value: store.contact_email || "hello@botaniq.com",
       href: `mailto:${store.contact_email || "hello@botaniq.com"}`,
     },
     {
       icon: Phone,
-      label: "Call us",
+      label: t("contact_call_us"),
       value: store.contact_phone || "+855 12 345 678",
       href: `tel:${store.contact_phone || "+855 12 345 678"}`,
     },
     {
       icon: MapPin,
-      label: "Visit us",
+      label: t("contact_visit_us"),
       value: store.address || "Phnom Penh, Cambodia",
     },
   ];
@@ -93,7 +96,7 @@ export default function Contact() {
     const errors = {};
 
     if (!form.name.trim()) {
-      errors.name = "Name is required.";
+      errors.name = t("contact_validation_name_req");
     }
 
     const emailCheck = validateRealEmail(form.email);
@@ -102,7 +105,7 @@ export default function Contact() {
     }
 
     if (!form.message.trim()) {
-      errors.message = "Message is required.";
+      errors.message = t("contact_validation_msg_req");
     }
 
     if (Object.keys(errors).length > 0) {
@@ -136,7 +139,7 @@ export default function Contact() {
         setValidationErrors(err.response.data?.errors || {});
 
         setError(
-          err.response.data?.message || "Please check the form and try again.",
+          err.response.data?.message || t("contact_err_form"),
         );
 
         return;
@@ -144,7 +147,7 @@ export default function Contact() {
 
       // Authentication error
       if (err.response?.status === 401) {
-        setError("Please log in before sending a message.");
+        setError(t("contact_err_auth"));
 
         return;
       }
@@ -152,7 +155,7 @@ export default function Contact() {
       // Other errors
       setError(
         err.response?.data?.message ||
-          "Couldn't send your message right now. Please try again.",
+          t("contact_err_generic"),
       );
     } finally {
       setSending(false);
@@ -218,16 +221,15 @@ export default function Contact() {
 
         <div className="contact-fade-up relative">
           <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss">
-            Get in touch
+            {t("contact_badge")}
           </p>
 
           <h1 className="mx-auto max-w-xl font-display text-[34px] font-medium leading-[1.1] tracking-[-0.02em] text-ink sm:text-[42px]">
-            We'd love to hear from you
+            {t("contact_title")}
           </h1>
 
           <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-stone">
-            Questions about a product, your order, or just want to say hi — send
-            us a message and we'll get back to you soon.
+            {t("contact_desc")}
           </p>
         </div>
       </section>
@@ -280,19 +282,19 @@ export default function Contact() {
                 <Clock size={16} className="text-moss" strokeWidth={1.75} />
 
                 <p className="text-[13px] font-medium text-ink">
-                  Response hours
+                  {t("contact_response_hours")}
                 </p>
               </div>
 
               <div className="space-y-1.5 text-[12.5px] text-stone">
                 <div className="flex justify-between">
-                  <span>Mon – Fri</span>
+                  <span>{t("contact_mon_fri")}</span>
 
                   <span className="font-mono text-ink">9am – 6pm</span>
                 </div>
 
                 <div className="flex justify-between">
-                  <span>Sat – Sun</span>
+                  <span>{t("contact_sat_sun")}</span>
 
                   <span className="font-mono text-ink">10am – 4pm</span>
                 </div>
@@ -314,7 +316,7 @@ export default function Contact() {
               />
 
               <h2 className="font-display text-[19px] font-medium text-ink">
-                Send a message
+                {t("contact_form_title")}
               </h2>
             </div>
 
@@ -332,7 +334,7 @@ export default function Contact() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 {/* Name */}
 
-                <Field label="Your name" error={validationErrors.name}>
+                <Field label={t("contact_field_name")} error={validationErrors.name}>
                   <input
                     type="text"
                     name="name"
@@ -341,14 +343,14 @@ export default function Contact() {
                     disabled={sending}
                     required
                     autoComplete="name"
-                    placeholder="Jane Doe"
+                    placeholder={t("contact_placeholder_name")}
                     className={inputClass}
                   />
                 </Field>
 
                 {/* Email */}
 
-                <Field label="Email" error={validationErrors.email}>
+                <Field label={t("contact_field_email")} error={validationErrors.email}>
                   <input
                     type="email"
                     name="email"
@@ -357,7 +359,7 @@ export default function Contact() {
                     disabled={sending}
                     required
                     autoComplete="email"
-                    placeholder="jane@example.com"
+                    placeholder={t("contact_placeholder_email")}
                     className={inputClass}
                   />
                 </Field>
@@ -365,7 +367,7 @@ export default function Contact() {
 
               {/* Message */}
 
-              <Field label="Message" error={validationErrors.message}>
+              <Field label={t("contact_field_message")} error={validationErrors.message}>
                 <textarea
                   name="message"
                   value={form.message}
@@ -374,7 +376,7 @@ export default function Contact() {
                   required
                   rows={5}
                   maxLength={5000}
-                  placeholder="How can we help?"
+                  placeholder={t("contact_placeholder_message")}
                   className={`${inputClass} resize-none`}
                 />
 
@@ -397,17 +399,17 @@ export default function Contact() {
                 {sent ? (
                   <>
                     <Check size={16} strokeWidth={2} />
-                    Message sent
+                    {t("contact_btn_sent")}
                   </>
                 ) : sending ? (
                   <>
                     <Loader2 size={16} className="animate-spin" />
-                    Sending...
+                    {t("contact_btn_sending")}
                   </>
                 ) : (
                   <>
                     <Send size={15} strokeWidth={1.75} />
-                    Send message
+                    {t("contact_btn_send")}
                   </>
                 )}
               </button>
@@ -424,16 +426,16 @@ export default function Contact() {
         <div className="mx-auto max-w-3xl">
           <div className="contact-fade-up mb-10 text-center">
             <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss">
-              Quick answers
+              {t("contact_faq_badge")}
             </p>
 
             <h2 className="font-display text-[26px] font-medium text-ink sm:text-[30px]">
-              Frequently asked
+              {t("contact_faq_title")}
             </h2>
           </div>
 
           <div className="space-y-3">
-            {FAQS.map((faq, index) => (
+            {faqs.map((faq, index) => (
               <FaqItem key={faq.q} faq={faq} delay={index * 90} />
             ))}
           </div>
