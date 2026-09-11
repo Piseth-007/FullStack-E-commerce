@@ -49,23 +49,20 @@ export default function FavoriteButton({
       disabled={pending}
       aria-label={favorited ? "Remove from favorites" : "Save to favorites"}
       aria-pressed={favorited}
-      className={`inline-flex items-center justify-center rounded-none shrink-0 transition-all hover:bg-paper active:scale-95 disabled:opacity-60 shadow-2xs ${className}`}
-      style={{
-        width: size + 20,
-        height: size + 20,
-        backgroundColor: "var(--color-surface)",
-        border: "1px solid var(--color-hairline)",
-      }}
+      className={`inline-flex items-center justify-center shrink-0 bg-transparent border-0 p-1.5 transition-transform duration-200 hover:scale-115 active:scale-95 disabled:opacity-60 cursor-pointer ${
+        favorited ? "text-clay" : "text-stone/75 hover:text-clay"
+      } ${className}`}
     >
       <svg
         width={size}
         height={size}
         viewBox="0 0 24 24"
-        fill={favorited ? "var(--color-clay)" : "none"}
-        stroke={favorited ? "var(--color-clay)" : "var(--color-stone)"}
+        fill={favorited ? "currentColor" : "none"}
+        stroke="currentColor"
         strokeWidth="1.8"
         strokeLinecap="round"
         strokeLinejoin="round"
+        className="transition-colors duration-200 drop-shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
       >
         <path d="M12 21s-6.8-4.35-9.6-8.55C.6 9.35 1.8 5.4 5.4 4.5c2-.5 4.1.3 5.3 2.05.5.7.5.7 1 0C12.9 4.8 15 4 17 4.5c3.6.9 4.8 4.85 3 7.95C18.8 16.65 12 21 12 21z" />
       </svg>

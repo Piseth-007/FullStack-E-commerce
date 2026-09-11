@@ -72,13 +72,14 @@ export default function ProductCard({ product }) {
         className="
           block
           outline-none
-          focus-visible:rounded-none
+          focus-visible:rounded-2xl
           focus-visible:ring-1
           focus-visible:ring-moss
         "
       >
         <div
           className="
+            rounded-2xl
             relative
             aspect-square
             overflow-hidden
@@ -164,7 +165,7 @@ export default function ProductCard({ product }) {
               {hasDiscount && !isOutOfStock && (
                 <span
                   className="
-                      rounded-none
+                      rounded-full
                       border
                       border-red-600
                       bg-red-600
@@ -189,11 +190,11 @@ export default function ProductCard({ product }) {
                     flex
                     items-center
                     gap-1.5
-                    rounded-none
+                    rounded-full
                     border
                     border-hairline
                     bg-surface/95
-                    px-2
+                    px-2.5
                     py-0.5
                     text-[9px]
                     font-mono
@@ -227,7 +228,7 @@ export default function ProductCard({ product }) {
               event.stopPropagation();
             }}
           >
-            <FavoriteButton productId={productId} size={16} />
+            <FavoriteButton productId={productId} size={18} />
           </div>
 
           {isOutOfStock && (
@@ -245,7 +246,7 @@ export default function ProductCard({ product }) {
             >
               <span
                 className="
-                  rounded-none
+                  rounded-full
                   border
                   border-hairline
                   bg-surface/95
@@ -279,7 +280,7 @@ export default function ProductCard({ product }) {
                 translate-y-1.5
                 items-center
                 justify-center
-                rounded-none
+                rounded-full
                 border
                 border-hairline
                 bg-surface/95

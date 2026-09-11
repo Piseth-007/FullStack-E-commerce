@@ -29,7 +29,7 @@ function Field({ label, value, onChange, type = "text", error, ...rest }) {
         type={type}
         value={value}
         onChange={onChange}
-        className="w-full px-3.5 py-2.5 text-sm rounded-sm outline-none transition-all duration-200"
+        className="w-full px-3.5 py-2.5 text-sm rounded-xl outline-none transition-all duration-200"
         style={{
           backgroundColor: "var(--color-paper)",
           border: `1px solid ${
@@ -89,7 +89,7 @@ function PrimaryButton({ children, ...props }) {
   return (
     <button
       {...props}
-      className="inline-flex items-center justify-center min-w-32 px-5 py-2.5 text-sm rounded-sm transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+      className="inline-flex items-center justify-center min-w-32 px-5 py-2.5 text-sm rounded-xl transition-all duration-200 hover:opacity-90 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
       style={{
         backgroundColor: "var(--color-moss)",
         color: "var(--color-paper)",
@@ -104,7 +104,7 @@ function GhostButton({ children, ...props }) {
   return (
     <button
       {...props}
-      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm rounded-sm border transition-all duration-200 hover:bg-paper active:scale-[0.98] disabled:opacity-50"
+      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm rounded-xl border transition-all duration-200 hover:bg-paper active:scale-[0.98] disabled:opacity-50"
       style={{
         borderColor: "var(--color-hairline)",
         color: "var(--color-ink)",
@@ -464,7 +464,7 @@ export default function Profile() {
                         key={item.key}
                         type="button"
                         onClick={() => setActive(item.key)}
-                        className="w-full text-left px-3.5 py-2.5 text-sm rounded-sm transition-all duration-200"
+                        className="w-full text-left px-3.5 py-2.5 text-sm rounded-xl transition-all duration-200"
                         style={{
                           backgroundColor: selected
                             ? "var(--color-surface)"
@@ -492,7 +492,7 @@ export default function Profile() {
                   <button
                     type="button"
                     onClick={handleSignOut}
-                    className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm text-left rounded-sm transition-colors hover:bg-surface"
+                    className="w-full flex items-center gap-2 px-3.5 py-2.5 text-sm text-left rounded-xl transition-colors hover:bg-surface"
                     style={{ color: "var(--color-clay)" }}
                   >
                     <LogOut size={15} strokeWidth={1.7} />
@@ -520,7 +520,7 @@ export default function Profile() {
 
                     <div className="flex flex-col sm:flex-row sm:items-center gap-5">
                       <div
-                        className="relative w-20 h-20 shrink-0 rounded-none border border-hairline overflow-hidden flex items-center justify-center shadow-2xs"
+                        className="relative w-20 h-20 shrink-0 rounded-full border border-hairline overflow-hidden flex items-center justify-center shadow-2xs"
                         style={{
                           backgroundColor: "var(--color-moss)",
                           color: "var(--color-paper)",
@@ -542,7 +542,7 @@ export default function Profile() {
                           type="button"
                           onClick={() => fileInputRef.current?.click()}
                           disabled={savingProfile}
-                          className="absolute bottom-1 right-1 w-7 h-7 flex items-center justify-center rounded-none border transition-all duration-200 hover:scale-105 disabled:opacity-50"
+                          className="absolute bottom-1 right-1 w-7 h-7 flex items-center justify-center rounded-full border transition-all duration-200 hover:scale-105 disabled:opacity-50"
                           style={{
                             backgroundColor: "var(--color-surface)",
                             borderColor: "var(--color-paper)",
@@ -559,7 +559,7 @@ export default function Profile() {
                           <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="px-4 py-2 text-sm rounded-sm border transition-colors hover:bg-paper"
+                            className="px-4 py-2 text-sm rounded-xl border transition-colors hover:bg-paper"
                             style={{
                               borderColor: "var(--color-hairline)",
                               color: "var(--color-ink)",
@@ -572,7 +572,7 @@ export default function Profile() {
                             <button
                               type="button"
                               onClick={handleRemoveImage}
-                              className="w-9 h-9 flex items-center justify-center rounded-sm border transition-colors hover:bg-paper"
+                              className="w-9 h-9 flex items-center justify-center rounded-full border transition-colors hover:bg-paper"
                               style={{
                                 borderColor: "var(--color-hairline)",
                                 color: "var(--color-clay)",
@@ -735,7 +735,7 @@ export default function Profile() {
                   </div>
                 ) : addresses.length === 0 ? (
                   <div
-                    className="py-10 text-center rounded-sm border"
+                    className="py-10 text-center rounded-2xl border"
                     style={{
                       borderColor: "var(--color-hairline)",
                     }}
@@ -783,7 +783,7 @@ export default function Profile() {
 
                             {address.is_default && (
                               <span
-                                className="inline-flex px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-none"
+                                className="inline-flex px-2.5 py-0.5 text-[10px] font-mono uppercase tracking-wider rounded-full"
                                 style={{
                                   backgroundColor: "var(--color-surface)",
                                   border: "1px solid var(--color-hairline)",

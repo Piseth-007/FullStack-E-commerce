@@ -83,7 +83,7 @@ function ItemRow({ item }) {
             {skinTypes.map((skinType) => (
               <span
                 key={skinType.id || skinType.name || skinType}
-                className="text-[11px] px-2 py-0.5 rounded-none border border-hairline text-stone font-mono uppercase tracking-wider"
+                className="text-[11px] px-2.5 py-0.5 rounded-full border border-hairline text-stone font-mono uppercase tracking-wider"
               >
                 {skinType.name || skinType}
               </span>
@@ -166,7 +166,7 @@ export default function OrderDetail() {
   if (error || !order || !details) {
     return (
       <div className="max-w-xl mx-auto px-6 py-24 text-center">
-        <div className="w-14 h-14 rounded-none border border-hairline bg-moss-tint flex items-center justify-center mx-auto mb-4">
+        <div className="w-14 h-14 rounded-2xl border border-hairline bg-moss-tint flex items-center justify-center mx-auto mb-4">
           <PackageX size={24} className="text-moss" strokeWidth={1.5} />
         </div>
         <h1 className="font-display text-[22px] font-medium text-ink mb-1.5">
@@ -178,7 +178,7 @@ export default function OrderDetail() {
         </p>
         <Link
           to="/orders"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-none border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs"
         >
           <ArrowLeft size={14} />
           Back to all orders
@@ -219,7 +219,7 @@ export default function OrderDetail() {
           </p>
         </div>
         <span
-          className={`rounded-none border px-3 py-1 text-xs font-mono uppercase tracking-wider capitalize ${statusTone}`}
+          className={`rounded-full border px-3 py-1 text-xs font-mono uppercase tracking-wider capitalize ${statusTone}`}
         >
           {order.status || "pending"}
         </span>

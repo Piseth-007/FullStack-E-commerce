@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\OrderItem;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -202,6 +203,14 @@ class OrderController extends Controller
                 'string',
                 'max:100',
             ],
+            'start_date' => [
+                'nullable',
+                'date',
+            ],
+            'end_date' => [
+                'nullable',
+                'date',
+            ],
             'per_page' => [
                 'nullable',
                 'integer',
@@ -223,6 +232,26 @@ class OrderController extends Controller
                     $query->where(
                         'status',
                         $validated['status']
+                    );
+                }
+            )
+            ->when(
+                ! empty($validated['start_date']),
+                function ($query) use ($validated) {
+                    $query->where(
+                        'created_at',
+                        '>=',
+                        Carbon::parse($validated['start_date'])->startOfDay()->toDateTimeString()
+                    );
+                }
+            )
+            ->when(
+                ! empty($validated['end_date']),
+                function ($query) use ($validated) {
+                    $query->where(
+                        'created_at',
+                        '<=',
+                        Carbon::parse($validated['end_date'])->endOfDay()->toDateTimeString()
                     );
                 }
             )

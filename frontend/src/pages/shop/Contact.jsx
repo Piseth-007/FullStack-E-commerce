@@ -497,7 +497,7 @@ function FaqItem({ faq, delay }) {
 ========================================================= */
 
 const inputClass =
-  "w-full rounded-lg border border-hairline bg-paper px-3.5 py-2.5 text-[14px] text-ink placeholder:text-stone/50 focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 transition-shadow disabled:opacity-60";
+  "w-full rounded-xl border border-hairline bg-paper px-3.5 py-2.5 text-[14px] text-ink placeholder:text-stone/50 focus:border-moss focus:outline-none focus:ring-2 focus:ring-moss/20 transition-shadow disabled:opacity-60";
 
 function Field({ label, error, children }) {
   return (

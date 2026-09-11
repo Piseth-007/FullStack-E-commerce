@@ -33,11 +33,11 @@ export function StatSkeleton() {
 export function ProductSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="aspect-square bg-paper border border-hairline mb-3" />
+      <div className="aspect-square bg-paper border border-hairline rounded-2xl mb-3" />
       <div className="space-y-2 pt-1">
-        <div className="h-2.5 w-16 bg-hairline/60 rounded-none" />
-        <div className="h-3.5 w-3/4 bg-hairline/70 rounded-none" />
-        <div className="h-3.5 w-1/3 bg-hairline/50 rounded-none" />
+        <div className="h-2.5 w-16 bg-hairline/60 rounded-full" />
+        <div className="h-3.5 w-3/4 bg-hairline/70 rounded-full" />
+        <div className="h-3.5 w-1/3 bg-hairline/50 rounded-full" />
       </div>
     </div>
   );

@@ -125,7 +125,7 @@ export default function OtpVerification({
   return (
     <div className="space-y-6">
       <div className="text-center space-y-2">
-        <div className="inline-flex items-center justify-center w-12 h-12 rounded-none border border-moss/20 bg-moss-tint text-moss mb-2">
+        <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl border border-moss/20 bg-moss-tint text-moss mb-2">
           <Mail size={22} strokeWidth={1.75} />
         </div>
         <h2 className="text-xl font-medium font-display text-ink">
@@ -153,7 +153,7 @@ export default function OtpVerification({
               onChange={(e) => handleChange(index, e.target.value)}
               onKeyDown={(e) => handleKeyDown(index, e)}
               disabled={loading}
-              className={`w-11 h-14 sm:w-12 sm:h-14 text-center font-mono text-2xl font-bold rounded-none border transition-all duration-150 outline-none
+              className={`w-11 h-14 sm:w-12 sm:h-14 text-center font-mono text-2xl font-bold rounded-xl border transition-all duration-150 outline-none
                 ${
                   digit
                     ? "border-moss bg-moss-tint/40 text-ink shadow-2xs"
@@ -167,7 +167,7 @@ export default function OtpVerification({
 
         {/* Error Alert */}
         {error && (
-          <div className="p-3 text-[13px] border border-clay/30 bg-clay-tint/50 text-clay rounded-none flex items-start gap-2">
+          <div className="p-3 text-[13px] border border-clay/30 bg-clay-tint/50 text-clay rounded-xl flex items-start gap-2">
             <span className="shrink-0 mt-0.5">•</span>
             <span className="leading-snug">{error}</span>
           </div>
@@ -175,7 +175,7 @@ export default function OtpVerification({
 
         {/* Resend Success Notice */}
         {resendMessage && (
-          <div className="p-3 text-[13px] border border-moss/30 bg-moss-tint/50 text-moss rounded-none flex items-center gap-2">
+          <div className="p-3 text-[13px] border border-moss/30 bg-moss-tint/50 text-moss rounded-xl flex items-center gap-2">
             <CheckCircle2 size={16} className="shrink-0" />
             <span>{resendMessage}</span>
           </div>
@@ -185,7 +185,7 @@ export default function OtpVerification({
         <button
           type="submit"
           disabled={loading || otp.some((d) => d === "")}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-none bg-moss text-paper font-medium text-[13.5px] hover:bg-moss-deep disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xs"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-moss text-paper font-medium text-[13.5px] hover:bg-moss-deep disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-xs"
         >
           {loading ? (
             <>

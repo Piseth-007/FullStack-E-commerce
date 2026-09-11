@@ -23,7 +23,7 @@ function Input({ label, ...props }) {
       </span>
       <input
         {...props}
-        className="w-full px-3 py-2.5 text-sm rounded-sm outline-none transition-colors"
+        className="w-full px-3 py-2.5 text-sm rounded-xl outline-none transition-colors"
         style={{
           backgroundColor: "var(--color-paper)",
           border: "1px solid var(--color-hairline)",
@@ -88,7 +88,7 @@ export default function AddressFormModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-md p-6 rounded-sm max-h-[90vh] overflow-y-auto"
+        className="w-full max-w-md p-6 rounded-2xl max-h-[90vh] overflow-y-auto shadow-2xl"
         style={{
           backgroundColor: "var(--color-surface)",
           border: "1px solid var(--color-hairline)",
@@ -175,7 +175,7 @@ export default function AddressFormModal({
             <button
               type="submit"
               disabled={saving}
-              className="px-5 py-2.5 text-sm rounded-sm transition-opacity hover:opacity-90 disabled:opacity-50"
+              className="px-5 py-2.5 text-sm rounded-xl transition-opacity hover:opacity-90 disabled:opacity-50"
               style={{
                 backgroundColor: "var(--color-moss)",
                 color: "var(--color-paper)",
@@ -186,7 +186,7 @@ export default function AddressFormModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-5 py-2.5 text-sm rounded-sm border transition-colors hover:bg-paper"
+              className="px-5 py-2.5 text-sm rounded-xl border transition-colors hover:bg-paper"
               style={{
                 borderColor: "var(--color-hairline)",
                 color: "var(--color-ink)",

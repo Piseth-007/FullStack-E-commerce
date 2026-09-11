@@ -134,7 +134,7 @@ export default function Login() {
             </AuthField>
 
             {error && (
-              <div className="flex items-start gap-2.5 p-3 rounded-none bg-clay-tint border border-clay/20 text-clay-deep text-[13px] leading-relaxed">
+              <div className="flex items-start gap-2.5 p-3 rounded-xl bg-clay-tint border border-clay/20 text-clay-deep text-[13px] leading-relaxed">
                 <AlertCircle size={16} className="shrink-0 mt-0.5 text-clay" />
                 <span>{error}</span>
               </div>
@@ -143,7 +143,7 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full h-11 rounded-none bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
+              className="w-full h-11 rounded-xl bg-moss hover:bg-moss-deep active:scale-[0.99] text-white font-medium text-[14px] shadow-sm transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:cursor-wait"
             >
               {loading ? (
                 <>

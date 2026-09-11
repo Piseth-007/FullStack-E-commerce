@@ -103,11 +103,11 @@ export default function Footer() {
                     if (error) setError("");
                   }}
                   placeholder="you@example.com"
-                  className="flex-1 min-w-0 px-4 py-2.5 rounded-lg border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/25 focus:border-moss transition-colors"
+                  className="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/25 focus:border-moss transition-colors"
                 />
                 <button
                   type="submit"
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-moss text-white text-[13px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all shrink-0"
+                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-moss text-white text-[13px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all shrink-0"
                 >
                   {t("footer_subscribe", "Subscribe")}
                   <ArrowRight size={14} strokeWidth={2} />
@@ -159,8 +159,12 @@ export default function Footer() {
             { label: t("nav_categories", "Categories"), to: "/categories" },
             { label: t("nav_brands", "Brands"), to: "/brands" },
             {
-              label: "Best rated",
+              label: t("nav_best_rated", "Best rated"),
               to: "/products?has_rating=1&sort=rating",
+            },
+            {
+              label: t("nav_promotions", "Promotions"),
+              to: "/products?has_discount=1&sort=discount",
             },
           ]}
         />
@@ -192,14 +196,14 @@ export default function Footer() {
 
           <div className="flex flex-wrap items-center gap-4 sm:gap-5">
             {/* Language switch */}
-            <div className="flex items-center rounded-none border border-hairline bg-paper p-0.5 text-[11px] font-medium">
+            <div className="flex items-center rounded-full border border-hairline bg-paper p-1 text-[11px] font-medium shadow-2xs">
               <button
                 type="button"
                 onClick={() => setLanguage("en")}
-                className={`px-2 py-0.5 transition-all ${
+                className={`rounded-full px-2.5 py-0.5 transition-all duration-200 ${
                   language === "en"
-                    ? "bg-moss text-white font-semibold"
-                    : "text-stone hover:text-ink"
+                    ? "bg-moss text-white font-semibold shadow-xs"
+                    : "text-stone hover:text-ink hover:bg-surface"
                 }`}
               >
                 EN
@@ -207,10 +211,10 @@ export default function Footer() {
               <button
                 type="button"
                 onClick={() => setLanguage("km")}
-                className={`px-2 py-0.5 transition-all ${
+                className={`rounded-full px-2.5 py-0.5 transition-all duration-200 ${
                   language === "km"
-                    ? "bg-moss text-white font-semibold"
-                    : "text-stone hover:text-ink"
+                    ? "bg-moss text-white font-semibold shadow-xs"
+                    : "text-stone hover:text-ink hover:bg-surface"
                 }`}
               >
                 ខ្មែរ
@@ -272,7 +276,7 @@ function SocialLink({ platform, label, href }) {
       rel: "noopener noreferrer",
       "aria-label": label,
       className:
-        "w-8 h-8 rounded-lg border border-hairline flex items-center justify-center text-stone hover:text-moss hover:border-moss/40 hover:bg-moss-tint transition-colors [&>svg]:w-3.5 [&>svg]:h-3.5",
+        "w-8 h-8 rounded-full border border-hairline flex items-center justify-center text-stone hover:text-moss hover:border-moss/40 hover:bg-moss-tint transition-colors [&>svg]:w-3.5 [&>svg]:h-3.5",
     },
     SOCIAL_ICONS[platform],
   );

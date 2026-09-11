@@ -38,14 +38,10 @@ export function ConfirmProvider({ children }) {
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`bg-surface border border-hairline p-6 w-full max-w-sm shadow-[0_8px_24px_rgba(33,31,27,0.12)] ${
-              isAdmin ? "rounded-2xl" : "rounded-none"
-            }`}
+            className="bg-surface border border-hairline p-6 w-full max-w-sm shadow-[0_8px_24px_rgba(33,31,27,0.12)] rounded-2xl"
           >
             <div
-              className={`w-10 h-10 border border-clay/20 bg-clay-tint flex items-center justify-center mb-4 ${
-                isAdmin ? "rounded-xl" : "rounded-none"
-              }`}
+              className="w-10 h-10 border border-clay/20 bg-clay-tint flex items-center justify-center mb-4 rounded-xl"
             >
               <AlertTriangle
                 size={18}
@@ -62,17 +58,13 @@ export function ConfirmProvider({ children }) {
             <div className="flex gap-2.5">
               <button
                 onClick={() => handleClose(true)}
-                className={`flex-1 py-2.5 border border-clay bg-clay text-white text-[13.5px] font-medium hover:bg-clay/90 transition-colors shadow-xs ${
-                  isAdmin ? "rounded-lg" : "rounded-none"
-                }`}
+                className="flex-1 py-2.5 border border-clay bg-clay text-white text-[13.5px] font-medium hover:bg-clay/90 transition-colors shadow-xs rounded-xl"
               >
                 {dialog.confirmLabel}
               </button>
               <button
                 onClick={() => handleClose(false)}
-                className={`flex-1 py-2.5 border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors ${
-                  isAdmin ? "rounded-lg" : "rounded-none"
-                }`}
+                className="flex-1 py-2.5 border border-hairline text-ink text-[13.5px] font-medium hover:bg-paper transition-colors rounded-xl"
               >
                 Cancel
               </button>

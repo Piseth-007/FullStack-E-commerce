@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   BarChart,
@@ -24,6 +24,13 @@ import {
   Clock3,
   CheckCircle2,
   XCircle,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
+  RotateCcw,
+  Check,
+  X,
 } from "lucide-react";
 
 import api from "../../api/axios";
@@ -44,6 +51,135 @@ const PIE_COLORS = {
 };
 
 const CANCELLED_STATUSES = ["cancelled", "canceled", "rejected", "refunded"];
+
+const MONTH_NAMES_EN = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
+const MONTH_NAMES_KM = [
+  "មករា",
+  "កុម្ភៈ",
+  "មីនា",
+  "មេសា",
+  "ឧសភា",
+  "មិថុនា",
+  "កក្កដា",
+  "សីហា",
+  "កញ្ញា",
+  "តុលា",
+  "វិច្ឆិកា",
+  "ធ្នូ",
+];
+
+const WEEKDAY_NAMES_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+const WEEKDAY_NAMES_KM = ["អា", "ច", "អ", "ព", "ព្រ", "សុ", "ស"];
+
+function formatYMD(d) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function calculatePresetDates(preset) {
+  const today = new Date();
+  switch (preset) {
+    case "today": {
+      const d = formatYMD(today);
+      return { startDate: d, endDate: d };
+    }
+    case "yesterday": {
+      const y = new Date();
+      y.setDate(y.getDate() - 1);
+      const d = formatYMD(y);
+      return { startDate: d, endDate: d };
+    }
+    case "7d": {
+      const past = new Date();
+      past.setDate(past.getDate() - 6);
+      return { startDate: formatYMD(past), endDate: formatYMD(today) };
+    }
+    case "30d": {
+      const past = new Date();
+      past.setDate(past.getDate() - 29);
+      return { startDate: formatYMD(past), endDate: formatYMD(today) };
+    }
+    case "this_month": {
+      const start = new Date(today.getFullYear(), today.getMonth(), 1);
+      const end = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+      return { startDate: formatYMD(start), endDate: formatYMD(end) };
+    }
+    case "last_month": {
+      const start = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+      const end = new Date(today.getFullYear(), today.getMonth(), 0);
+      return { startDate: formatYMD(start), endDate: formatYMD(end) };
+    }
+    case "all":
+    default:
+      return { startDate: null, endDate: null };
+  }
+}
+
+function formatDateShort(dateStr, isKhmer) {
+  if (!dateStr) return "";
+  try {
+    const parts = dateStr.split("-");
+    const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return d.toLocaleDateString(isKhmer ? "km-KH" : "en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch {
+    return dateStr;
+  }
+}
+
+function getFilterDisplayLabel(filter, t, isKhmer) {
+  if (filter.preset === "all" || (!filter.startDate && !filter.endDate)) {
+    return t("dash_filter_all", "All Time");
+  }
+  if (filter.preset === "today") {
+    return `${t("dash_filter_today", "Today")} (${formatDateShort(filter.startDate, isKhmer)})`;
+  }
+  if (filter.preset === "yesterday") {
+    return `${t("dash_filter_yesterday", "Yesterday")} (${formatDateShort(filter.startDate, isKhmer)})`;
+  }
+  if (filter.preset === "7d") {
+    return t("dash_filter_7d", "Last 7 Days");
+  }
+  if (filter.preset === "30d") {
+    return t("dash_filter_30d", "Last 30 Days");
+  }
+  if (filter.preset === "this_month") {
+    return t("dash_filter_this_month", "This Month");
+  }
+  if (filter.preset === "last_month") {
+    return t("dash_filter_last_month", "Last Month");
+  }
+
+  if (filter.startDate && filter.endDate) {
+    if (filter.startDate === filter.endDate) {
+      return formatDateShort(filter.startDate, isKhmer);
+    }
+    return `${formatDateShort(filter.startDate, isKhmer)} - ${formatDateShort(filter.endDate, isKhmer)}`;
+  }
+  if (filter.startDate) {
+    return `≥ ${formatDateShort(filter.startDate, isKhmer)}`;
+  }
+  return t("dash_filter_all", "All Time");
+}
 
 function useDarkMode() {
   const [isDark, setIsDark] = useState(() =>
@@ -79,6 +215,13 @@ export default function Dashboard() {
   const [trend, setTrend] = useState([]);
   const [range, setRange] = useState("7d");
 
+  const [dateFilter, setDateFilter] = useState({
+    preset: "all",
+    startDate: null,
+    endDate: null,
+    label: t("dash_filter_all", "All Time"),
+  });
+
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [trendLoading, setTrendLoading] = useState(true);
@@ -89,23 +232,43 @@ export default function Dashboard() {
     { key: "12m", label: t("dash_range_12m", "Last 12 months") },
   ];
 
+  // Update dateFilter label on language change
+  useEffect(() => {
+    setDateFilter((prev) => ({
+      ...prev,
+      label: getFilterDisplayLabel(prev, t, isKhmer),
+    }));
+  }, [t, isKhmer]);
+
+  const isFiltered =
+    dateFilter.preset !== "all" &&
+    Boolean(dateFilter.startDate || dateFilter.endDate);
+
+  const isSingleDay = Boolean(
+    dateFilter.startDate &&
+      dateFilter.endDate &&
+      dateFilter.startDate === dateFilter.endDate,
+  );
+
   useEffect(() => {
     const loadDashboard = async () => {
       try {
         setSummaryLoading(true);
         setOrdersLoading(true);
 
+        const params = {};
+        if (dateFilter.startDate) params.start_date = dateFilter.startDate;
+        if (dateFilter.endDate) params.end_date = dateFilter.endDate;
+
         const [summaryResponse, ordersResponse] = await Promise.all([
-          api.get("/admin/dashboard/summary"),
-          api.get("/admin/orders"),
+          api.get("/admin/dashboard/summary", { params }),
+          api.get("/admin/orders", { params: { ...params, per_page: 50 } }),
         ]);
 
         const summaryData = summaryResponse.data?.data ?? summaryResponse.data;
-
         const ordersData = ordersResponse.data?.data ?? ordersResponse.data;
 
         setSummary(summaryData || null);
-
         setOrders(extractOrders(ordersData));
       } catch (err) {
         setSummary(null);
@@ -122,15 +285,24 @@ export default function Dashboard() {
     };
 
     loadDashboard();
-  }, [showToast, t]);
+  }, [dateFilter, showToast, t]);
 
   useEffect(() => {
     const loadTrend = async () => {
       try {
         setTrendLoading(true);
 
+        const trendParams = {};
+        if (dateFilter.startDate && dateFilter.endDate) {
+          trendParams.start_date = dateFilter.startDate;
+          trendParams.end_date = dateFilter.endDate;
+          trendParams.range = "custom";
+        } else {
+          trendParams.range = range;
+        }
+
         const res = await api.get("/admin/dashboard/sales-trend", {
-          params: { range },
+          params: trendParams,
         });
 
         const data = res.data?.data ?? res.data;
@@ -149,7 +321,45 @@ export default function Dashboard() {
     };
 
     loadTrend();
-  }, [range, showToast, t]);
+  }, [dateFilter, range, showToast, t]);
+
+  const handleRangeChange = (newRange) => {
+    setRange(newRange);
+    if (newRange === "7d") {
+      const { startDate, endDate } = calculatePresetDates("7d");
+      setDateFilter({
+        preset: "7d",
+        startDate,
+        endDate,
+        label: t("dash_filter_7d", "Last 7 Days"),
+      });
+    } else if (newRange === "30d") {
+      const { startDate, endDate } = calculatePresetDates("30d");
+      setDateFilter({
+        preset: "30d",
+        startDate,
+        endDate,
+        label: t("dash_filter_30d", "Last 30 Days"),
+      });
+    } else if (newRange === "12m") {
+      setDateFilter({
+        preset: "12m",
+        startDate: null,
+        endDate: null,
+        label: t("dash_range_12m", "Last 12 months"),
+      });
+    }
+  };
+
+  const handleResetToAllTime = () => {
+    setDateFilter({
+      preset: "all",
+      startDate: null,
+      endDate: null,
+      label: t("dash_filter_all", "All Time"),
+    });
+    setRange("7d");
+  };
 
   const recentOrders = useMemo(() => {
     if (!Array.isArray(orders)) {
@@ -341,12 +551,35 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="font-display text-[28px] font-medium text-ink">
             {t("dash_title", "Dashboard")}
           </h1>
+          {isFiltered && (
+            <div className="mt-1 flex items-center gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-moss-tint px-2.5 py-0.5 text-[11px] font-medium text-moss dark:bg-emerald-500/15 dark:text-emerald-400">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                {t("dash_calendar_filtered_badge", "Filtered")}: {dateFilter.label}
+              </span>
+              <button
+                type="button"
+                onClick={handleResetToAllTime}
+                className="flex items-center gap-1 text-[11px] text-stone underline transition-colors hover:text-clay"
+              >
+                <RotateCcw size={11} />
+                {t("dash_calendar_clear", "Reset to All Time")}
+              </button>
+            </div>
+          )}
         </div>
+
+        <DashboardDatePicker
+          dateFilter={dateFilter}
+          onChange={setDateFilter}
+          t={t}
+          isKhmer={isKhmer}
+        />
       </div>
 
       {summaryLoading ? (
@@ -398,11 +631,19 @@ export default function Dashboard() {
               <div>
                 <p className="mb-1 text-[10.5px] font-medium uppercase tracking-widest text-stone">
                   {t("dash_sales_overview", "Sales Overview")}
+                  {isFiltered && (
+                    <span className="ml-2 font-normal text-moss dark:text-emerald-400">
+                      • {dateFilter.label} {isSingleDay ? `(${t("dash_calendar_hourly_hint", "24h Hourly")})` : ""}
+                    </span>
+                  )}
                 </p>
 
                 <div className="flex items-center gap-3">
                   <h2 className="font-mono text-[28px] leading-none text-ink">
-                    ${Number(summary?.total_sales || 0).toLocaleString()}
+                    ${Number(summary?.total_sales || 0).toLocaleString(undefined, {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    })}
                   </h2>
 
                   {Number(summary?.sales_growth || 0) !== 0 && (
@@ -420,9 +661,9 @@ export default function Dashboard() {
                     key={item.key}
                     type="button"
                     disabled={trendLoading}
-                    onClick={() => setRange(item.key)}
+                    onClick={() => handleRangeChange(item.key)}
                     className={`rounded-md px-3 py-1.5 text-[12px] font-medium transition-all disabled:opacity-60 ${
-                      range === item.key
+                      range === item.key && !isFiltered
                         ? "bg-surface text-ink shadow-[0_1px_3px_rgba(33,31,27,0.08)]"
                         : "text-stone hover:text-ink"
                     }`}
@@ -430,6 +671,13 @@ export default function Dashboard() {
                     {item.label}
                   </button>
                 ))}
+                {isFiltered && (
+                  <span className="rounded-md bg-surface px-3 py-1.5 text-[12px] font-medium text-moss shadow-[0_1px_3px_rgba(33,31,27,0.08)] dark:text-emerald-400">
+                    {dateFilter.preset === "custom"
+                      ? t("dash_filter_custom", "Custom")
+                      : dateFilter.label}
+                  </span>
+                )}
               </div>
             </div>
 
@@ -498,6 +746,9 @@ export default function Dashboard() {
                     itemStyle={{
                       color: chartColors.tooltipText,
                     }}
+                    labelFormatter={(label) =>
+                      isSingleDay ? `${label} (Hour)` : label
+                    }
                     formatter={(value) => [
                       `$${Number(value).toFixed(2)}`,
                       t("dash_sales_tooltip", "Sales"),
@@ -523,7 +774,12 @@ export default function Dashboard() {
                 </h2>
 
                 <p className="mt-1 text-[12px] text-stone">
-                  {t("dash_recent_orders_sub", "Latest 5 orders from your customers")}
+                  {t(
+                    "dash_recent_orders_sub",
+                    isFiltered
+                      ? "Orders during selected period"
+                      : "Latest 5 orders from your customers",
+                  )}
                 </p>
               </div>
 
@@ -665,7 +921,12 @@ export default function Dashboard() {
                 </h2>
 
                 <p className="text-[12px] text-stone">
-                  {t("dash_breakdown_sub", "Current order status")}
+                  {t(
+                    "dash_breakdown_sub",
+                    isFiltered
+                      ? "Status for selected period"
+                      : "Current order status",
+                  )}
                 </p>
               </div>
             </div>
@@ -757,7 +1018,12 @@ export default function Dashboard() {
                 </h2>
 
                 <p className="mt-1 text-[12px] text-stone">
-                  {t("dash_top_products_sub", "Products with the most orders")}
+                  {t(
+                    "dash_top_products_sub",
+                    isFiltered
+                      ? "Products with the most orders in this period"
+                      : "Products with the most orders",
+                  )}
                 </p>
               </div>
             </div>
@@ -1066,4 +1332,400 @@ function formatDate(date, isKhmer) {
   } catch {
     return date;
   }
+}
+
+function DashboardDatePicker({ dateFilter, onChange, t, isKhmer }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const containerRef = useRef(null);
+
+  const [tempPreset, setTempPreset] = useState(dateFilter.preset);
+  const [tempStart, setTempStart] = useState(dateFilter.startDate);
+  const [tempEnd, setTempEnd] = useState(dateFilter.endDate);
+  const [hoveredDate, setHoveredDate] = useState(null);
+
+  const [viewDate, setViewDate] = useState(() => {
+    if (dateFilter.endDate) {
+      const [y, m, d] = dateFilter.endDate.split("-").map(Number);
+      return new Date(y, m - 1, d);
+    }
+    return new Date();
+  });
+
+  useEffect(() => {
+    if (isOpen) {
+      setTempPreset(dateFilter.preset);
+      setTempStart(dateFilter.startDate);
+      setTempEnd(dateFilter.endDate);
+      if (dateFilter.endDate) {
+        const [y, m, d] = dateFilter.endDate.split("-").map(Number);
+        setViewDate(new Date(y, m - 1, d));
+      } else if (dateFilter.startDate) {
+        const [y, m, d] = dateFilter.startDate.split("-").map(Number);
+        setViewDate(new Date(y, m - 1, d));
+      } else {
+        setViewDate(new Date());
+      }
+    }
+  }, [isOpen, dateFilter]);
+
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setIsOpen(false);
+      }
+    }
+    function handleKeyDown(e) {
+      if (e.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const viewYear = viewDate.getFullYear();
+  const viewMonth = viewDate.getMonth();
+
+  const prevMonth = () => {
+    setViewDate(new Date(viewYear, viewMonth - 1, 1));
+  };
+
+  const nextMonth = () => {
+    setViewDate(new Date(viewYear, viewMonth + 1, 1));
+  };
+
+  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
+  const firstDayOfWeek = new Date(viewYear, viewMonth, 1).getDay();
+
+  const monthName = isKhmer
+    ? MONTH_NAMES_KM[viewMonth]
+    : MONTH_NAMES_EN[viewMonth];
+  const weekdayNames = isKhmer ? WEEKDAY_NAMES_KM : WEEKDAY_NAMES_EN;
+
+  const todayStr = formatYMD(new Date());
+
+  const presets = [
+    { key: "all", label: t("dash_filter_all", "All Time") },
+    { key: "today", label: t("dash_filter_today", "Today") },
+    { key: "yesterday", label: t("dash_filter_yesterday", "Yesterday") },
+    { key: "7d", label: t("dash_filter_7d", "Last 7 Days") },
+    { key: "30d", label: t("dash_filter_30d", "Last 30 Days") },
+    { key: "this_month", label: t("dash_filter_this_month", "This Month") },
+    { key: "last_month", label: t("dash_filter_last_month", "Last Month") },
+  ];
+
+  const handlePresetSelect = (key) => {
+    setTempPreset(key);
+    const { startDate, endDate } = calculatePresetDates(key);
+    setTempStart(startDate);
+    setTempEnd(endDate);
+    if (endDate) {
+      const [y, m, d] = endDate.split("-").map(Number);
+      setViewDate(new Date(y, m - 1, d));
+    }
+  };
+
+  const handleCellClick = (dateStr) => {
+    setTempPreset("custom");
+    if (!tempStart || (tempStart && tempEnd)) {
+      setTempStart(dateStr);
+      setTempEnd(null);
+    } else if (tempStart && !tempEnd) {
+      if (dateStr < tempStart) {
+        setTempStart(dateStr);
+      } else {
+        setTempEnd(dateStr);
+      }
+    }
+  };
+
+  const handleCellDoubleClick = (dateStr) => {
+    setTempPreset("custom");
+    setTempStart(dateStr);
+    setTempEnd(dateStr);
+  };
+
+  const handleApply = () => {
+    let finalStart = tempStart;
+    let finalEnd = tempEnd;
+
+    if (finalStart && !finalEnd) {
+      finalEnd = finalStart;
+    }
+    if (finalStart && finalEnd && finalStart > finalEnd) {
+      const tmp = finalStart;
+      finalStart = finalEnd;
+      finalEnd = tmp;
+    }
+
+    const updated = {
+      preset: tempPreset,
+      startDate: finalStart,
+      endDate: finalEnd,
+    };
+    updated.label = getFilterDisplayLabel(updated, t, isKhmer);
+    onChange(updated);
+    setIsOpen(false);
+  };
+
+  const handleClear = () => {
+    const updated = {
+      preset: "all",
+      startDate: null,
+      endDate: null,
+      label: t("dash_filter_all", "All Time"),
+    };
+    setTempPreset("all");
+    setTempStart(null);
+    setTempEnd(null);
+    onChange(updated);
+    setIsOpen(false);
+  };
+
+  const isFiltered =
+    dateFilter.preset !== "all" &&
+    Boolean(dateFilter.startDate || dateFilter.endDate);
+
+  return (
+    <div className="relative inline-block" ref={containerRef}>
+      <button
+        type="button"
+        onClick={() => setIsOpen((prev) => !prev)}
+        className={`flex items-center gap-2 rounded-xl border px-3.5 py-2 text-[12.5px] font-medium transition-all shadow-sm ${
+          isFiltered
+            ? "border-moss/40 bg-moss-tint text-moss dark:border-emerald-500/40 dark:bg-emerald-500/15 dark:text-emerald-400"
+            : "border-hairline bg-surface text-ink hover:bg-paper"
+        }`}
+      >
+        <Calendar
+          size={16}
+          className={
+            isFiltered ? "text-moss dark:text-emerald-400" : "text-stone"
+          }
+        />
+        <span className="max-w-45 truncate font-sans sm:max-w-65">
+          {dateFilter.label}
+        </span>
+        <ChevronDown
+          size={14}
+          className={`text-stone transition-transform ${isOpen ? "rotate-180" : ""}`}
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute right-0 top-full z-50 mt-2 w-[340px] overflow-hidden rounded-2xl border border-hairline bg-surface shadow-2xl animate-in fade-in zoom-in-95 duration-150 sm:w-145">
+          {/* Header */}
+          <div className="flex items-center justify-between border-b border-hairline bg-paper/50 px-4 py-3">
+            <div className="flex items-center gap-2">
+              <Calendar
+                size={15}
+                className="text-moss dark:text-emerald-400"
+              />
+              <h3 className="text-[13px] font-semibold text-ink">
+                {t("dash_calendar_title", "Select Date Range")}
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="rounded-lg p-1 text-stone transition-colors hover:bg-paper hover:text-ink"
+            >
+              <X size={15} />
+            </button>
+          </div>
+
+          {/* Body: Responsive Split (Presets | Calendar) */}
+          <div className="flex flex-col sm:flex-row">
+            {/* Presets List */}
+            <div className="shrink-0 border-b border-hairline bg-paper/20 p-3 sm:w-44 sm:border-b-0 sm:border-r">
+              <p className="mb-2 px-2 text-[10px] font-semibold uppercase tracking-wider text-stone">
+                Presets
+              </p>
+              <div className="grid grid-cols-2 gap-1 sm:grid-cols-1">
+                {presets.map((p) => {
+                  const isActive = tempPreset === p.key;
+                  return (
+                    <button
+                      key={p.key}
+                      type="button"
+                      onClick={() => handlePresetSelect(p.key)}
+                      className={`w-full rounded-lg px-2.5 py-1.5 text-left text-[12px] font-medium transition-all ${
+                        isActive
+                          ? "bg-moss text-white shadow-sm dark:bg-emerald-600"
+                          : "text-stone hover:bg-paper hover:text-ink"
+                      }`}
+                    >
+                      {p.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Calendar & Inputs Section */}
+            <div className="flex-1 p-4">
+              {/* Month Navigation */}
+              <div className="mb-3 flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={prevMonth}
+                  className="rounded-lg p-1.5 text-stone transition-colors hover:bg-paper hover:text-ink"
+                  aria-label="Previous Month"
+                >
+                  <ChevronLeft size={16} />
+                </button>
+                <span className="font-display text-[13.5px] font-medium text-ink">
+                  {monthName} {viewYear}
+                </span>
+                <button
+                  type="button"
+                  onClick={nextMonth}
+                  className="rounded-lg p-1.5 text-stone transition-colors hover:bg-paper hover:text-ink"
+                  aria-label="Next Month"
+                >
+                  <ChevronRight size={16} />
+                </button>
+              </div>
+
+              {/* Day of Week Headers */}
+              <div className="mb-1.5 grid grid-cols-7 text-center">
+                {weekdayNames.map((w, idx) => (
+                  <span
+                    key={idx}
+                    className="text-[10.5px] font-medium uppercase tracking-wider text-stone"
+                  >
+                    {w}
+                  </span>
+                ))}
+              </div>
+
+              {/* Days Grid */}
+              <div
+                className="grid grid-cols-7 gap-y-1 text-center"
+                onMouseLeave={() => setHoveredDate(null)}
+              >
+                {Array.from({ length: firstDayOfWeek }).map((_, i) => (
+                  <div key={`blank-${i}`} className="h-8" />
+                ))}
+
+                {Array.from({ length: daysInMonth }).map((_, i) => {
+                  const day = i + 1;
+                  const dateStr = `${viewYear}-${String(viewMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
+
+                  const isStart = tempStart === dateStr;
+                  const isEnd = tempEnd === dateStr;
+
+                  let isInRange = false;
+                  if (tempStart && tempEnd) {
+                    isInRange = dateStr >= tempStart && dateStr <= tempEnd;
+                  } else if (tempStart && !tempEnd && hoveredDate) {
+                    const low =
+                      tempStart < hoveredDate ? tempStart : hoveredDate;
+                    const high =
+                      tempStart < hoveredDate ? hoveredDate : tempStart;
+                    isInRange = dateStr >= low && dateStr <= high;
+                  }
+
+                  const isToday = dateStr === todayStr;
+
+                  return (
+                    <button
+                      key={dateStr}
+                      type="button"
+                      onClick={() => handleCellClick(dateStr)}
+                      onDoubleClick={() => handleCellDoubleClick(dateStr)}
+                      onMouseEnter={() => setHoveredDate(dateStr)}
+                      className={`relative flex h-8 w-full items-center justify-center text-[12px] font-medium transition-all ${
+                        isStart && isEnd
+                          ? "rounded-lg bg-moss font-bold text-white shadow-sm dark:bg-emerald-600"
+                          : isStart
+                            ? "rounded-l-lg bg-moss font-bold text-white dark:bg-emerald-600"
+                            : isEnd
+                              ? "rounded-r-lg bg-moss font-bold text-white dark:bg-emerald-600"
+                              : isInRange
+                                ? "bg-moss-tint/80 text-moss dark:bg-emerald-500/20 dark:text-emerald-300"
+                                : isToday
+                                  ? "rounded-lg font-bold text-moss underline underline-offset-4 hover:bg-paper dark:text-emerald-400"
+                                  : "rounded-lg text-ink hover:bg-paper"
+                      }`}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Start & End Inputs Row */}
+              <div className="mt-4 grid grid-cols-2 gap-2 border-t border-hairline pt-3">
+                <div>
+                  <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-stone">
+                    {t("dash_calendar_start", "Start Date")}
+                  </label>
+                  <input
+                    type="date"
+                    value={tempStart || ""}
+                    onChange={(e) => {
+                      setTempStart(e.target.value || null);
+                      setTempPreset("custom");
+                    }}
+                    className="w-full rounded-lg border border-hairline bg-paper px-2.5 py-1.5 text-[11.5px] text-ink focus:border-moss focus:outline-none dark:focus:border-emerald-500"
+                  />
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] font-medium uppercase tracking-wider text-stone">
+                    {t("dash_calendar_end", "End Date")}
+                  </label>
+                  <input
+                    type="date"
+                    value={tempEnd || ""}
+                    onChange={(e) => {
+                      setTempEnd(e.target.value || null);
+                      setTempPreset("custom");
+                    }}
+                    className="w-full rounded-lg border border-hairline bg-paper px-2.5 py-1.5 text-[11.5px] text-ink focus:border-moss focus:outline-none dark:focus:border-emerald-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer Actions */}
+          <div className="flex items-center justify-between border-t border-hairline bg-paper/40 px-4 py-3">
+            <button
+              type="button"
+              onClick={handleClear}
+              className="flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-[11.5px] font-medium text-stone transition-colors hover:text-clay"
+            >
+              <RotateCcw size={13} />
+              {t("dash_calendar_clear", "Reset to All Time")}
+            </button>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setIsOpen(false)}
+                className="rounded-lg px-3 py-1.5 text-[12px] font-medium text-stone transition-colors hover:text-ink"
+              >
+                {t("dash_calendar_cancel", "Cancel")}
+              </button>
+              <button
+                type="button"
+                onClick={handleApply}
+                className="flex items-center gap-1.5 rounded-lg bg-moss px-3.5 py-1.5 text-[12px] font-medium text-white shadow-sm transition-opacity hover:opacity-95 dark:bg-emerald-600"
+              >
+                <Check size={13} />
+                {t("dash_calendar_apply", "Apply Filter")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

@@ -52,7 +52,7 @@ export default function ForgotPassword() {
     >
       {sent ? (
         <div className="text-center py-2 space-y-4">
-          <div className="w-12 h-12 rounded-none border border-moss/20 bg-moss-tint flex items-center justify-center mx-auto text-moss">
+          <div className="w-12 h-12 rounded-2xl border border-moss/20 bg-moss-tint flex items-center justify-center mx-auto text-moss">
             <CheckCircle2 size={24} strokeWidth={2} />
           </div>
           <div>

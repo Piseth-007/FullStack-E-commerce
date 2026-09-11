@@ -560,7 +560,7 @@ export default function ProductList() {
               ))}
             </div>
           ) : error && products.length === 0 ? (
-            <div className="flex flex-col items-center text-center py-20 border border-dashed border-clay/20 rounded-none bg-surface">
+            <div className="flex flex-col items-center text-center py-20 border border-dashed border-clay/20 rounded-2xl bg-surface">
               <p className="text-[14px] text-clay mb-3">
                 {t("shop_error", "Couldn't load products.")}
               </p>
@@ -573,8 +573,8 @@ export default function ProductList() {
               </button>
             </div>
           ) : products.length === 0 ? (
-            <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-none bg-surface px-6">
-              <div className="w-14 h-14 rounded-none border border-hairline bg-moss-tint flex items-center justify-center mb-4">
+            <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-2xl bg-surface px-6">
+              <div className="w-14 h-14 rounded-2xl border border-hairline bg-moss-tint flex items-center justify-center mb-4">
                 <PackageX size={22} className="text-moss" strokeWidth={1.75} />
               </div>
 
@@ -591,7 +591,7 @@ export default function ProductList() {
               {(activeFilterCount > 0 || search) && (
                 <button
                   onClick={clearFilters}
-                  className="rounded-none border border-moss bg-moss px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-moss-deep shadow-xs"
+                  className="rounded-xl border border-moss bg-moss px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-moss-deep shadow-xs"
                 >
                   {t("shop_reset_filters", "Clear all filters")}
                 </button>

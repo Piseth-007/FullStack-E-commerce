@@ -404,23 +404,23 @@ export default function Navbar() {
             to="/products?has_rating=1&sort=rating"
             className="nav-link hover:text-ink"
           >
-            Best rated
+            {t("nav_best_rated", "Best rated")}
           </Link>
 
           <Link
             to="/products?has_discount=1&sort=discount"
             className="nav-link hover:text-ink"
           >
-            Promotions
+            {t("nav_promotions", "Promotions")}
           </Link>
         </nav>
 
-        <div className="flex items-center gap-0.5 sm:gap-1 justify-self-end">
+        <div className="flex items-center gap-1.5 sm:gap-2 justify-self-end">
           <div className="relative">
             <button
               type="button"
               onClick={() => setSearchOpen((v) => !v)}
-              className="nav-action p-2 rounded-lg text-stone hover:bg-paper hover:text-ink"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-stone transition-colors hover:bg-paper hover:text-ink"
               aria-label={searchOpen ? "Close search" : "Search"}
               aria-expanded={searchOpen}
             >
@@ -441,12 +441,12 @@ export default function Navbar() {
 
                 <form
                   onSubmit={handleSearchSubmit}
-                  className="navdrop-in absolute right-0 top-11 z-20 w-64 bg-surface border border-hairline rounded-xl shadow-[0_8px_24px_rgba(33,31,27,0.1)] p-2"
+                  className="navdrop-in absolute right-0 top-11 z-20 w-64 bg-surface border border-hairline rounded-2xl shadow-[0_8px_24px_rgba(33,31,27,0.1)] p-2"
                 >
                   <div className="relative">
                     <Search
                       size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-stone"
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone"
                     />
 
                     <input
@@ -455,7 +455,7 @@ export default function Navbar() {
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       placeholder={t("nav_search_placeholder", "Search products...")}
-                      className="w-full pl-9 pr-3 py-2 rounded-lg border border-hairline bg-paper text-[13px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss"
+                      className="w-full pl-9 pr-3 py-1.5 rounded-full border border-hairline bg-paper text-[13px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss"
                       aria-label={t("nav_search_aria", "Search products")}
                     />
                   </div>
@@ -469,16 +469,13 @@ export default function Navbar() {
             onMouseEnter={() => {
               import("../../pages/shop/Cart").catch(() => {});
             }}
-            className="nav-action relative p-2 rounded-none text-stone hover:bg-paper hover:text-ink"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-stone transition-colors hover:bg-paper hover:text-ink"
             aria-label={`Cart${itemCount > 0 ? `, ${itemCount} items` : ""}`}
           >
             <ShoppingBag size={18} strokeWidth={1.75} />
 
             {itemCount > 0 && (
-              <span
-                key={itemCount}
-                className="nav-cart-badge absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-none border border-moss bg-moss text-white text-[9px] font-mono font-medium flex items-center justify-center shadow-xs"
-              >
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-moss px-1 text-[9px] font-semibold text-white shadow-2xs">
                 {itemCount > 99 ? "99+" : itemCount}
               </span>
             )}
@@ -489,7 +486,7 @@ export default function Navbar() {
             onMouseEnter={() => {
               import("../../pages/shop/Favorites").catch(() => {});
             }}
-            className="nav-action relative p-2 rounded-none text-stone hover:bg-paper hover:text-ink"
+            className="relative flex h-9 w-9 items-center justify-center rounded-full text-stone transition-colors hover:bg-paper hover:text-ink"
             aria-label={`Favorites${
               favoriteCount > 0 ? `, ${favoriteCount} items` : ""
             }`}
@@ -497,10 +494,7 @@ export default function Navbar() {
             <Heart size={18} strokeWidth={1.75} />
 
             {favoriteCount > 0 && (
-              <span
-                key={favoriteCount}
-                className="nav-cart-badge absolute -top-1 -right-1 min-w-4 h-4 px-1 rounded-none border border-clay bg-clay text-white text-[9px] font-mono font-medium flex items-center justify-center shadow-xs"
-              >
+              <span className="absolute -right-0.5 -top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-clay px-1 text-[9px] font-semibold text-white shadow-2xs">
                 {favoriteCount > 99 ? "99+" : favoriteCount}
               </span>
             )}
@@ -511,7 +505,7 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setAccountOpen((v) => !v)}
-                className="nav-action ml-1 flex h-7 w-7 items-center justify-center overflow-hidden rounded-none border border-hairline bg-paper text-stone hover:text-ink"
+                className="relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-full ring-1 ring-hairline bg-paper text-stone transition-all hover:ring-moss hover:ring-2"
                 aria-label="Account menu"
                 aria-expanded={accountOpen}
               >
@@ -519,7 +513,7 @@ export default function Navbar() {
                   <img
                     src={profileImage}
                     alt={user.name || "Profile"}
-                    className="nav-profile-image h-full w-full object-cover"
+                    className="h-full w-full object-cover rounded-full"
                     loading="lazy"
                   />
                 ) : (
@@ -535,15 +529,15 @@ export default function Navbar() {
                     aria-hidden="true"
                   />
 
-                  <div className="navdrop-in absolute right-0 top-11 z-20 w-52 bg-surface border border-hairline rounded-none shadow-[0_8px_24px_rgba(33,31,27,0.1)] py-1.5">
-                    <div className="px-3.5 py-2.5 border-b border-hairline">
+                  <div className="navdrop-in absolute right-0 top-11 z-50 w-56 rounded-2xl border border-hairline bg-surface shadow-[0_12px_32px_rgba(33,31,27,0.12)] p-1.5">
+                    <div className="px-3.5 py-2.5 mb-1 border-b border-hairline">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-8 w-8 shrink-0 overflow-hidden rounded-none border border-hairline bg-paper flex items-center justify-center">
+                        <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full ring-1 ring-hairline bg-paper flex items-center justify-center">
                           {profileImage ? (
                             <img
                               src={profileImage}
                               alt={user.name || "Profile"}
-                              className="h-full w-full object-cover"
+                              className="h-full w-full object-cover rounded-full"
                             />
                           ) : (
                             <User size={15} strokeWidth={1.75} />
@@ -565,7 +559,7 @@ export default function Navbar() {
                     <Link
                       to="/orders"
                       onClick={() => setAccountOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-medium text-ink hover:bg-paper transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium text-ink hover:bg-paper transition-colors"
                     >
                       <Package size={15} strokeWidth={1.75} />
                       My orders
@@ -574,7 +568,7 @@ export default function Navbar() {
                     <Link
                       to="/profile"
                       onClick={() => setAccountOpen(false)}
-                      className="flex items-center gap-2.5 px-3.5 py-2 text-[13px] font-medium text-ink hover:bg-paper transition-colors"
+                      className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-[13px] font-medium text-ink hover:bg-paper transition-colors"
                     >
                       <User size={15} strokeWidth={1.75} />
                       My profile
@@ -583,7 +577,7 @@ export default function Navbar() {
                     <button
                       type="button"
                       onClick={handleLogout}
-                      className="flex items-center gap-2.5 w-full px-3.5 py-2 text-[13px] font-medium text-stone hover:bg-clay-tint hover:text-clay transition-colors"
+                      className="flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-[13px] font-medium text-stone hover:bg-clay-tint hover:text-clay transition-colors"
                     >
                       <LogOut size={15} strokeWidth={1.75} />
                       Log out
@@ -595,24 +589,25 @@ export default function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="nav-action ml-1 px-3 sm:px-4 py-2 rounded-lg bg-moss text-white text-[13px] font-medium hover:bg-moss-deep"
+              className="flex h-9 items-center gap-1.5 px-3.5 rounded-full border border-hairline bg-surface text-stone hover:text-ink hover:border-moss hover:bg-paper transition-all text-[13px] font-medium shadow-2xs"
             >
-              {t("nav_signin", "Sign in")}
+              <User size={15} strokeWidth={1.75} />
+              <span>{t("nav_signin", "Sign in")}</span>
             </Link>
           )}
 
           {/* Font & Language Switcher (EN / ខ្មែរ) */}
           <div
-            className="flex items-center rounded-none border border-hairline bg-surface p-0.5 text-[11px] font-medium shadow-2xs"
+            className="flex items-center rounded-full border border-hairline bg-surface p-1 text-[11px] font-medium shadow-2xs"
             role="group"
             aria-label={t("nav_language", "Language & Font")}
           >
             <button
               type="button"
               onClick={() => setLanguage("en")}
-              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 transition-all ${
+              className={`rounded-full px-3 py-1 text-center transition-all duration-200 ${
                 language === "en"
-                  ? "bg-moss text-white font-semibold"
+                  ? "bg-moss text-white font-semibold shadow-xs"
                   : "text-stone hover:text-ink hover:bg-paper"
               }`}
               title="English Font (Inter & Fraunces)"
@@ -623,9 +618,9 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setLanguage("km")}
-              className={`px-2 py-0.5 sm:px-2.5 sm:py-1 transition-all ${
+              className={`rounded-full px-3 py-1 text-center transition-all duration-200 ${
                 language === "km"
-                  ? "bg-moss text-white font-semibold"
+                  ? "bg-moss text-white font-semibold shadow-xs"
                   : "text-stone hover:text-ink hover:bg-paper"
               }`}
               title="Khmer Font (Google Sans & Poppins)"
@@ -638,23 +633,23 @@ export default function Navbar() {
           <button
             type="button"
             onClick={toggleTheme}
-            className="nav-action flex h-9 w-9 items-center justify-center rounded-lg text-stone hover:bg-paper hover:text-ink"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-stone transition-colors hover:bg-paper hover:text-ink"
             aria-label={
-              darkMode ? "Switch to light mode" : "Switch to dark mode"
+              darkMode ? t("nav_theme_light", "Switch to light mode") : t("nav_theme_dark", "Switch to dark mode")
             }
-            title={darkMode ? "Light mode" : "Dark mode"}
+            title={darkMode ? t("nav_theme_light", "Light mode") : t("nav_theme_dark", "Dark mode")}
           >
             {darkMode ? (
-              <Sun size={17} strokeWidth={1.75} />
+              <Sun size={18} strokeWidth={1.75} />
             ) : (
-              <Moon size={17} strokeWidth={1.75} />
+              <Moon size={18} strokeWidth={1.75} />
             )}
           </button>
 
           <button
             type="button"
             onClick={() => setMenuOpen((v) => !v)}
-            className="nav-action md:hidden p-2 rounded-lg text-stone hover:bg-paper hover:text-ink"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-stone transition-colors hover:bg-paper hover:text-ink md:hidden"
             aria-label={menuOpen ? "Close menu" : "Open menu"}
             aria-expanded={menuOpen}
           >
@@ -707,7 +702,7 @@ export default function Navbar() {
             <Heart size={15} strokeWidth={1.75} />
             {t("nav_favorites", "Favorites")}
             {favoriteCount > 0 && (
-              <span className="ml-auto rounded-none border border-clay bg-clay px-1.5 py-0.5 text-[10px] font-mono font-medium text-white">
+              <span className="ml-auto rounded-full border border-clay bg-clay px-1.5 py-0.5 text-[10px] font-mono font-medium text-white">
                 {favoriteCount > 99 ? "99+" : favoriteCount}
               </span>
             )}
@@ -738,14 +733,14 @@ export default function Navbar() {
               {t("nav_language", "Language & Font")}
             </span>
 
-            <div className="flex items-center rounded-none border border-hairline bg-surface p-0.5 text-[11px] font-medium">
+            <div className="flex items-center rounded-full border border-hairline bg-surface p-1 text-[11px] font-medium shadow-2xs">
               <button
                 type="button"
                 onClick={() => setLanguage("en")}
-                className={`px-2.5 py-1 transition-all ${
+                className={`rounded-full px-3 py-1 transition-all duration-200 ${
                   language === "en"
-                    ? "bg-moss text-white font-semibold"
-                    : "text-stone hover:text-ink"
+                    ? "bg-moss text-white font-semibold shadow-xs"
+                    : "text-stone hover:text-ink hover:bg-paper"
                 }`}
               >
                 English
@@ -753,10 +748,10 @@ export default function Navbar() {
               <button
                 type="button"
                 onClick={() => setLanguage("km")}
-                className={`px-2.5 py-1 transition-all ${
+                className={`rounded-full px-3 py-1 transition-all duration-200 ${
                   language === "km"
-                    ? "bg-moss text-white font-semibold"
-                    : "text-stone hover:text-ink"
+                    ? "bg-moss text-white font-semibold shadow-xs"
+                    : "text-stone hover:text-ink hover:bg-paper"
                 }`}
               >
                 ភាសាខ្មែរ
@@ -767,12 +762,12 @@ export default function Navbar() {
           {user && (
             <div className="mt-2 pt-2 border-t border-hairline">
               <div className="flex items-center gap-3 py-2.5 mb-1">
-                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-none border border-hairline bg-paper flex items-center justify-center text-stone">
+                <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full ring-1 ring-hairline bg-paper flex items-center justify-center text-stone">
                   {profileImage ? (
                     <img
                       src={profileImage}
                       alt={user.name || "Profile"}
-                      className="h-full w-full object-cover"
+                      className="h-full w-full object-cover rounded-full"
                       loading="lazy"
                     />
                   ) : (
@@ -889,8 +884,8 @@ function MegaMenu({
           )}
         </div>
 
-        <div className="rounded-none border border-hairline bg-moss-tint p-5">
-          <span className="flex h-9 w-9 items-center justify-center rounded-none border border-hairline bg-surface text-moss">
+        <div className="rounded-2xl border border-hairline bg-moss-tint p-5">
+          <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-hairline bg-surface text-moss">
             <Leaf size={16} strokeWidth={1.75} />
           </span>
 

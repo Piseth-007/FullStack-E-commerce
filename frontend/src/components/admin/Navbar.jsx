@@ -285,16 +285,16 @@ export default function Navbar({ onMenuClick }) {
 
         {/* Font & Language Switcher (EN / ខ្មែរ) */}
         <div
-          className="flex items-center rounded-lg border border-hairline bg-surface p-0.5 text-[11px] font-medium shadow-2xs"
+          className="flex items-center rounded-full border border-hairline bg-surface p-1 text-[11px] font-medium shadow-2xs"
           role="group"
           aria-label={t("nav_language", "Language & Font")}
         >
           <button
             type="button"
             onClick={() => setLanguage("en")}
-            className={`rounded-md px-2 py-1 sm:px-2.5 sm:py-1 transition-all ${
+            className={`rounded-full px-3 py-1 text-center transition-all duration-200 ${
               language === "en"
-                ? "bg-moss text-white font-semibold"
+                ? "bg-moss text-white font-semibold shadow-xs"
                 : "text-stone hover:text-ink hover:bg-paper"
             }`}
             title="English Font (Inter & Fraunces)"
@@ -305,9 +305,9 @@ export default function Navbar({ onMenuClick }) {
           <button
             type="button"
             onClick={() => setLanguage("km")}
-            className={`rounded-md px-2 py-1 sm:px-2.5 sm:py-1 transition-all ${
+            className={`rounded-full px-3 py-1 text-center transition-all duration-200 ${
               language === "km"
-                ? "bg-moss text-white font-semibold"
+                ? "bg-moss text-white font-semibold shadow-xs"
                 : "text-stone hover:text-ink hover:bg-paper"
             }`}
             title="Khmer Font (Google Sans & Poppins)"

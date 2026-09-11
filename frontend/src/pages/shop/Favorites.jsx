@@ -48,7 +48,7 @@ export default function Favorites() {
             {Array.from({ length: 8 }).map((_, index) => (
               <div key={index}>
                 <div
-                  className="aspect-square rounded-sm animate-pulse mb-3"
+                  className="aspect-square rounded-2xl animate-pulse mb-3"
                   style={{
                     backgroundColor: "var(--color-surface)",
                     border: "1px solid var(--color-hairline)",
@@ -75,7 +75,7 @@ export default function Favorites() {
           /* Empty State */
           <div className="py-16 text-center">
             <div
-              className="w-12 h-12 mx-auto mb-4 rounded-none flex items-center justify-center"
+              className="w-12 h-12 mx-auto mb-4 rounded-2xl flex items-center justify-center"
               style={{
                 backgroundColor: "var(--color-surface)",
                 border: "1px solid var(--color-hairline)",
@@ -118,7 +118,7 @@ export default function Favorites() {
                 <article key={fav.id} className="group relative">
                   <Link to={`/products/${product.id}`} className="block">
                     <div
-                      className="aspect-square rounded-sm overflow-hidden mb-3"
+                      className="aspect-square rounded-2xl overflow-hidden mb-3"
                       style={{
                         backgroundColor: "var(--color-surface)",
                         border: "1px solid var(--color-hairline)",
@@ -183,14 +183,8 @@ export default function Favorites() {
                   </Link>
 
                   {/* Favorite */}
-                  <div
-                    className="absolute top-2 right-2 rounded-none p-1"
-                    style={{
-                      backgroundColor:
-                        "color-mix(in srgb, var(--color-paper) 85%, transparent)",
-                    }}
-                  >
-                    <FavoriteButton productId={product.id} size={15} />
+                  <div className="absolute top-2.5 right-2.5 z-10">
+                    <FavoriteButton productId={product.id} size={18} />
                   </div>
                 </article>
               );

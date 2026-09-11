@@ -325,8 +325,8 @@ export default function OrderHistory() {
           onRetry={() => loadOrders()}
         />
       ) : orders.length === 0 ? (
-        <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-none bg-surface px-6">
-          <div className="w-14 h-14 rounded-none border border-hairline bg-moss-tint flex items-center justify-center mb-4">
+        <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-2xl bg-surface px-6">
+          <div className="w-14 h-14 rounded-2xl border border-hairline bg-moss-tint flex items-center justify-center mb-4">
             <PackageX size={22} className="text-moss" strokeWidth={1.75} />
           </div>
           <p className="font-display text-[20px] font-medium text-ink mb-1">
@@ -337,7 +337,7 @@ export default function OrderHistory() {
           </p>
           <Link
             to="/products"
-            className="rounded-none border border-moss bg-moss px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-moss-deep shadow-xs"
+            className="rounded-xl border border-moss bg-moss px-5 py-2.5 text-[13px] font-medium text-white transition-colors hover:bg-moss-deep shadow-xs"
           >
             Browse products
           </Link>
@@ -375,7 +375,7 @@ export default function OrderHistory() {
                 </div>
 
                 <span
-                  className={`text-[11px] font-medium uppercase tracking-wide px-2.5 py-1 rounded-md ${
+                  className={`text-[11px] font-medium uppercase tracking-wide px-2.5 py-1 rounded-full ${
                     statusStyles[order.status] || statusStyles.pending
                   }`}
                 >

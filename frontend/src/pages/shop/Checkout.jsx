@@ -16,6 +16,7 @@ import {
 import api from "../../api/axios";
 import { useCart } from "../../context/useCard";
 import { useToast } from "../../context/useToast";
+import { useLanguage } from "../../context/LanguageContext";
 import khqrLogoRed from "../../assets/KHQR Logo red.svg";
 import khqrLogoWhite from "../../assets/KHQR Logo.svg";
 import khqrBadgeBg from "../../assets/KHQR available here - logo with bg.svg";
@@ -23,6 +24,7 @@ import khqrBadgeBg from "../../assets/KHQR available here - logo with bg.svg";
 export default function Checkout() {
   const { cart, subtotal, refreshCart } = useCart();
   const { showToast } = useToast();
+  const { language, isKhmer, t } = useLanguage();
   const navigate = useNavigate();
 
   const [addresses, setAddresses] = useState([]);
@@ -132,7 +134,7 @@ export default function Checkout() {
     setLocationCodes({ province: province?.code || "", district: "" });
     setForm((prev) => ({
       ...prev,
-      city_province: province?.name_en || "",
+      city_province: (isKhmer ? (province?.name_km || province?.name_en) : (province?.name_en || province?.name_km)) || "",
       district: "",
       commune: "",
     }));
@@ -154,7 +156,7 @@ export default function Checkout() {
     setLocationCodes((prev) => ({ ...prev, district: district?.code || "" }));
     setForm((prev) => ({
       ...prev,
-      district: district?.name_en || "",
+      district: (isKhmer ? (district?.name_km || district?.name_en) : (district?.name_en || district?.name_km)) || "",
       commune: "",
     }));
     setCommunes([]);
@@ -171,7 +173,10 @@ export default function Checkout() {
 
   const handleCommuneChange = (e) => {
     const commune = communes.find((item) => item.code === e.target.value);
-    setForm((prev) => ({ ...prev, commune: commune?.name_en || "" }));
+    setForm((prev) => ({
+      ...prev,
+      commune: (isKhmer ? (commune?.name_km || commune?.name_en) : (commune?.name_en || commune?.name_km)) || "",
+    }));
   };
 
   const handleAddAddress = async (e) => {
@@ -199,8 +204,8 @@ export default function Checkout() {
       resetAddressForm();
       showToast(
         editingAddressId
-          ? "Address updated successfully"
-          : "Address saved successfully",
+          ? t("checkout_address_updated", "Address updated successfully")
+          : t("checkout_address_saved", "Address saved successfully"),
         "success",
       );
     } catch (err) {
@@ -258,7 +263,7 @@ export default function Checkout() {
   };
 
   const handleDeleteAddress = async (address) => {
-    if (!window.confirm(`Delete the address for ${address.full_name}?`)) return;
+    if (!window.confirm(`${t("checkout_address_confirm_delete", "Delete the address for")} ${address.full_name}?`)) return;
 
     try {
       await api.delete(`/addresses/${address.id}`);
@@ -271,7 +276,7 @@ export default function Checkout() {
         setSelectedId(remainingAddresses[0]?.id || null);
       }
 
-      showToast("Address deleted", "success");
+      showToast(t("checkout_address_deleted", "Address deleted"), "success");
     } catch (error) {
       console.error("Address deletion error:", error);
       showToast(
@@ -293,12 +298,12 @@ export default function Checkout() {
     }
 
     if (!selectedId) {
-      showToast("Please select a shipping address", "error");
+      showToast(t("checkout_select_address_err", "Please select a shipping address"), "error");
       return;
     }
 
     if (items.length === 0) {
-      showToast("Your cart is empty", "error");
+      showToast(t("checkout_cart_empty", "Your cart is empty"), "error");
       return;
     }
 
@@ -335,7 +340,7 @@ export default function Checkout() {
       setPaymentStatus("pending");
       setShowQrModal(true);
 
-      showToast("Scan the QR code with any Bakong-supported app", "success");
+      showToast(t("checkout_scan_toast", "Scan the QR code with any Bakong-supported app"), "success");
     } catch (err) {
       console.error("KHQR Payment Error:", err);
 
@@ -538,7 +543,7 @@ export default function Checkout() {
 
     try {
       await navigator.clipboard.writeText(paymentData.qr_string);
-      showToast("KHQR payment string copied", "success");
+      showToast(t("checkout_copied_toast", "KHQR payment string copied"), "success");
     } catch {
       showToast("Failed to copy QR code", "error");
     }
@@ -571,9 +576,9 @@ export default function Checkout() {
   const isExpiringSoon = secondsLeft !== null && secondsLeft <= 60;
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className={`max-w-4xl mx-auto px-6 py-10 ${isKhmer ? "font-khmer" : ""}`}>
       <h1 className="font-display text-[28px] font-medium text-ink mb-8">
-        Checkout
+        {t("checkout_title", "Checkout")}
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
@@ -582,7 +587,7 @@ export default function Checkout() {
           {/* SHIPPING ADDRESS */}
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-3">
-              Shipping Address
+              {t("checkout_shipping_address", "Shipping Address")}
             </p>
 
             <div className="space-y-2 mb-3">
@@ -590,7 +595,7 @@ export default function Checkout() {
                 <div
                   key={addr.id}
                   onClick={() => setSelectedId(addr.id)}
-                  className={`w-full text-left flex items-start gap-3 p-4 rounded-none border transition-colors cursor-pointer ${
+                  className={`w-full text-left flex items-start gap-3 p-4 rounded-xl border transition-colors cursor-pointer ${
                     selectedId === addr.id
                       ? "border-moss bg-moss-tint"
                       : "border-hairline bg-surface hover:border-stone/30"
@@ -656,18 +661,18 @@ export default function Checkout() {
                 className="flex items-center gap-2 text-[13px] font-medium text-moss hover:text-moss-deep"
               >
                 <Plus size={14} strokeWidth={2} />
-                Add a new address
+                {t("checkout_add_address", "Add a new address")}
               </button>
             )}
 
             {showForm && (
               <form
                 onSubmit={handleAddAddress}
-                className="bg-surface border border-hairline rounded-none p-5 space-y-3 mt-3 shadow-xs"
+                className="bg-surface border border-hairline rounded-2xl p-5 space-y-3 mt-3 shadow-xs"
               >
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <input
-                    placeholder="Full name"
+                    placeholder={t("checkout_full_name", "Full name")}
                     value={form.full_name}
                     onChange={(e) =>
                       setForm({ ...form, full_name: e.target.value })
@@ -677,7 +682,7 @@ export default function Checkout() {
                   />
 
                   <input
-                    placeholder="Telephone"
+                    placeholder={t("checkout_telephone", "Telephone")}
                     value={form.telephone}
                     onChange={(e) =>
                       setForm({ ...form, telephone: e.target.value })
@@ -688,7 +693,7 @@ export default function Checkout() {
                 </div>
 
                 <input
-                  placeholder="Street / house number"
+                  placeholder={t("checkout_street", "Street / house number")}
                   value={form.street}
                   onChange={(e) => setForm({ ...form, street: e.target.value })}
                   className={inputClass}
@@ -701,10 +706,10 @@ export default function Checkout() {
                     className={inputClass}
                     required
                   >
-                    <option value="">Select province</option>
+                    <option value="">{t("checkout_select_province", "Select province")}</option>
                     {provinces.map((province) => (
                       <option key={province.id} value={province.code}>
-                        {province.name_en}
+                        {isKhmer ? (province.name_km || province.name_en) : (province.name_en || province.name_km)}
                       </option>
                     ))}
                   </select>
@@ -716,17 +721,17 @@ export default function Checkout() {
                     disabled={!locationCodes.province}
                     required
                   >
-                    <option value="">Select district</option>
+                    <option value="">{t("checkout_select_district", "Select district")}</option>
                     {districts.map((district) => (
                       <option key={district.id} value={district.code}>
-                        {district.name_en}
+                        {isKhmer ? (district.name_km || district.name_en) : (district.name_en || district.name_km)}
                       </option>
                     ))}
                   </select>
 
                   <select
                     value={
-                      communes.find((item) => item.name_en === form.commune)
+                      communes.find((item) => item.name_en === form.commune || item.name_km === form.commune)
                         ?.code || ""
                     }
                     onChange={handleCommuneChange}
@@ -734,17 +739,17 @@ export default function Checkout() {
                     disabled={!locationCodes.district}
                     required
                   >
-                    <option value="">Select commune</option>
+                    <option value="">{t("checkout_select_commune", "Select commune")}</option>
                     {communes.map((commune) => (
                       <option key={commune.id} value={commune.code}>
-                        {commune.name_en}
+                        {isKhmer ? (commune.name_km || commune.name_en) : (commune.name_en || commune.name_km)}
                       </option>
                     ))}
                   </select>
                 </div>
 
                 <input
-                  placeholder="Label (e.g. Home or Work)"
+                  placeholder={t("checkout_label", "Label (e.g. Home or Work)")}
                   value={form.label}
                   onChange={(e) => setForm({ ...form, label: e.target.value })}
                   className={inputClass}
@@ -753,9 +758,11 @@ export default function Checkout() {
                 <div className="flex gap-2 pt-1">
                   <button
                     type="submit"
-                    className="px-4 py-2 rounded-none border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep shadow-xs"
+                    className="px-4 py-2 rounded-xl border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep shadow-xs"
                   >
-                    {editingAddressId ? "Update Address" : "Save Address"}
+                    {editingAddressId
+                      ? t("checkout_update_address", "Update Address")
+                      : t("checkout_save_address", "Save Address")}
                   </button>
 
                   {addresses.length > 0 && (
@@ -765,9 +772,9 @@ export default function Checkout() {
                         setShowForm(false);
                         resetAddressForm();
                       }}
-                      className="px-4 py-2 rounded-none border border-hairline text-ink text-[13px] font-medium hover:bg-paper"
+                      className="px-4 py-2 rounded-xl border border-hairline text-ink text-[13px] font-medium hover:bg-paper"
                     >
-                      Cancel
+                      {t("checkout_cancel", "Cancel")}
                     </button>
                   )}
                 </div>
@@ -778,33 +785,33 @@ export default function Checkout() {
           {/* PAYMENT METHOD */}
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-3">
-              Payment Method
+              {t("checkout_payment_method", "Payment Method")}
             </p>
 
-            <div className="bg-surface border-2 border-moss/40 rounded-none p-4.5 relative overflow-hidden transition-all shadow-xs">
+            <div className="bg-surface border-2 border-moss/40 rounded-2xl p-4.5 relative overflow-hidden transition-all shadow-xs">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-start gap-3">
-                  <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-none border-2 border-moss">
-                    <div className="h-2 w-2 rounded-none bg-moss" />
+                  <div className="mt-1 flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 border-moss">
+                    <div className="h-2 w-2 rounded-full bg-moss" />
                   </div>
 
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="font-medium text-[14px] text-ink">
-                        Bakong KHQR
+                        {t("checkout_bakong_khqr", "Bakong KHQR")}
                       </span>
-                      <span className="rounded-none border border-moss/20 bg-moss-tint px-2 py-0.5 text-[11px] font-medium text-moss">
-                        Instant
+                      <span className="rounded-full border border-moss/20 bg-moss-tint px-2.5 py-0.5 text-[11px] font-medium text-moss">
+                        {t("checkout_instant", "Instant")}
                       </span>
                     </div>
 
                     <p className="text-[12.5px] text-stone mt-1 leading-relaxed">
-                      Scan and pay with any Cambodian mobile banking app supporting Bakong KHQR.
+                      {t("checkout_khqr_desc", "Scan and pay with any Cambodian mobile banking app supporting Bakong KHQR.")}
                     </p>
 
                     <div className="flex flex-wrap items-center gap-1.5 mt-3 pt-2.5 border-t border-hairline/60">
                       <span className="text-[11px] text-stone font-medium mr-1">
-                        Works with:
+                        {t("checkout_works_with", "Works with:")}
                       </span>
                       <span className="px-2 py-0.5 rounded bg-paper text-[11px] font-medium text-stone">
                         Bakong
@@ -839,10 +846,10 @@ export default function Checkout() {
           {/* ORDER ITEMS */}
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-3">
-              Order Items
+              {t("checkout_order_items", "Order Items")}
             </p>
 
-            <div className="bg-surface border border-hairline rounded-none divide-y divide-hairline shadow-xs">
+            <div className="bg-surface border border-hairline rounded-2xl divide-y divide-hairline shadow-xs overflow-hidden">
               {items.map((item) => (
                 <div
                   key={item.id}
@@ -854,7 +861,7 @@ export default function Checkout() {
                     </p>
 
                     <p className="text-[12px] text-stone mt-1">
-                      Quantity: {item.quantity}
+                      {t("checkout_quantity", "Quantity:")} {item.quantity}
                     </p>
                   </div>
 
@@ -872,19 +879,19 @@ export default function Checkout() {
         </div>
 
         {/* ORDER SUMMARY */}
-        <div className="bg-surface border border-hairline rounded-none p-5 h-fit lg:sticky lg:top-24 shadow-xs">
+        <div className="bg-surface border border-hairline rounded-2xl p-5 h-fit lg:sticky lg:top-24 shadow-xs">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-4">
-            Order Summary
+            {t("checkout_order_summary", "Order Summary")}
           </p>
 
           <div className="space-y-3 mb-5">
             <div className="flex justify-between text-[13px] text-stone">
-              <span>Items</span>
+              <span>{t("checkout_items", "Items")}</span>
               <span>{items.length}</span>
             </div>
 
             <div className="border-t border-hairline pt-4 flex justify-between text-[16px] font-medium text-ink">
-              <span>Total</span>
+              <span>{t("checkout_total", "Total")}</span>
               <span className="font-mono">
                 ${Number(subtotal || 0).toFixed(2)}
               </span>
@@ -897,7 +904,7 @@ export default function Checkout() {
             disabled={
               placing || items.length === 0 || !selectedId || showQrModal
             }
-            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-none border border-[#E1232E] bg-[#E1232E] hover:bg-[#C81A24] text-white text-[14px] font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2.5 py-3.5 px-4 rounded-xl border border-[#E1232E] bg-[#E1232E] hover:bg-[#C81A24] text-white text-[14px] font-medium transition-all shadow-sm hover:shadow disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {placing ? (
               <Loader2 size={18} className="animate-spin" />
@@ -909,17 +916,17 @@ export default function Checkout() {
               />
             )}
 
-            <span>{placing ? "Generating QR..." : "Pay with KHQR"}</span>
+            <span>{placing ? t("checkout_generating_qr", "Generating QR...") : t("checkout_pay_khqr", "Pay with KHQR")}</span>
           </button>
 
           <div className="flex items-center justify-center gap-1.5 mt-3 text-center">
-            <span className="text-[11px] text-stone">Powered by</span>
+            <span className="text-[11px] text-stone">{t("checkout_powered_by", "Powered by")}</span>
             <img
               src={khqrLogoRed}
               alt="KHQR"
               className="h-3 w-auto object-contain opacity-85"
             />
-            <span className="text-[11px] text-stone">· Official Bakong Network</span>
+            <span className="text-[11px] text-stone">· {t("checkout_official_bakong", "Official Bakong Network")}</span>
           </div>
         </div>
       </div>
@@ -927,7 +934,7 @@ export default function Checkout() {
       {/* KHQR MODAL */}
       {showQrModal && paymentData && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
-          <div className="bg-surface rounded-none max-w-[380px] w-full shadow-2xl overflow-hidden border border-hairline my-auto animate-in fade-in zoom-in-95 duration-200">
+          <div className="bg-surface rounded-3xl max-w-[380px] w-full shadow-2xl overflow-hidden border border-hairline my-auto animate-in fade-in zoom-in-95 duration-200">
             {/* OFFICIAL KHQR STAND CARD */}
             <div className="relative bg-surface">
               {/* TOP KHQR RED BANNER */}
@@ -942,7 +949,7 @@ export default function Checkout() {
                     type="button"
                     onClick={handleClosePayment}
                     disabled={checkingPayment || cancellingPayment}
-                    className="p-1.5 rounded-none border border-white/20 bg-white/15 hover:bg-white/25 transition-colors disabled:opacity-50 text-white"
+                    className="p-1.5 rounded-full border border-white/20 bg-white/15 hover:bg-white/25 transition-colors disabled:opacity-50 text-white"
                     title="Close"
                   >
                     <X size={18} />
@@ -953,7 +960,7 @@ export default function Checkout() {
               {/* MERCHANT & ORDER AMOUNT */}
               <div className="px-6 pt-4 pb-1 text-center">
                 <p className="text-[13px] font-semibold text-ink uppercase tracking-wider">
-                  Botaniq Store
+                  {t("checkout_store_name", "Botaniq Store")}
                 </p>
                 <div className="mt-1 flex items-baseline justify-center gap-1">
                   <span className="text-[19px] font-semibold text-ink">$</span>
@@ -976,19 +983,19 @@ export default function Checkout() {
               {/* QR BODY: ACTIVE QR OR SUCCESS */}
               <div className="px-6 pb-4">
                 {paymentStatus === "paid" ? (
-                  <div className="rounded-none border border-moss/20 bg-moss-tint px-6 py-10 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-none border border-moss bg-moss text-white shadow-sm">
+                  <div className="rounded-2xl border border-moss/20 bg-moss-tint px-6 py-10 text-center">
+                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-moss bg-moss text-white shadow-sm">
                       <CheckCircle2 size={36} strokeWidth={2} />
                     </div>
                     <h3 className="mt-4 text-[17px] font-semibold text-ink">
-                      Payment Successful!
+                      {t("checkout_payment_successful", "Payment Successful!")}
                     </h3>
                     <p className="mt-1 text-[12px] text-stone">
-                      Thank you for your order.
+                      {t("checkout_thank_you", "Thank you for your order.")}
                     </p>
                     <div className="mt-4 flex items-center justify-center gap-2 text-[12px] text-moss font-medium">
                       <Loader2 size={14} className="animate-spin" />
-                      <span>Preparing your receipt...</span>
+                      <span>{t("checkout_preparing_receipt", "Preparing your receipt...")}</span>
                     </div>
                   </div>
                 ) : (
@@ -996,7 +1003,7 @@ export default function Checkout() {
                     {/* DYNAMIC QR CANVAS */}
                     <div
                       ref={qrCanvasRef}
-                      className="p-3 bg-white rounded-none shadow-xs border border-hairline/80 flex items-center justify-center"
+                      className="p-3 bg-white rounded-2xl shadow-xs border border-hairline/80 flex items-center justify-center overflow-hidden"
                     >
                       {paymentData.qr_string ? (
                         <QRCodeCanvas
@@ -1007,7 +1014,7 @@ export default function Checkout() {
                         />
                       ) : (
                         <div className="w-[220px] h-[220px] flex items-center justify-center text-stone text-xs">
-                          QR code not available
+                          {t("checkout_qr_unavailable", "QR code not available")}
                         </div>
                       )}
                     </div>
@@ -1020,7 +1027,7 @@ export default function Checkout() {
                         className="h-4 w-auto object-contain"
                       />
                       <span className="text-[11.5px] text-stone font-medium">
-                        Scan with any KHQR banking app
+                        {t("checkout_scan_with_khqr", "Scan with any KHQR banking app")}
                       </span>
                     </div>
 
@@ -1046,12 +1053,12 @@ export default function Checkout() {
                 <>
                   {/* COUNTDOWN */}
                   {paymentStatus === "expired" ? (
-                    <div className="rounded-none border border-clay/30 bg-clay-tint px-3 py-2 text-center text-[12px] font-medium text-clay">
-                      This QR code has expired. Please close and try again.
+                    <div className="rounded-xl border border-clay/30 bg-clay-tint px-3 py-2 text-center text-[12px] font-medium text-clay">
+                      {t("checkout_qr_expired", "This QR code has expired. Please close and try again.")}
                     </div>
                   ) : (
                     <div
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-none border ${
+                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border ${
                         isExpiringSoon
                           ? "border-clay/30 bg-clay-tint text-clay"
                           : "border-moss/20 bg-moss-tint text-moss-deep"
@@ -1060,7 +1067,7 @@ export default function Checkout() {
                       <div className="flex items-center gap-2">
                         <Clock3 size={15} strokeWidth={2} />
                         <span className="text-[11px] font-medium uppercase tracking-wider">
-                          {isExpiringSoon ? "Expires soon" : "Time remaining"}
+                          {isExpiringSoon ? t("checkout_expires_soon", "Expires soon") : t("checkout_time_remaining", "Time remaining")}
                         </span>
                       </div>
                       <span className="font-mono text-[16px] font-semibold tracking-wider">
@@ -1072,10 +1079,10 @@ export default function Checkout() {
                   {/* AUTO-CHECK INDICATOR */}
                   <div className="flex items-center justify-center gap-1.5 text-[11px] text-stone">
                     <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-none bg-moss opacity-75"></span>
-                      <span className="relative inline-flex rounded-none h-2 w-2 bg-moss"></span>
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-moss opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-moss"></span>
                     </span>
-                    <span>Checking payment automatically every 5s</span>
+                    <span>{t("checkout_checking_auto", "Checking payment automatically every 5s")}</span>
                   </div>
 
                   {/* REFERENCE MD5 */}
@@ -1083,7 +1090,7 @@ export default function Checkout() {
                     className="text-[11px] text-stone text-center truncate px-2"
                     title={paymentData.md5}
                   >
-                    Ref: <span className="font-mono text-ink/70">{paymentData.md5}</span>
+                    {t("checkout_ref", "Ref:")} <span className="font-mono text-ink/70">{paymentData.md5}</span>
                   </p>
 
                   {/* MANUAL VERIFY BUTTON */}
@@ -1091,15 +1098,15 @@ export default function Checkout() {
                     type="button"
                     onClick={() => checkPaymentStatus(true)}
                     disabled={checkingPayment || paymentStatus === "expired"}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-none bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs disabled:opacity-50"
+                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs disabled:opacity-50"
                   >
                     {checkingPayment && (
                       <Loader2 size={16} className="animate-spin" />
                     )}
                     <span>
                       {checkingPayment
-                        ? "Verifying Payment..."
-                        : "I Have Completed Payment"}
+                        ? t("checkout_verifying_payment", "Verifying Payment...")
+                        : t("checkout_i_have_paid", "I Have Completed Payment")}
                     </span>
                   </button>
 
@@ -1108,19 +1115,19 @@ export default function Checkout() {
                     <button
                       type="button"
                       onClick={handleCopyQr}
-                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-none hover:bg-paper text-ink text-[12px] font-medium transition-colors"
+                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors"
                     >
                       <Copy size={13} />
-                      <span>Copy KHQR</span>
+                      <span>{t("checkout_copy_khqr", "Copy KHQR")}</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={handleDownloadQr}
-                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-none hover:bg-paper text-ink text-[12px] font-medium transition-colors"
+                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors"
                     >
                       <Download size={13} />
-                      <span>Download QR</span>
+                      <span>{t("checkout_download_qr", "Download QR")}</span>
                     </button>
                   </div>
                 </>
@@ -1133,7 +1140,7 @@ export default function Checkout() {
                 disabled={checkingPayment || cancellingPayment}
                 className="w-full py-2 text-stone hover:text-ink text-[12.5px] font-medium transition-colors disabled:opacity-50"
               >
-                {cancellingPayment ? "Cancelling payment..." : "Cancel & Return to Cart"}
+                {cancellingPayment ? t("checkout_cancelling", "Cancelling payment...") : t("checkout_cancel_and_return", "Cancel & Return to Cart")}
               </button>
             </div>
           </div>
@@ -1144,4 +1151,4 @@ export default function Checkout() {
 }
 
 const inputClass =
-  "w-full px-3 py-2 rounded-none border border-hairline bg-paper text-[13.5px] focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss";
+  "w-full px-3 py-2 rounded-xl border border-hairline bg-paper text-[13.5px] focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss";
