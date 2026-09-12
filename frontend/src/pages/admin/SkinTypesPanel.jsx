@@ -206,8 +206,9 @@ export default function SkinTypesPanel() {
 
       {!loading && skinTypes.length > 0 && (
         <p className="text-[12.5px] text-stone mb-4">
-          {t("admin_skin_showing", "Showing {count} skin types", {
-            count: `${filteredSkinTypes.length} / ${skinTypes.length}`,
+          {t("admin_skin_showing", "Showing {count} of {total}", {
+            count: filteredSkinTypes.length,
+            total: skinTypes.length,
           })}
         </p>
       )}

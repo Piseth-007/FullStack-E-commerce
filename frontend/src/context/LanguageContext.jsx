@@ -36,10 +36,46 @@ export function LanguageProvider({ children }) {
   }, [language]);
 
   const t = useCallback(
-    (key, fallback = "") => {
-      const text = translations[language]?.[key] ?? translations.en?.[key];
-      if (text !== undefined) return text;
-      return fallback || key;
+    (key, fallbackOrParams = "", maybeParams = null) => {
+      let fallback = "";
+      let params = null;
+
+      if (typeof fallbackOrParams === "object" && fallbackOrParams !== null) {
+        params = fallbackOrParams;
+      } else {
+        fallback = typeof fallbackOrParams === "string" ? fallbackOrParams : "";
+        if (typeof maybeParams === "object" && maybeParams !== null) {
+          params = maybeParams;
+        }
+      }
+
+      let text = translations[language]?.[key] ?? translations.en?.[key];
+      if (text === undefined) {
+        text = fallback || key;
+      }
+
+      if (params && typeof text === "string") {
+        const mergedParams = { ...params };
+        if (mergedParams.current !== undefined && mergedParams.page === undefined) {
+          mergedParams.page = mergedParams.current;
+        }
+        if (mergedParams.page !== undefined && mergedParams.current === undefined) {
+          mergedParams.current = mergedParams.page;
+        }
+
+        Object.entries(mergedParams).forEach(([paramKey, paramVal]) => {
+          text = text.replaceAll(`{${paramKey}}`, String(paramVal ?? ""));
+        });
+
+        if (text.includes("{total}") && mergedParams.total === undefined) {
+          text = text
+            .replaceAll(" of {total}", "")
+            .replaceAll(" នៃ {total}", "")
+            .replaceAll("{total}", "");
+        }
+      }
+
+      return text;
     },
     [language],
   );

@@ -286,8 +286,9 @@ export default function Orders() {
         {!loading && orders.length > 0 && (
           <div className="mt-3 flex items-center justify-between border-t border-hairline pt-3">
             <p className="text-[12px] text-stone">
-              {t("admin_orders_showing", "Showing {count} orders", {
-                count: `${filteredOrders.length} / ${orders.length}`,
+              {t("admin_orders_showing", "Showing {count} of {total} orders", {
+                count: filteredOrders.length,
+                total: orders.length,
               })}
             </p>
             {search && (
@@ -675,8 +676,9 @@ function Pagination({
   return (
     <div className="flex flex-col gap-3 py-5 print:hidden sm:flex-row sm:items-center sm:justify-between">
       <p className="text-[12px] text-stone">
-        {t("admin_orders_showing", "Showing {count} orders", {
-          count: `${startOrder}–${endOrder} / ${totalOrders}`,
+        {t("admin_orders_showing", "Showing {count} of {total} orders", {
+          count: `${startOrder}–${endOrder}`,
+          total: totalOrders,
         })}
       </p>
       <div className="flex items-center gap-2">
@@ -690,8 +692,8 @@ function Pagination({
           <ChevronLeft size={16} />
         </button>
         <span className="min-w-21.25 text-center text-[12px] text-stone">
-          {t("admin_prod_page", "Page {current} of {total}", {
-            current: currentPage,
+          {t("admin_prod_page", "Page {page} of {total}", {
+            page: currentPage,
             total: totalPages,
           })}
         </span>

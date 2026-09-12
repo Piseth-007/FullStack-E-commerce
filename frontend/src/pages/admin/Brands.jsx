@@ -246,8 +246,9 @@ export default function Brands() {
       {/* Result count */}
       {!loading && brands.length > 0 && (
         <p className="text-[12.5px] text-stone mb-4">
-          {t("admin_brand_showing", "Showing {count} brands", {
-            count: `${filteredBrands.length} / ${brands.length}`,
+          {t("admin_brand_showing", "Showing {count} of {total} brands", {
+            count: filteredBrands.length,
+            total: brands.length,
           })}
         </p>
       )}

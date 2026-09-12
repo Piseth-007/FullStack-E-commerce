@@ -679,8 +679,8 @@ function Pagination({ currentPage, totalPages, onPrevious, onNext }) {
       </button>
 
       <span className="min-w-21.25 text-center text-[12px] text-stone">
-        {t("admin_prod_page", "Page {current} of {total}", {
-          current: currentPage,
+        {t("admin_prod_page", "Page {page} of {total}", {
+          page: currentPage,
           total: totalPages,
         })}
       </span>
