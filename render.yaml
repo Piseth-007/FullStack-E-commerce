@@ -1,0 +1,63 @@
+services:
+  - type: web
+    name: botaniq-backend
+    runtime: docker
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    plan: free
+    region: singapore
+    envVars:
+      - key: APP_NAME
+        value: Botaniq
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_URL
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: mysql
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        value: "3306"
+      - key: DB_DATABASE
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: SANCTUM_EXPIRATION
+        value: "10080"
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: BAKONG_TOKEN
+        sync: false
+      - key: BAKONG_ACCOUNT_ID
+        sync: false
+      - key: BAKONG_MERCHANT_NAME
+        value: "Botaniq"
+      - key: BAKONG_MERCHANT_CITY
+        value: "Phnom Penh"
+      - key: MAIL_MAILER
+        value: smtp
+      - key: MAIL_HOST
+        sync: false
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_USERNAME
+        sync: false
+      - key: MAIL_PASSWORD
+        sync: false
+      - key: MAIL_ENCRYPTION
+        value: tls
+      - key: MAIL_FROM_ADDRESS
+        value: "care@botaniq.com"
+      - key: MAIL_FROM_NAME
+        value: "${APP_NAME}"
+      - key: GOOGLE_CLIENT_ID
+        sync: false

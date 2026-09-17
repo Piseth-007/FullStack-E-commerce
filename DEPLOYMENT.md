@@ -27,27 +27,61 @@ The React SPA is pre-configured with `vercel.json` and `_redirects` for clean cl
 
 ---
 
-## 2. Backend Deployment
+## 2. Backend Deployment on Render
 
-### Option A: Railway / Render (PaaS — Quick & Simple)
+Because Render does not have a native PHP runtime, the backend is configured to deploy as a **Docker Web Service** using [`backend/Dockerfile`](file:///c:/xampp/htdocs/Laravel/e-commerce/backend/Dockerfile).
 
-1. Create a new service on [Railway](https://railway.app) or [Render](https://render.com).
-2. Connect your GitHub repository: `Piseth-007/FullStack-E-commerce`.
-3. Set **Root Directory** to `backend`.
-4. Add a managed **MySQL Database** service and link database credentials.
-5. Set environment variables (see [Backend Environment Variables](#3-backend-environment-variables)).
-6. **Build Command:**
-   ```bash
-   composer install --no-dev --optimize-autoloader && php artisan config:cache && php artisan route:cache && php artisan view:cache
-   ```
-7. **Start Command:**
-   ```bash
-   php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=$PORT
-   ```
+### Step 1: Provision a Free MySQL Database
+> [!NOTE]
+> Render only offers managed PostgreSQL natively. Because this application relies on MySQL, use a free cloud MySQL provider:
+> - **[Aiven for MySQL](https://aiven.io)** (Recommended: Free tier, 5GB storage, SSL enabled)
+> - or **[Railway](https://railway.app)** (Free MySQL instance)
+
+Once your cloud database is created, note down:
+- `DB_HOST`
+- `DB_PORT` (usually `3306` or Aiven's custom port)
+- `DB_DATABASE`
+- `DB_USERNAME`
+- `DB_PASSWORD`
 
 ---
 
-### Option B: Ubuntu VPS (DigitalOcean / AWS EC2 / Hetzner)
+### Step 2: Deploy Backend Web Service on Render
+
+1. Go to [dashboard.render.com](https://dashboard.render.com) &rarr; click **New +** &rarr; **Web Service**.
+2. Connect your GitHub repository: `Piseth-007/FullStack-E-commerce`.
+3. Configure Service:
+   - **Name:** `botaniq-backend`
+   - **Region:** `Singapore` (or nearest to your audience)
+   - **Root Directory:** `backend`
+   - **Runtime:** `Docker`
+   - **Dockerfile Path:** `./Dockerfile`
+   - **Instance Type:** `Free`
+4. Add **Environment Variables**:
+   | Variable | Example Value | Description |
+   | :--- | :--- | :--- |
+   | `APP_NAME` | `Botaniq` | Application name |
+   | `APP_ENV` | `production` | Environment mode |
+   | `APP_DEBUG` | `false` | Disable debug stack traces |
+   | `APP_KEY` | *(Click Generate or paste 32-char key)* | Encryption key |
+   | `APP_URL` | `https://botaniq-backend.onrender.com` | Your Render service URL |
+   | `FRONTEND_URL` | `https://your-store.vercel.app` | Your Vercel frontend URL |
+   | `DB_CONNECTION` | `mysql` | Driver |
+   | `DB_HOST` | `mysql-xxxxx.aivencloud.com` | Cloud DB host |
+   | `DB_PORT` | `3306` (or Aiven port) | DB port |
+   | `DB_DATABASE` | `defaultdb` | DB name |
+   | `DB_USERNAME` | `avnadmin` | DB user |
+   | `DB_PASSWORD` | `your_db_password` | DB password |
+   | `SANCTUM_EXPIRATION` | `10080` | Token expiration (7 days) |
+   | `CLOUDINARY_URL` | `cloudinary://key:secret@name` | Cloudinary credentials |
+   | `BAKONG_TOKEN` | `your_bakong_token` | Bakong KHQR token |
+   | `BAKONG_ACCOUNT_ID` | `account@bank` | Bakong account ID |
+5. Click **Create Web Service**.
+   - Render will build the Docker container, run migrations (`php artisan migrate --force`), and start Apache on `$PORT` automatically.
+
+---
+
+### Option B: Alternative - Ubuntu VPS (DigitalOcean / AWS EC2 / Hetzner)
 
 #### 1. Server Packages Installation
 ```bash
@@ -184,3 +218,4 @@ GOOGLE_CLIENT_ID=your_google_client_id
 - [ ] **Google Console Origins:** In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), add your deployed frontend URL (e.g. `https://your-store.vercel.app`) to **Authorized JavaScript origins**.
 - [ ] **Verify Bakong KHQR:** Ensure payment checkout creates valid QR codes on live transactions.
 - [ ] **Verify Email Delivery:** Register a new test user to confirm the 6-digit OTP email is sent and received.
+
