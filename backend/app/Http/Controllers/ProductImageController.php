@@ -11,7 +11,7 @@ class ProductImageController extends Controller
     {
         $request->validate([
             'images' => 'required|array',
-            'images.*' => 'image|max:4096',
+            'images.*' => 'image|mimes:jpeg,png,webp,jpg|max:4096',
         ]);
 
         $existing = $product->images ?? [];
