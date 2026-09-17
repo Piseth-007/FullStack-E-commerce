@@ -19,6 +19,7 @@ use App\Http\Controllers\ProductImageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkinTypeController;
+use App\Http\Controllers\SubscriberController;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/register', [AuthController::class, 'register']);
@@ -63,6 +64,10 @@ Route::get(
     '/products/{product}/reviews',
     [ReviewController::class, 'index']
 );
+
+Route::post('/newsletter/subscribe', [SubscriberController::class, 'subscribe'])
+    ->middleware('throttle:10,1');
+Route::post('/newsletter/unsubscribe', [SubscriberController::class, 'unsubscribe']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -186,4 +191,5 @@ Route::middleware([
     Route::post('/admin/settings/notifications/test-telegram', [SettingController::class, 'testTelegram']);
     Route::get('/admin/notifications/counts', [NotificationController::class, 'counts']);
     Route::post('/admin/notifications/mark-viewed/{section}', [NotificationController::class, 'markViewed']);
+    Route::get('/admin/subscribers', [SubscriberController::class, 'adminIndex']);
 });

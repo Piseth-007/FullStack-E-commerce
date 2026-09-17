@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Leaf, ArrowRight, ShieldCheck, Check, Languages } from "lucide-react";
+import { Leaf, ArrowRight, ShieldCheck, Check, Languages, Loader2 } from "lucide-react";
 import { createElement } from "react";
+import api from "../../api/axios";
 import { useStoreSettings } from "../../context/StoreSettingsContext";
 import { useLanguage } from "../../context/useLanguage";
 import { validateRealEmail } from "../../utils/emailValidation";
@@ -51,9 +52,10 @@ export default function Footer() {
   const { t, language, setLanguage } = useLanguage();
   const [email, setEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
   const [error, setError] = useState("");
 
-  const handleSubscribe = (e) => {
+  const handleSubscribe = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -63,20 +65,32 @@ export default function Footer() {
       return;
     }
 
-    setSubscribed(true);
-    setEmail("");
+    setSubscribing(true);
+    try {
+      await api.post("/newsletter/subscribe", { email: email.trim() });
+      setSubscribed(true);
+      setEmail("");
+    } catch (err) {
+      const msg =
+        err.response?.data?.errors?.email?.[0] ||
+        err.response?.data?.message ||
+        t("footer_subscribe_err", "Failed to subscribe. Please try again.");
+      setError(msg);
+    } finally {
+      setSubscribing(false);
+    }
   };
 
   return (
     <footer className="border-t border-hairline bg-surface">
       {/* Newsletter strip */}
       <div className="border-b border-hairline bg-moss-tint">
-        <div className="max-w-6xl mx-auto px-6 py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div>
-            <p className="font-display text-[20px] font-medium text-ink mb-1">
+            <p className="font-display text-lg sm:text-[20px] font-medium text-ink mb-1">
               {t("footer_newsletter_title", "Skincare notes, in your inbox")}
             </p>
-            <p className="text-[13px] text-stone">
+            <p className="text-xs sm:text-[13px] text-stone">
               {t("footer_newsletter_desc", "New arrivals, restocks, and the occasional ingredient deep-dive. No spam.")}
             </p>
           </div>
@@ -92,25 +106,36 @@ export default function Footer() {
             <div className="w-full lg:w-auto max-w-sm">
               <form
                 onSubmit={handleSubscribe}
-                className="flex w-full gap-2"
+                className="flex flex-col sm:flex-row w-full gap-2"
               >
                 <input
                   type="email"
                   required
                   value={email}
+                  disabled={subscribing}
                   onChange={(e) => {
                     setEmail(e.target.value);
                     if (error) setError("");
                   }}
                   placeholder="you@example.com"
-                  className="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/25 focus:border-moss transition-colors"
+                  className="flex-1 min-w-0 px-4 py-2.5 rounded-xl border border-hairline bg-surface text-[13.5px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/25 focus:border-moss transition-colors disabled:opacity-60"
                 />
                 <button
                   type="submit"
-                  className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-moss text-white text-[13px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all shrink-0"
+                  disabled={subscribing}
+                  className="flex items-center justify-center gap-1.5 px-4 py-2.5 rounded-xl bg-moss text-white text-[13px] font-medium hover:bg-moss-deep active:scale-[0.98] transition-all shrink-0 disabled:opacity-60"
                 >
-                  {t("footer_subscribe", "Subscribe")}
-                  <ArrowRight size={14} strokeWidth={2} />
+                  {subscribing ? (
+                    <>
+                      <Loader2 size={14} className="animate-spin" />
+                      <span>{t("footer_subscribing", "Joining...")}</span>
+                    </>
+                  ) : (
+                    <>
+                      {t("footer_subscribe", "Subscribe")}
+                      <ArrowRight size={14} strokeWidth={2} />
+                    </>
+                  )}
                 </button>
               </form>
               {error && (
@@ -122,7 +147,7 @@ export default function Footer() {
       </div>
 
       {/* Link columns */}
-      <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-2 md:grid-cols-5 gap-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 sm:py-14 grid grid-cols-2 md:grid-cols-5 gap-8">
         <div className="col-span-2">
           <Link to="/" className="flex items-center gap-2 mb-3">
             {store.logo?.url ? (
@@ -189,12 +214,12 @@ export default function Footer() {
 
       {/* Bottom bar */}
       <div className="border-t border-hairline">
-        <div className="max-w-6xl mx-auto px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-5 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
           <p className="text-[12px] text-stone font-mono">
             © {new Date().getFullYear()} {store.name || "Botaniq"}. {t("footer_rights", "All rights reserved.")}
           </p>
 
-          <div className="flex flex-wrap items-center gap-4 sm:gap-5">
+          <div className="flex flex-wrap items-center justify-center sm:justify-end gap-3.5 sm:gap-5">
             {/* Language switch */}
             <div className="flex items-center rounded-full border border-hairline bg-paper p-1 text-[11px] font-medium shadow-2xs">
               <button

@@ -434,8 +434,10 @@ export default function ProductCard({ product }) {
               className="
                 flex
                 min-w-0
+                flex-wrap
                 items-baseline
-                gap-2
+                gap-1.5
+                sm:gap-2
               "
             >
               <span

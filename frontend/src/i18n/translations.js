@@ -25,6 +25,8 @@ export const translations = {
     nav_lang_km: "ភាសាខ្មែរ",
     nav_best_rated: "Best rated",
     nav_promotions: "Promotions",
+    search_popular: "Popular searches",
+    search_explore_categories: "Explore categories",
 
     // Home Page
     home_badge_clean: "Clean, effective skincare",
@@ -177,7 +179,9 @@ export const translations = {
     footer_newsletter_title: "Skincare notes, in your inbox",
     footer_newsletter_desc: "New arrivals, restocks, and the occasional ingredient deep-dive. No spam.",
     footer_subscribe: "Subscribe",
+    footer_subscribing: "Joining...",
     footer_subscribed: "You're on the list",
+    footer_subscribe_err: "Failed to subscribe. Please try again.",
     footer_rights: "All rights reserved.",
     footer_store_hours: "Store hours",
     footer_privacy: "Privacy Policy",
@@ -739,6 +743,8 @@ export const translations = {
     nav_lang_km: "ភាសាខ្មែរ",
     nav_best_rated: "វាយតម្លៃល្អបំផុត",
     nav_promotions: "ការបញ្ចុះតម្លៃពិសេស",
+    search_popular: "ការស្វែងរកពេញនិយម",
+    search_explore_categories: "ស្វែងរកតាមប្រភេទ",
 
     // Home Page
     home_badge_clean: "ផលិតផលថែរក្សាស្បែកបែបធម្មជាតិ",
@@ -891,7 +897,9 @@ export const translations = {
     footer_newsletter_title: "ទទួលបានព័ត៌មានអំពីការថែរក្សាស្បែក",
     footer_newsletter_desc: "ផលិតផលទើបមកដល់ ការបញ្ចុះតម្លៃ និងចំណេះដឹងអំពីគ្រឿងផ្សំ។ គ្មានសារឥតប្រយោជន៍។",
     footer_subscribe: "ជាវព័ត៌មាន",
+    footer_subscribing: "កំពុងជាវ...",
     footer_subscribed: "អ្នកបានចុះឈ្មោះជោគជ័យ",
+    footer_subscribe_err: "មិនអាចជាវបានទេ។ សូមព្យាយាមម្តងទៀត។",
     footer_rights: "រក្សាសិទ្ធិគ្រប់យ៉ាង។",
     footer_store_hours: "ម៉ោងធ្វើការ",
     footer_privacy: "គោលការណ៍ភាពឯកជន",

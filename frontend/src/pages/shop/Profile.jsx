@@ -138,8 +138,14 @@ function getProfileImage(user) {
 }
 
 export default function Profile() {
-  const { user, updateProfile, updatePassword, updateProfileImage, logout } =
-    useContext(AuthContext);
+  const {
+    user,
+    updateProfile,
+    updatePassword,
+    updateProfileImage,
+    removeProfileImage,
+    logout,
+  } = useContext(AuthContext);
 
   const { showToast } = useContext(ToastContext);
   const { confirm } = useContext(ConfirmContext);
@@ -258,10 +264,20 @@ export default function Profile() {
       return;
     }
 
-    const emailCheck = validateRealEmail(form.email);
-    if (!emailCheck.isValid) {
+    const isEmailChanged =
+      form.email.trim().toLowerCase() !== (user?.email || "").toLowerCase();
+
+    if (isEmailChanged) {
+      const emailCheck = validateRealEmail(form.email);
+      if (!emailCheck.isValid) {
+        setFormErrors({
+          email: emailCheck.error,
+        });
+        return;
+      }
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) {
       setFormErrors({
-        email: emailCheck.error,
+        email: "Please enter a valid email address.",
       });
       return;
     }
@@ -278,10 +294,8 @@ export default function Profile() {
 
       if (profileImage) {
         await updateProfileImage(profileImage);
-      }
-
-      if (removeImage) {
-        showToast?.("Photo removal isn't supported yet.", "error");
+      } else if (removeImage) {
+        await removeProfileImage();
       }
 
       setProfileImage(null);
@@ -441,9 +455,40 @@ export default function Profile() {
         color: "var(--color-ink)",
       }}
     >
-      <div className="max-w-5xl mx-auto px-5 sm:px-6 lg:px-8 py-10 md:py-14">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-16">
-          <aside className="md:col-span-1">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 md:py-14">
+        {/* Mobile Horizontal Tabs */}
+        <div className="md:hidden mb-6">
+          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-hide">
+            {NAV.map((item) => {
+              const selected = active === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setActive(item.key)}
+                  className={`px-3.5 py-2 text-xs font-medium rounded-full shrink-0 transition-all ${
+                    selected
+                      ? "bg-moss text-white shadow-xs"
+                      : "bg-surface border border-hairline text-stone hover:text-ink"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium rounded-full shrink-0 text-clay bg-surface border border-hairline hover:bg-clay-tint transition-colors ml-auto"
+            >
+              <LogOut size={13} strokeWidth={1.7} />
+              <span>Sign out</span>
+            </button>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-16">
+          <aside className="hidden md:block md:col-span-1">
             <nav aria-label="Profile navigation">
               <div className="md:sticky md:top-8">
                 <div className="mb-5">

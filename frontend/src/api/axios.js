@@ -31,8 +31,11 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("token");
 
-      if (window.location.pathname !== "/login") {
-        window.location.href = "/login";
+      const isAdmin = window.location.pathname.startsWith("/admin");
+      const targetLogin = isAdmin ? "/admin/login" : "/login";
+
+      if (window.location.pathname !== targetLogin) {
+        window.location.href = targetLogin;
       }
     }
 

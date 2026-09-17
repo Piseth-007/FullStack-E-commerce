@@ -12,11 +12,10 @@ export default function AdminLogin() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const { login, user, loading: authLoading } = useAuth();
+  const { login, logout, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
-  
   if (!authLoading && user?.role === "admin") {
     const redirectTo = location.state?.from || "/admin/dashboard";
     return <Navigate to={redirectTo} replace />;
@@ -29,6 +28,15 @@ export default function AdminLogin() {
     try {
       const loggedInUser = await login(email, password);
       if (loggedInUser.role !== "admin") {
+        if (typeof logout === "function") {
+          try {
+            await logout();
+          } catch {
+            localStorage.removeItem("token");
+          }
+        } else {
+          localStorage.removeItem("token");
+        }
         setError("This account does not have admin access.");
         return;
       }

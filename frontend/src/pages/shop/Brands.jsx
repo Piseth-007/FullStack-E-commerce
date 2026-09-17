@@ -15,7 +15,7 @@ export default function Brand() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-14">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
       <style>{`
         @keyframes brand-fade-up {
           from { opacity: 0; transform: translateY(16px); }
@@ -30,23 +30,23 @@ export default function Brand() {
       `}</style>
 
       {/* Hero */}
-      <div className="brand-fade-up text-center max-w-xl mx-auto mb-12">
+      <div className="brand-fade-up text-center max-w-xl mx-auto mb-8 sm:mb-12">
         <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss mb-2">
           Our partners
         </p>
 
-        <h1 className="font-display text-[34px] sm:text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
+        <h1 className="font-display text-2xl sm:text-[36px] md:text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
           Shop by brand
         </h1>
 
-        <p className="mt-3 text-[14px] leading-relaxed text-stone">
+        <p className="mt-2.5 sm:mt-3 text-xs sm:text-[14px] leading-relaxed text-stone">
           Trusted formulas from skincare brands we've carefully selected.
         </p>
       </div>
 
       {/* Content */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
@@ -67,7 +67,7 @@ export default function Brand() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
           {brands.map((brand, index) => (
             <BrandCard key={brand.id} brand={brand} index={index} />
           ))}
@@ -83,20 +83,20 @@ function BrandCard({ brand, index }) {
   return (
     <Link
       to={`/products?brand_id=${brand.id}`}
-      className="brand-fade-up group relative flex aspect-square flex-col items-center justify-center gap-3 overflow-hidden rounded-2xl border border-hairline bg-surface p-5 text-center transition-all duration-500 hover:-translate-y-1.5 hover:border-moss/30 hover:shadow-[0_20px_40px_rgba(33,31,27,0.08)]"
+      className="brand-fade-up group relative flex aspect-square flex-col items-center justify-center gap-2.5 sm:gap-3 overflow-hidden rounded-2xl border border-hairline bg-surface p-3.5 sm:p-5 text-center transition-all duration-500 hover:-translate-y-1.5 hover:border-moss/30 hover:shadow-[0_20px_40px_rgba(33,31,27,0.08)]"
       style={{ animationDelay: `${delay}ms` }}
     >
       {/* Arrow */}
-      <span className="absolute right-3 top-3 flex h-7 w-7 items-center justify-center rounded-full border border-hairline bg-paper text-stone opacity-0 transition-all duration-300 group-hover:opacity-100 group-hover:border-moss group-hover:bg-moss group-hover:text-white">
+      <span className="absolute right-2.5 top-2.5 sm:right-3 sm:top-3 flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-full border border-hairline bg-paper text-stone opacity-70 sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-300 group-hover:border-moss group-hover:bg-moss group-hover:text-white">
         <ArrowUpRight
-          size={14}
+          size={13}
           strokeWidth={2}
           className="transition-transform duration-300 group-hover:rotate-45"
         />
       </span>
 
       {/* Logo / fallback */}
-      <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-xl bg-paper transition-transform duration-500 group-hover:scale-105">
+      <div className="flex h-13 w-13 sm:h-16 sm:w-16 items-center justify-center overflow-hidden rounded-xl bg-paper transition-transform duration-500 group-hover:scale-105">
         {brand.logo_url ? (
           <img
             src={brand.logo_url}
@@ -104,13 +104,13 @@ function BrandCard({ brand, index }) {
             className="h-full w-full object-contain p-2"
           />
         ) : (
-          <span className="font-display text-[22px] font-medium text-moss">
+          <span className="font-display text-lg sm:text-[22px] font-medium text-moss">
             {brand.name?.charAt(0).toUpperCase() || "B"}
           </span>
         )}
       </div>
 
-      <h3 className="font-display text-[15px] font-medium capitalize text-ink leading-tight">
+      <h3 className="font-display text-xs sm:text-[15px] font-medium capitalize text-ink leading-tight truncate max-w-full px-1">
         {brand.name}
       </h3>
     </Link>

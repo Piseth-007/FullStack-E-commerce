@@ -240,9 +240,14 @@ class AuthController extends Controller
     {
         $user = $request->user();
 
+        $emailRules = ['required', 'string', 'max:255', 'unique:users,email,' . $user->id];
+        if ($request->filled('email') && strtolower(trim($request->email)) !== strtolower(trim($user->email))) {
+            $emailRules[] = new RealEmail();
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'max:255', 'unique:users,email,' . $user->id, new RealEmail()],
+            'email' => $emailRules,
             'phone' => 'nullable|string|max:30',
         ]);
 

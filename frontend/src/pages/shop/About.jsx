@@ -71,7 +71,7 @@ export default function About() {
       `}</style>
 
 
-      <section className="relative px-6 pt-20 pb-24 text-center">
+      <section className="relative px-4 sm:px-6 pt-12 sm:pt-20 pb-14 sm:pb-24 text-center">
         <div className="about-pulse pointer-events-none absolute left-1/2 top-10 z-0 h-72 w-72 -translate-x-1/2 rounded-full bg-moss/[0.07] blur-3xl" />
 
         <Reveal>
@@ -79,22 +79,22 @@ export default function About() {
             {t("about_story_badge")}
           </p>
 
-          <h1 className="mx-auto max-w-2xl font-display text-[38px] sm:text-[48px] font-medium leading-[1.08] tracking-[-0.02em] text-ink">
+          <h1 className="mx-auto max-w-2xl font-display text-3xl sm:text-[42px] md:text-[48px] font-medium leading-[1.08] tracking-[-0.02em] text-ink">
             {t("about_hero_title")}
           </h1>
 
-          <p className="mx-auto mt-5 max-w-lg text-[15px] leading-relaxed text-stone">
+          <p className="mx-auto mt-4 sm:mt-5 max-w-lg text-sm sm:text-[15px] leading-relaxed text-stone">
             {t("about_hero_desc")}
           </p>
         </Reveal>
       </section>
 
 
-      <section className="px-6 pb-20">
+      <section className="px-4 sm:px-6 pb-12 sm:pb-20">
         <div className="mx-auto grid max-w-3xl grid-cols-1 gap-4 sm:grid-cols-3">
           {stats.map((stat, index) => (
             <Reveal key={stat.label} delay={index * 100}>
-              <div className="rounded-2xl border border-hairline bg-surface p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(33,31,27,0.06)]">
+              <div className="rounded-2xl border border-hairline bg-surface p-5 sm:p-6 text-center transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_16px_32px_rgba(33,31,27,0.06)]">
                 <div className="mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-moss-tint">
                   <stat.icon
                     size={18}
@@ -114,7 +114,7 @@ export default function About() {
         </div>
       </section>
 
-      <section className="px-6 py-20 border-y border-hairline bg-surface">
+      <section className="px-4 sm:px-6 py-12 sm:py-20 border-y border-hairline bg-surface">
         <div className="mx-auto grid max-w-5xl items-center gap-12 lg:grid-cols-2">
           <Reveal>
             <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-linear-to-br from-moss/90 to-moss-deep">
@@ -149,37 +149,37 @@ export default function About() {
       {/* =====================================================
           VALUES
       ===================================================== */}
-      <section className="px-6 py-24">
+      <section className="px-4 sm:px-6 py-14 sm:py-24">
         <Reveal>
-          <div className="mx-auto max-w-xl text-center mb-14">
+          <div className="mx-auto max-w-xl text-center mb-10 sm:mb-14">
             <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss mb-2">
               {t("about_values_badge")}
             </p>
 
-            <h2 className="font-display text-[30px] sm:text-[34px] font-medium text-ink">
+            <h2 className="font-display text-2xl sm:text-[34px] font-medium text-ink">
               {t("about_values_title")}
             </h2>
           </div>
         </Reveal>
 
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 sm:grid-cols-2">
+        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-4 sm:gap-5 sm:grid-cols-2">
           {values.map((value, index) => (
             <Reveal key={value.title} delay={index * 100}>
-              <div className="group flex gap-4 rounded-2xl border border-hairline bg-surface p-6 transition-all duration-300 hover:-translate-y-1 hover:border-moss/30 hover:shadow-[0_16px_32px_rgba(33,31,27,0.06)]">
-                <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-moss-tint transition-all duration-300 group-hover:scale-105 group-hover:bg-moss">
+              <div className="group flex gap-3.5 sm:gap-4 rounded-2xl border border-hairline bg-surface p-4 sm:p-6 transition-all duration-300 hover:-translate-y-1 hover:border-moss/30 hover:shadow-[0_16px_32px_rgba(33,31,27,0.06)]">
+                <span className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-moss-tint transition-all duration-300 group-hover:scale-105 group-hover:bg-moss">
                   <value.icon
-                    size={19}
+                    size={18}
                     strokeWidth={1.5}
                     className="text-moss transition-colors duration-300 group-hover:text-white"
                   />
                 </span>
 
                 <div>
-                  <h3 className="text-[15px] font-medium text-ink mb-1.5">
+                  <h3 className="text-[14px] sm:text-[15px] font-medium text-ink mb-1">
                     {value.title}
                   </h3>
 
-                  <p className="text-[13px] leading-relaxed text-stone">
+                  <p className="text-xs sm:text-[13px] leading-relaxed text-stone">
                     {value.text}
                   </p>
                 </div>
@@ -189,13 +189,13 @@ export default function About() {
         </div>
       </section>
 
-      <section className="px-6 pb-24">
+      <section className="px-4 sm:px-6 pb-14 sm:pb-24">
         <Reveal>
-          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl bg-moss px-8 py-14 text-center sm:px-16">
+          <div className="relative mx-auto max-w-4xl overflow-hidden rounded-3xl bg-moss px-5 sm:px-16 py-10 sm:py-14 text-center">
             <div className="about-pulse pointer-events-none absolute -left-16 -top-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
             <div className="about-pulse pointer-events-none absolute -bottom-16 -right-16 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
 
-            <h2 className="relative font-display text-[26px] sm:text-[32px] font-medium leading-tight text-white">
+            <h2 className="relative font-display text-[22px] sm:text-[32px] font-medium leading-tight text-white">
               {t("about_cta_title")}
             </h2>
 

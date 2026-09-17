@@ -22,7 +22,7 @@ export default function Category() {
   }, []);
 
   return (
-    <div className="max-w-6xl mx-auto px-6 py-14">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-14">
       <style>{`
         @keyframes cat-fade-up {
           from { opacity: 0; transform: translateY(16px); }
@@ -37,16 +37,16 @@ export default function Category() {
       `}</style>
 
       {/* Hero */}
-      <div className="cat-fade-up text-center max-w-xl mx-auto mb-12">
+      <div className="cat-fade-up text-center max-w-xl mx-auto mb-8 sm:mb-12">
         <p className="text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss mb-2">
           Browse
         </p>
 
-        <h1 className="font-display text-[34px] sm:text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
+        <h1 className="font-display text-2xl sm:text-[36px] md:text-[40px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
           Shop by category
         </h1>
 
-        <p className="mt-3 text-[14px] leading-relaxed text-stone">
+        <p className="mt-2.5 sm:mt-3 text-xs sm:text-[14px] leading-relaxed text-stone">
           Explore our range, organized so you can find exactly what your skin
           needs.
         </p>
@@ -54,7 +54,7 @@ export default function Category() {
 
       {/* Content */}
       {loading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
           {Array.from({ length: 8 }).map((_, i) => (
             <div
               key={i}
@@ -77,7 +77,7 @@ export default function Category() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5">
           {categories.map((category, index) => (
             <CategoryCard key={category.id} category={category} index={index} />
           ))}
@@ -111,15 +111,15 @@ function CategoryCard({ category, index }) {
       </div>
 
       {/* Content */}
-      <div className="absolute inset-x-0 bottom-0 p-4 sm:p-5">
+      <div className="absolute inset-x-0 bottom-0 p-3 sm:p-5">
         <div className="flex items-end justify-between gap-2">
-          <h3 className="font-display text-[16px] sm:text-[18px] font-medium capitalize text-white leading-tight">
+          <h3 className="font-display text-sm sm:text-[18px] font-medium capitalize text-white leading-tight">
             {category.name}
           </h3>
 
-          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-all duration-300 group-hover:bg-surface group-hover:text-ink group-hover:border-surface">
+          <span className="flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-full border border-white/20 bg-white/15 text-white backdrop-blur-sm transition-all duration-300 group-hover:bg-surface group-hover:text-ink group-hover:border-surface">
             <ArrowUpRight
-              size={14}
+              size={13}
               strokeWidth={2}
               className="transition-transform duration-300 group-hover:rotate-45"
             />

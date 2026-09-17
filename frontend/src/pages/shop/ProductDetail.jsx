@@ -490,7 +490,7 @@ export default function ProductDetail() {
         }
       `}</style>
 
-      <div className="mx-auto max-w-6xl px-6 pt-7">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-5 sm:pt-7">
         <div className="flex items-center gap-2 text-[11px] text-stone">
           <Link to="/products" className="transition-colors hover:text-moss">
             {t("shop_title", "Shop")}
@@ -517,8 +517,8 @@ export default function ProductDetail() {
         </div>
       </div>
 
-      <main className="mx-auto max-w-6xl px-6 pb-20 pt-7">
-        <div className="grid items-start gap-10 p-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 pb-16 sm:pb-20 pt-5 sm:pt-7">
+        <div className="grid items-start gap-8 sm:gap-10 p-4 sm:p-6 lg:p-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
           <div className="product-detail-fade">
             <div className="group relative aspect-square overflow-hidden rounded-2xl border border-hairline bg-surface">
               <div className="product-detail-pulse pointer-events-none absolute -right-16 -top-16 z-0 h-40 w-40 rounded-full bg-moss/6 blur-2xl" />
@@ -569,7 +569,7 @@ export default function ProductDetail() {
                     type="button"
                     onClick={previousImage}
                     aria-label="Previous image"
-                    className="absolute left-4 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-hairline/70 bg-surface/90 text-ink opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface group-hover:opacity-100"
+                    className="absolute left-3 sm:left-4 top-1/2 z-30 flex h-8 w-8 sm:h-9 sm:w-9 -translate-y-1/2 items-center justify-center rounded-full border border-hairline/70 bg-surface/90 text-ink opacity-90 lg:opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface lg:group-hover:opacity-100"
                   >
                     <ChevronLeft size={17} />
                   </button>
@@ -578,7 +578,7 @@ export default function ProductDetail() {
                     type="button"
                     onClick={nextImage}
                     aria-label="Next image"
-                    className="absolute right-4 top-1/2 z-30 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-full border border-hairline/70 bg-surface/90 text-ink opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface group-hover:opacity-100"
+                    className="absolute right-3 sm:right-4 top-1/2 z-30 flex h-8 w-8 sm:h-9 sm:w-9 -translate-y-1/2 items-center justify-center rounded-full border border-hairline/70 bg-surface/90 text-ink opacity-90 lg:opacity-0 shadow-sm backdrop-blur-md transition-all duration-300 hover:bg-surface lg:group-hover:opacity-100"
                   >
                     <ChevronRight size={17} />
                   </button>
@@ -602,7 +602,7 @@ export default function ProductDetail() {
                       key={image.public_id || image.id || imageUrl || index}
                       type="button"
                       onClick={() => setActiveImage(index)}
-                      className={`relative h-18.5 w-18.5 shrink-0 overflow-hidden rounded-xl border transition-all duration-300 ${
+                      className={`relative h-16 w-16 sm:h-18.5 sm:w-18.5 shrink-0 overflow-hidden rounded-xl border transition-all duration-300 ${
                         index === activeImage
                           ? "border-moss shadow-[0_6px_20px_rgba(63,88,67,0.12)]"
                           : "border-hairline opacity-65 hover:border-moss/30 hover:opacity-100"
@@ -807,7 +807,7 @@ export default function ProductDetail() {
                 type="button"
                 onClick={handleAddToCart}
                 disabled={adding || isOutOfStock}
-                className={`group flex h-12.5 flex-1 items-center justify-center gap-2 rounded-xl border px-5 text-[13px] font-medium text-white shadow-[0_10px_25px_rgba(63,88,67,0.14)] transition-all duration-300 ${
+                className={`group flex h-12.5 flex-1 items-center justify-center gap-2 rounded-xl border px-3 sm:px-5 text-[13px] font-medium text-white shadow-[0_10px_25px_rgba(63,88,67,0.14)] transition-all duration-300 ${
                   added
                     ? "border-moss-deep bg-moss-deep"
                     : "border-moss bg-moss hover:-translate-y-0.5 hover:bg-moss-deep hover:shadow-[0_14px_30px_rgba(63,88,67,0.22)]"

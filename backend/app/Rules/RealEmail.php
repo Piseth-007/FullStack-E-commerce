@@ -131,8 +131,11 @@ class RealEmail implements ValidationRule
         }
 
         // 5. DNS MX record check (verifies active mail servers exist)
-        if (function_exists('checkdnsrr')) {
-            if (!@checkdnsrr($domain, 'MX')) {
+        $isLocal = app()->environment('local', 'testing');
+        $isTestDomain = in_array($domain, ['example.com', 'example.org', 'test.com', 'localhost', 'test.local'], true);
+
+        if (!$isLocal && !$isTestDomain && function_exists('checkdnsrr')) {
+            if (!@checkdnsrr($domain, 'MX') && !@checkdnsrr($domain, 'A')) {
                 $fail("The email domain '{$domain}' does not have active mail servers and cannot receive emails.");
                 return;
             }

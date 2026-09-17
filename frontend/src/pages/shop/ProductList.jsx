@@ -349,8 +349,106 @@ export default function ProductList() {
   const isLoading = loading || fetching;
   const showSkeleton = loading && products.length === 0;
 
+  const renderFilterContent = () => (
+    <>
+      <FilterGroup icon={Tag} label={t("shop_category", "Category")}>
+        {categories.length === 0 ? (
+          <p className="text-[12.5px] text-stone">{t("shop_no_categories", "No categories yet.")}</p>
+        ) : (
+          categories.map((c) => (
+            <FilterOption
+              key={c.id}
+              label={c.name}
+              active={categoryId === String(c.id)}
+              onClick={() =>
+                updateParam(
+                  "category_id",
+                  categoryId === String(c.id) ? "" : c.id,
+                )
+              }
+            />
+          ))
+        )}
+      </FilterGroup>
+
+      <FilterGroup icon={Award} label={t("shop_brand", "Brand")}>
+        {brands.length === 0 ? (
+          <p className="text-[12.5px] text-stone">{t("shop_no_brands", "No brands yet.")}</p>
+        ) : (
+          brands.map((b) => (
+            <FilterOption
+              key={b.id}
+              label={b.name}
+              active={brandId === String(b.id)}
+              onClick={() =>
+                updateParam(
+                  "brand_id",
+                  brandId === String(b.id) ? "" : b.id,
+                )
+              }
+            />
+          ))
+        )}
+      </FilterGroup>
+
+      {skinTypes.length > 0 && (
+        <FilterGroup icon={Sparkles} label={t("shop_skin_type", "Skin Type")}>
+          {skinTypes.map((s) => (
+            <FilterOption
+              key={s.id}
+              label={s.name}
+              active={skinTypeId === String(s.id)}
+              onClick={() =>
+                updateParam(
+                  "skin_type_id",
+                  skinTypeId === String(s.id) ? "" : s.id,
+                )
+              }
+            />
+          ))}
+        </FilterGroup>
+      )}
+
+      <FilterGroup icon={Wallet} label={t("shop_price", "Price")}>
+        <div className="flex items-center gap-2">
+          <div className="relative flex-1">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-stone">
+              $
+            </span>
+            <input
+              type="number"
+              min="0"
+              placeholder={t("filter_min", "Min")}
+              defaultValue={minPrice}
+              onBlur={(e) => updateParam("min_price", e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
+              className="w-full pl-6 pr-2 py-1.5 rounded-lg border border-hairline bg-paper text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss"
+            />
+          </div>
+
+          <span className="text-stone text-[13px]">–</span>
+
+          <div className="relative flex-1">
+            <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-stone">
+              $
+            </span>
+            <input
+              type="number"
+              min="0"
+              placeholder={t("filter_max", "Max")}
+              defaultValue={maxPrice}
+              onBlur={(e) => updateParam("max_price", e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
+              className="w-full pl-6 pr-2 py-1.5 rounded-lg border border-hairline bg-paper text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss"
+            />
+          </div>
+        </div>
+      </FilterGroup>
+    </>
+  );
+
   return (
-    <div className="max-w-6xl mx-auto px-6 py-10">
+    <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-4 mb-1">
         <div>
@@ -425,9 +523,57 @@ export default function ProductList() {
         </div>
       )}
 
+      {/* Mobile/Tablet Filter Drawer Modal */}
+      {showFilters && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            onClick={() => setShowFilters(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed inset-y-0 right-0 max-w-xs w-full bg-surface border-l border-hairline shadow-2xl flex flex-col p-5 overflow-y-auto">
+            <div className="flex items-center justify-between pb-3.5 mb-4 border-b border-hairline">
+              <p className="text-[13px] font-semibold uppercase tracking-[0.08em] text-ink">
+                {t("shop_filters", "Filters")}
+              </p>
+              <button
+                type="button"
+                onClick={() => setShowFilters(false)}
+                className="p-1 rounded-full text-stone hover:text-ink hover:bg-paper transition-colors"
+                aria-label="Close filters"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="flex-1 space-y-6 overflow-y-auto pr-1">
+              {renderFilterContent()}
+            </div>
+
+            <div className="pt-4 mt-6 border-t border-hairline flex gap-2">
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex-1 py-2 rounded-xl border border-hairline text-stone hover:text-ink text-[12.5px] font-medium text-center transition-colors"
+              >
+                {t("shop_clear_all", "Clear all")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowFilters(false)}
+                className="flex-1 py-2 rounded-xl bg-moss text-white text-[12.5px] font-medium text-center hover:bg-moss-deep transition-colors shadow-xs"
+              >
+                {t("apply", "Apply")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="flex gap-8 items-start">
+        {/* Desktop Sticky Sidebar */}
         {showFilters && (
-          <aside className="w-64 shrink-0 rounded-xl border border-hairline bg-surface p-5 space-y-6 lg:sticky lg:top-24">
+          <aside className="hidden lg:block w-64 shrink-0 rounded-xl border border-hairline bg-surface p-5 space-y-6 lg:sticky lg:top-24">
             <div className="flex items-center justify-between">
               <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone">
                 {t("shop_filters", "Filters")}
@@ -435,106 +581,14 @@ export default function ProductList() {
 
               <button
                 onClick={() => setShowFilters(false)}
-                className="text-stone hover:text-ink transition-colors lg:hidden"
+                className="text-stone hover:text-ink transition-colors"
                 aria-label="Close filters"
               >
                 <X size={16} />
               </button>
             </div>
 
-            <FilterGroup icon={Tag} label={t("shop_category", "Category")}>
-              {categories.length === 0 ? (
-                <p className="text-[12.5px] text-stone">{t("shop_no_categories", "No categories yet.")}</p>
-              ) : (
-                categories.map((c) => (
-                  <FilterOption
-                    key={c.id}
-                    label={c.name}
-                    active={categoryId === String(c.id)}
-                    onClick={() =>
-                      updateParam(
-                        "category_id",
-                        categoryId === String(c.id) ? "" : c.id,
-                      )
-                    }
-                  />
-                ))
-              )}
-            </FilterGroup>
-
-            <FilterGroup icon={Award} label={t("shop_brand", "Brand")}>
-              {brands.length === 0 ? (
-                <p className="text-[12.5px] text-stone">{t("shop_no_brands", "No brands yet.")}</p>
-              ) : (
-                brands.map((b) => (
-                  <FilterOption
-                    key={b.id}
-                    label={b.name}
-                    active={brandId === String(b.id)}
-                    onClick={() =>
-                      updateParam(
-                        "brand_id",
-                        brandId === String(b.id) ? "" : b.id,
-                      )
-                    }
-                  />
-                ))
-              )}
-            </FilterGroup>
-
-            {skinTypes.length > 0 && (
-              <FilterGroup icon={Sparkles} label={t("shop_skin_type", "Skin Type")}>
-                {skinTypes.map((s) => (
-                  <FilterOption
-                    key={s.id}
-                    label={s.name}
-                    active={skinTypeId === String(s.id)}
-                    onClick={() =>
-                      updateParam(
-                        "skin_type_id",
-                        skinTypeId === String(s.id) ? "" : s.id,
-                      )
-                    }
-                  />
-                ))}
-              </FilterGroup>
-            )}
-
-            <FilterGroup icon={Wallet} label={t("shop_price", "Price")}>
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-stone">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder={t("filter_min", "Min")}
-                    defaultValue={minPrice}
-                    onBlur={(e) => updateParam("min_price", e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
-                    className="w-full pl-6 pr-2 py-1.5 rounded-lg border border-hairline bg-paper text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss"
-                  />
-                </div>
-
-                <span className="text-stone text-[13px]">–</span>
-
-                <div className="relative flex-1">
-                  <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[13px] text-stone">
-                    $
-                  </span>
-                  <input
-                    type="number"
-                    min="0"
-                    placeholder={t("filter_max", "Max")}
-                    defaultValue={maxPrice}
-                    onBlur={(e) => updateParam("max_price", e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && e.target.blur()}
-                    className="w-full pl-6 pr-2 py-1.5 rounded-lg border border-hairline bg-paper text-[13px] font-mono focus:outline-none focus:ring-2 focus:ring-moss/30 focus:border-moss"
-                  />
-                </div>
-              </div>
-            </FilterGroup>
+            {renderFilterContent()}
           </aside>
         )}
 
@@ -607,7 +661,7 @@ export default function ProductList() {
               )}
 
               <div
-                className={`grid grid-cols-2 sm:grid-cols-3 gap-5 sm:gap-6 mb-10 transition-opacity duration-200 ${
+                className={`grid grid-cols-2 sm:grid-cols-3 gap-3.5 sm:gap-6 mb-10 transition-opacity duration-200 ${
                   fetching ? "opacity-60 pointer-events-none" : ""
                 }`}
               >
@@ -617,7 +671,7 @@ export default function ProductList() {
               </div>
 
               {meta && meta.last_page > 1 && (
-                <div className="flex items-center justify-center gap-1.5">
+                <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-1.5 mt-8">
                   <button
                     onClick={() => updateParam("page", Number(page) - 1)}
                     onMouseEnter={() => {
@@ -635,26 +689,34 @@ export default function ProductList() {
                     <ChevronLeft size={16} />
                   </button>
 
-                  {Array.from({ length: meta.last_page }, (_, i) => i + 1).map(
-                    (p) => (
-                      <button
-                        key={p}
-                        onClick={() => updateParam("page", p)}
-                        onMouseEnter={() =>
-                          prefetchApi("/products", {
-                            ...queryParams,
-                            page: String(p),
-                          })
-                        }
-                        className={`w-8 h-8 rounded-lg text-[13px] font-medium transition-colors ${
-                          Number(page) === p
-                            ? "bg-moss text-white"
-                            : "text-stone hover:bg-paper hover:text-ink"
-                        }`}
-                      >
-                        {p}
-                      </button>
-                    ),
+                  {getPageNumbers(Number(page), meta.last_page).map(
+                    (p, idx) =>
+                      p === "..." ? (
+                        <span
+                          key={`ellipsis-${idx}`}
+                          className="w-6 text-center text-stone text-xs"
+                        >
+                          ...
+                        </span>
+                      ) : (
+                        <button
+                          key={p}
+                          onClick={() => updateParam("page", p)}
+                          onMouseEnter={() =>
+                            prefetchApi("/products", {
+                              ...queryParams,
+                              page: String(p),
+                            })
+                          }
+                          className={`w-8 h-8 rounded-lg text-[13px] font-medium transition-colors ${
+                            Number(page) === p
+                              ? "bg-moss text-white"
+                              : "text-stone hover:bg-paper hover:text-ink"
+                          }`}
+                        >
+                          {p}
+                        </button>
+                      ),
                   )}
 
                   <button
@@ -714,4 +776,25 @@ function FilterOption({ label, active, onClick }) {
       )}
     </button>
   );
+}
+
+function getPageNumbers(currentPage, lastPage) {
+  if (lastPage <= 6) {
+    return Array.from({ length: lastPage }, (_, i) => i + 1);
+  }
+  const pages = [1];
+  const start = Math.max(2, currentPage - 1);
+  const end = Math.min(lastPage - 1, currentPage + 1);
+
+  if (start > 2) {
+    pages.push("...");
+  }
+  for (let i = start; i <= end; i++) {
+    pages.push(i);
+  }
+  if (end < lastPage - 1) {
+    pages.push("...");
+  }
+  pages.push(lastPage);
+  return pages;
 }

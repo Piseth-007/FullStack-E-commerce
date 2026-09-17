@@ -15,6 +15,7 @@ import api from "../../api/axios";
 import { RowSkeleton } from "../../components/Skeleton";
 import { useAdminNotifications } from "../../context/AdminNotificationsContext";
 import { ToastContext } from "../../context/ToastContext";
+import { ConfirmContext } from "../../context/ConfirmContext";
 import { useLanguage } from "../../context/LanguageContext";
 
 export default function Contacts() {
@@ -29,6 +30,7 @@ export default function Contacts() {
   const [deletingId, setDeletingId] = useState(null);
 
   const { showToast } = useContext(ToastContext);
+  const { confirm } = useContext(ConfirmContext);
   const { refresh, markViewed } = useAdminNotifications();
 
   useEffect(() => {
@@ -73,8 +75,12 @@ export default function Contacts() {
 
 
   const handleDelete = async (contactId) => {
-    const confirmed = window.confirm(
+    const confirmed = await confirm(
       t("admin_contacts_delete_confirm", "Are you sure you want to delete this message?"),
+      {
+        title: t("admin_contacts_delete_btn", "Delete message"),
+        confirmLabel: t("admin_prod_delete_confirm_btn", "Delete"),
+      },
     );
 
     if (!confirmed) return;

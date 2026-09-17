@@ -216,7 +216,7 @@ export default function Contact() {
 
 
 
-      <section className="relative overflow-hidden px-6 pt-16 pb-10 text-center">
+      <section className="relative overflow-hidden px-4 sm:px-6 pt-10 sm:pt-16 pb-8 sm:pb-10 text-center">
         <div className="contact-pulse pointer-events-none absolute left-1/2 top-4 h-64 w-64 -translate-x-1/2 rounded-full bg-moss/[0.07] blur-3xl" />
 
         <div className="contact-fade-up relative">
@@ -224,18 +224,18 @@ export default function Contact() {
             {t("contact_badge")}
           </p>
 
-          <h1 className="mx-auto max-w-xl font-display text-[34px] font-medium leading-[1.1] tracking-[-0.02em] text-ink sm:text-[42px]">
+          <h1 className="mx-auto max-w-xl font-display text-2xl sm:text-[36px] md:text-[42px] font-medium leading-[1.1] tracking-[-0.02em] text-ink">
             {t("contact_title")}
           </h1>
 
-          <p className="mx-auto mt-3 max-w-md text-[14px] leading-relaxed text-stone">
+          <p className="mx-auto mt-2.5 sm:mt-3 max-w-md text-xs sm:text-[14px] leading-relaxed text-stone">
             {t("contact_desc")}
           </p>
         </div>
       </section>
 
 
-      <section className="px-6 pb-20">
+      <section className="px-4 sm:px-6 pb-12 sm:pb-20">
         <div className="mx-auto grid max-w-5xl gap-6 lg:grid-cols-[1fr_1.3fr]">
 
 
@@ -245,8 +245,8 @@ export default function Contact() {
           >
             {contactInfo.map((item) => {
               const Content = (
-                <div className="group flex items-center gap-4 rounded-2xl border border-hairline bg-surface p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-moss/30 hover:shadow-[0_12px_28px_rgba(33,31,27,0.06)]">
-                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-moss-tint transition-all duration-300 group-hover:bg-moss">
+                <div className="group flex items-center gap-3.5 sm:gap-4 rounded-2xl border border-hairline bg-surface p-4 sm:p-5 transition-all duration-300 hover:-translate-y-0.5 hover:border-moss/30 hover:shadow-[0_12px_28px_rgba(33,31,27,0.06)]">
+                  <span className="flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-xl bg-moss-tint transition-all duration-300 group-hover:bg-moss">
                     <item.icon
                       size={18}
                       strokeWidth={1.75}
@@ -259,7 +259,7 @@ export default function Contact() {
                       {item.label}
                     </p>
 
-                    <p className="truncate text-[14px] font-medium text-ink">
+                    <p className="truncate text-xs sm:text-[14px] font-medium text-ink">
                       {item.value}
                     </p>
                   </div>
@@ -277,7 +277,7 @@ export default function Contact() {
 
 
 
-            <div className="rounded-2xl border border-hairline bg-surface p-5">
+            <div className="rounded-2xl border border-hairline bg-surface p-4 sm:p-5">
               <div className="mb-3 flex items-center gap-2.5">
                 <Clock size={16} className="text-moss" strokeWidth={1.75} />
 
@@ -305,17 +305,17 @@ export default function Contact() {
 
 
           <div
-            className="contact-fade-up rounded-2xl border border-hairline bg-surface p-6 sm:p-8"
+            className="contact-fade-up rounded-2xl border border-hairline bg-surface p-4 sm:p-8"
             style={{ animationDelay: "180ms" }}
           >
-            <div className="mb-6 flex items-center gap-2.5">
+            <div className="mb-5 sm:mb-6 flex items-center gap-2.5">
               <MessageCircle
                 size={18}
                 className="text-moss"
                 strokeWidth={1.75}
               />
 
-              <h2 className="font-display text-[19px] font-medium text-ink">
+              <h2 className="font-display text-base sm:text-[19px] font-medium text-ink">
                 {t("contact_form_title")}
               </h2>
             </div>
@@ -422,14 +422,14 @@ export default function Contact() {
           FAQ
       ===================================================== */}
 
-      <section className="px-6 pb-24">
+      <section className="px-4 sm:px-6 pb-14 sm:pb-24">
         <div className="mx-auto max-w-3xl">
-          <div className="contact-fade-up mb-10 text-center">
+          <div className="contact-fade-up mb-8 sm:mb-10 text-center">
             <p className="mb-2 text-[10.5px] font-medium uppercase tracking-[0.16em] text-moss">
               {t("contact_faq_badge")}
             </p>
 
-            <h2 className="font-display text-[26px] font-medium text-ink sm:text-[30px]">
+            <h2 className="font-display text-2xl font-medium text-ink sm:text-[30px]">
               {t("contact_faq_title")}
             </h2>
           </div>
@@ -463,16 +463,16 @@ function FaqItem({ faq, delay }) {
         type="button"
         onClick={() => setOpen((value) => !value)}
         aria-expanded={open}
-        className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+        className="flex w-full items-center justify-between gap-3 px-4 sm:px-5 py-3.5 sm:py-4 text-left"
       >
-        <span className="text-[13.5px] font-medium text-ink">{faq.q}</span>
+        <span className="text-xs sm:text-[13.5px] font-medium text-ink">{faq.q}</span>
 
         <span
-          className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-paper text-stone transition-transform duration-300 ${
+          className={`flex h-5 w-5 sm:h-6 sm:w-6 shrink-0 items-center justify-center rounded-full bg-paper text-stone transition-transform duration-300 ${
             open ? "rotate-45" : ""
           }`}
         >
-          <span className="text-[16px] leading-none">+</span>
+          <span className="text-[15px] sm:text-[16px] leading-none">+</span>
         </span>
       </button>
 
@@ -483,7 +483,7 @@ function FaqItem({ faq, delay }) {
         }}
       >
         <div className="overflow-hidden">
-          <p className="px-5 pb-4 text-[13px] leading-relaxed text-stone">
+          <p className="px-4 sm:px-5 pb-3.5 sm:pb-4 text-xs sm:text-[13px] leading-relaxed text-stone">
             {faq.a}
           </p>
         </div>

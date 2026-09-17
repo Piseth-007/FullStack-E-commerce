@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Subscriber;
+use App\Mail\NewProductAlert;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class ProductController extends Controller
@@ -219,6 +223,22 @@ class ProductController extends Controller
             'brand',
             'skinTypes',
         ]);
+
+        // Send notification to subscribed customers
+        try {
+            $subscribers = Subscriber::where('is_active', true)->pluck('email');
+            if ($subscribers->isNotEmpty()) {
+                foreach ($subscribers as $subscriberEmail) {
+                    try {
+                        Mail::to($subscriberEmail)->send(new NewProductAlert($product));
+                    } catch (\Throwable $mailErr) {
+                        Log::warning("Could not send new product email to {$subscriberEmail}: " . $mailErr->getMessage());
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error("Failed to notify subscribers about new product {$product->id}: " . $e->getMessage());
+        }
 
         return response()->json([
             'message' =>

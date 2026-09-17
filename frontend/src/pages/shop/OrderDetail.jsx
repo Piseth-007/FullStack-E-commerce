@@ -55,12 +55,12 @@ function Timeline({ status }) {
 
 function ItemRow({ item }) {
   const product = item.product || {};
-  const rawImage = product.images[0] || product.image_url || item.image_url;
-  const image = typeof rawImage === "string" ? rawImage : rawImage?.url || rawImage?.image_url || rawImage?.path
+  const rawImage = product.images?.[0] || product.image_url || item.image_url;
+  const image = typeof rawImage === "string" ? rawImage : rawImage?.url || rawImage?.image_url || rawImage?.path;
   const skinTypes = product.skin_types || product.skinTypes || [];
   return (
-    <div className="flex gap-4 py-5 border-b border-hairline">
-      <div className="w-16 h-16 shrink-0 flex items-center justify-center rounded-lg overflow-hidden bg-paper">
+    <div className="flex gap-3 sm:gap-4 py-4 sm:py-5 border-b border-hairline">
+      <div className="w-14 h-14 sm:w-16 sm:h-16 shrink-0 flex items-center justify-center rounded-lg overflow-hidden bg-paper border border-hairline">
         {image ? (
           <img
             src={image}
@@ -73,17 +73,17 @@ function ItemRow({ item }) {
       </div>
       <div className="flex-1 min-w-0">
         {product.brand?.name && (
-          <p className="text-xs text-stone">{product.brand.name}</p>
+          <p className="text-xs text-stone truncate">{product.brand.name}</p>
         )}
-        <p className="font-display text-base leading-snug mt-0.5 text-ink">
+        <p className="font-display text-sm sm:text-base leading-snug mt-0.5 text-ink break-words">
           {item.product_name}
         </p>
         {skinTypes.length > 0 && (
-          <div className="flex gap-1.5 mt-1.5 flex-wrap">
+          <div className="flex gap-1 mt-1.5 flex-wrap">
             {skinTypes.map((skinType) => (
               <span
                 key={skinType.id || skinType.name || skinType}
-                className="text-[11px] px-2.5 py-0.5 rounded-full border border-hairline text-stone font-mono uppercase tracking-wider"
+                className="text-[10px] sm:text-[11px] px-2 py-0.5 rounded-full border border-hairline text-stone font-mono uppercase tracking-wider"
               >
                 {skinType.name || skinType}
               </span>
@@ -204,17 +204,17 @@ export default function OrderDetail() {
         : "bg-moss-tint text-moss-deep";
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       <Link
         to="/orders"
-        className="text-sm inline-flex items-center gap-1 mb-8 text-stone hover:text-ink"
+        className="text-sm inline-flex items-center gap-1 mb-6 sm:mb-8 text-stone hover:text-ink"
       >
         ← Back to orders
       </Link>
-      <div className="flex items-start justify-between gap-4 mb-10">
+      <div className="flex items-start justify-between gap-4 mb-6 sm:mb-10">
         <div>
-          <h1 className="font-display text-3xl text-ink">Order #{order.id}</h1>
-          <p className="text-sm mt-1.5 text-stone">
+          <h1 className="font-display text-2xl sm:text-3xl text-ink">Order #{order.id}</h1>
+          <p className="text-xs sm:text-sm mt-1.5 text-stone">
             Placed {formatDate(order.created_at)}
           </p>
         </div>
@@ -224,7 +224,7 @@ export default function OrderDetail() {
           {order.status || "pending"}
         </span>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
         <main className="md:col-span-2">
           <div className="mb-10">
             <Timeline status={order.status} />
@@ -289,7 +289,7 @@ export default function OrderDetail() {
 
 function OrderDetailSkeleton() {
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10 animate-pulse">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 animate-pulse">
       <div className="h-4 w-28 bg-hairline/50 mb-6" />
       <div className="flex flex-wrap items-start justify-between gap-4 pb-6 border-b border-hairline mb-8">
         <div className="space-y-2">

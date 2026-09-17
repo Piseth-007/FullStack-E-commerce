@@ -576,14 +576,14 @@ export default function Checkout() {
   const isExpiringSoon = secondsLeft !== null && secondsLeft <= 60;
 
   return (
-    <div className={`max-w-4xl mx-auto px-6 py-10 ${isKhmer ? "font-khmer" : ""}`}>
-      <h1 className="font-display text-[28px] font-medium text-ink mb-8">
+    <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 ${isKhmer ? "font-khmer" : ""}`}>
+      <h1 className="font-display text-[24px] sm:text-[28px] font-medium text-ink mb-6 sm:mb-8">
         {t("checkout_title", "Checkout")}
       </h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
         {/* LEFT SIDE */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6 sm:space-y-8">
           {/* SHIPPING ADDRESS */}
           <div>
             <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-3">
@@ -595,7 +595,7 @@ export default function Checkout() {
                 <div
                   key={addr.id}
                   onClick={() => setSelectedId(addr.id)}
-                  className={`w-full text-left flex items-start gap-3 p-4 rounded-xl border transition-colors cursor-pointer ${
+                  className={`w-full text-left flex items-start gap-3 p-3.5 sm:p-4 rounded-xl border transition-colors cursor-pointer ${
                     selectedId === addr.id
                       ? "border-moss bg-moss-tint"
                       : "border-hairline bg-surface hover:border-stone/30"
@@ -933,12 +933,12 @@ export default function Checkout() {
 
       {/* KHQR MODAL */}
       {showQrModal && paymentData && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 z-50 overflow-y-auto">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
           <div className="bg-surface rounded-3xl max-w-[380px] w-full shadow-2xl overflow-hidden border border-hairline my-auto animate-in fade-in zoom-in-95 duration-200">
             {/* OFFICIAL KHQR STAND CARD */}
             <div className="relative bg-surface">
               {/* TOP KHQR RED BANNER */}
-              <div className="relative bg-[#E1232E] px-6 pt-5 pb-4 text-white overflow-hidden">
+              <div className="relative bg-[#E1232E] px-4 sm:px-6 pt-5 pb-4 text-white overflow-hidden">
                 <div className="flex items-center justify-between">
                   <img
                     src={khqrLogoWhite}
@@ -958,13 +958,13 @@ export default function Checkout() {
               </div>
 
               {/* MERCHANT & ORDER AMOUNT */}
-              <div className="px-6 pt-4 pb-1 text-center">
+              <div className="px-4 sm:px-6 pt-4 pb-1 text-center">
                 <p className="text-[13px] font-semibold text-ink uppercase tracking-wider">
                   {t("checkout_store_name", "Botaniq Store")}
                 </p>
                 <div className="mt-1 flex items-baseline justify-center gap-1">
                   <span className="text-[19px] font-semibold text-ink">$</span>
-                  <span className="font-mono text-[32px] font-bold tracking-tight text-ink leading-none">
+                  <span className="font-mono text-[30px] sm:text-[32px] font-bold tracking-tight text-ink leading-none">
                     {Number(subtotal || 0).toFixed(2)}
                   </span>
                   <span className="text-[12px] font-medium text-stone uppercase ml-0.5">
@@ -981,9 +981,9 @@ export default function Checkout() {
               </div>
 
               {/* QR BODY: ACTIVE QR OR SUCCESS */}
-              <div className="px-6 pb-4">
+              <div className="px-4 sm:px-6 pb-4">
                 {paymentStatus === "paid" ? (
-                  <div className="rounded-2xl border border-moss/20 bg-moss-tint px-6 py-10 text-center">
+                  <div className="rounded-2xl border border-moss/20 bg-moss-tint px-4 sm:px-6 py-8 sm:py-10 text-center">
                     <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-moss bg-moss text-white shadow-sm">
                       <CheckCircle2 size={36} strokeWidth={2} />
                     </div>
@@ -1003,17 +1003,17 @@ export default function Checkout() {
                     {/* DYNAMIC QR CANVAS */}
                     <div
                       ref={qrCanvasRef}
-                      className="p-3 bg-white rounded-2xl shadow-xs border border-hairline/80 flex items-center justify-center overflow-hidden"
+                      className="p-2.5 sm:p-3 bg-white rounded-2xl shadow-xs border border-hairline/80 flex items-center justify-center overflow-hidden max-w-full"
                     >
                       {paymentData.qr_string ? (
                         <QRCodeCanvas
                           value={paymentData.qr_string}
-                          size={220}
+                          size={200}
                           level="M"
                           marginSize={1}
                         />
                       ) : (
-                        <div className="w-[220px] h-[220px] flex items-center justify-center text-stone text-xs">
+                        <div className="w-[200px] h-[200px] flex items-center justify-center text-stone text-xs">
                           {t("checkout_qr_unavailable", "QR code not available")}
                         </div>
                       )}
@@ -1048,7 +1048,7 @@ export default function Checkout() {
             </div>
 
             {/* STATUS, COUNTDOWN & ACTIONS */}
-            <div className="bg-paper px-6 py-4 border-t border-hairline space-y-3">
+            <div className="bg-paper px-4 sm:px-6 py-4 border-t border-hairline space-y-3">
               {paymentStatus !== "paid" && (
                 <>
                   {/* COUNTDOWN */}

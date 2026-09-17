@@ -12,28 +12,37 @@ class ProfileController extends Controller
     public function uploadProfileImage(Request $request)
     {
         $request->validate([
-            'profile_image' => 'required|image|max:2048',
+            'profile_image' => 'required|image|max:5120',
         ]);
 
         $user = $request->user();
 
+        try {
+            if ($user->profile_image_public_id) {
+                try {
+                    cloudinary()->destroy($user->profile_image_public_id);
+                } catch (\Throwable $e) {
+                    // Ignore failure if old image was already deleted or Cloudinary had an issue
+                }
+            }
 
-        if ($user->profile_image_public_id) {
-            cloudinary()->destroy($user->profile_image_public_id);
+            $result = cloudinary()->upload($request->file('profile_image')->getRealPath(), [
+                'folder' => 'profile-images',
+            ]);
+
+            $user->update([
+                'profile_image' => $result->getSecurePath(),
+                'profile_image_public_id' => $result->getPublicId(),
+            ]);
+
+            return response()->json([
+                'profile_image' => $user->profile_image,
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'message' => 'Unable to upload photo: ' . ($e->getMessage() ?: 'Cloudinary service unavailable'),
+            ], 500);
         }
-
-        $result = cloudinary()->upload($request->file('profile_image')->getRealPath(), [
-            'folder' => 'profile-images',
-        ]);
-
-        $user->update([
-            'profile_image' => $result->getSecurePath(),
-            'profile_image_public_id' => $result->getPublicId(),
-        ]);
-
-        return response()->json([
-            'profile_image' => $user->profile_image,
-        ]);
     }
 
 
@@ -42,7 +51,11 @@ class ProfileController extends Controller
         $user = $request->user();
 
         if ($user->profile_image_public_id) {
-            cloudinary()->destroy($user->profile_image_public_id);
+            try {
+                cloudinary()->destroy($user->profile_image_public_id);
+            } catch (\Throwable $e) {
+                // Ignore failure if already removed from Cloudinary
+            }
         }
 
         $user->update([
@@ -60,9 +73,16 @@ class ProfileController extends Controller
     {
         $user = $request->user();
 
+        $emailRules = ['required', 'string', 'max:255', 'unique:users,email,' . $user->id];
+
+        // Only enforce DNS/disposable verification if the email is actually changed
+        if ($request->filled('email') && strtolower(trim($request->email)) !== strtolower(trim($user->email))) {
+            $emailRules[] = new RealEmail();
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => ['required', 'string', 'max:255', 'unique:users,email,' . $user->id, new RealEmail()],
+            'email' => $emailRules,
             'phone' => 'nullable|string|max:30',
         ]);
 

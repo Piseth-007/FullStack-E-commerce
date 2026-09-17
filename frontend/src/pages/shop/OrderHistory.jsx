@@ -303,10 +303,10 @@ export default function OrderHistory() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto px-6 py-10">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
       {/* Header */}
-      <div className="flex items-center gap-3 mb-8">
-        <h1 className="font-display text-[28px] font-medium text-ink">
+      <div className="flex items-center gap-3 mb-6 sm:mb-8">
+        <h1 className="font-display text-[24px] sm:text-[28px] font-medium text-ink">
           Your orders
         </h1>
 
@@ -325,7 +325,7 @@ export default function OrderHistory() {
           onRetry={() => loadOrders()}
         />
       ) : orders.length === 0 ? (
-        <div className="flex flex-col items-center text-center py-20 border border-dashed border-hairline rounded-2xl bg-surface px-6">
+        <div className="flex flex-col items-center text-center py-16 sm:py-20 border border-dashed border-hairline rounded-2xl bg-surface px-4 sm:px-6">
           <div className="w-14 h-14 rounded-2xl border border-hairline bg-moss-tint flex items-center justify-center mb-4">
             <PackageX size={22} className="text-moss" strokeWidth={1.75} />
           </div>
@@ -360,7 +360,7 @@ export default function OrderHistory() {
                   navigate(`/orders/${order.id}`);
                 }
               }}
-              className="bg-surface border border-hairline rounded-xl p-5 cursor-pointer hover:border-moss/40 transition-colors"
+              className="bg-surface border border-hairline rounded-xl p-4 sm:p-5 cursor-pointer hover:border-moss/40 transition-colors"
             >
               {/* Order Header */}
               <div className="flex items-center justify-between mb-4">
@@ -388,9 +388,9 @@ export default function OrderHistory() {
                 {order.items?.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between gap-4"
+                    className="flex flex-wrap sm:flex-nowrap items-center justify-between gap-2 sm:gap-4"
                   >
-                    <p className="text-[13.5px] text-ink">
+                    <p className="text-[13.5px] text-ink min-w-0 break-words flex-1">
                       {item.product_name} × {item.quantity}
                     </p>
 
@@ -408,7 +408,7 @@ export default function OrderHistory() {
                             comment: "",
                           });
                         }}
-                        className="flex shrink-0 items-center gap-1 text-[12.5px] font-medium text-moss hover:text-moss-deep transition-colors"
+                        className="flex shrink-0 items-center gap-1 text-[12px] sm:text-[12.5px] font-medium text-moss hover:text-moss-deep transition-colors py-0.5"
                       >
                         <Star size={12} strokeWidth={2} />
                         Write a review

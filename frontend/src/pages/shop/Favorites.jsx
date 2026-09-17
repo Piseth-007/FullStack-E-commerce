@@ -27,14 +27,14 @@ export default function Favorites() {
         color: "var(--color-ink)",
       }}
     >
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="font-display text-2xl mb-1">
+        <div className="mb-6 sm:mb-8">
+          <h1 className="font-display text-2xl sm:text-3xl mb-1">
             {t("fav_title", "Your favorites")}
           </h1>
 
-          <p className="text-sm" style={{ color: "var(--color-stone)" }}>
+          <p className="text-xs sm:text-sm" style={{ color: "var(--color-stone)" }}>
             {t("fav_desc", "Products you've saved to come back to later.")}
           </p>
         </div>
@@ -42,7 +42,7 @@ export default function Favorites() {
         {/* Loading */}
         {loading ? (
           <div
-            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-8"
+            className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-3.5 sm:gap-x-6 gap-y-6 sm:gap-y-8"
             aria-label="Loading favorites"
           >
             {Array.from({ length: 8 }).map((_, index) => (
@@ -100,7 +100,7 @@ export default function Favorites() {
           </div>
         ) : (
           /* Favorites */
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-6 gap-y-8">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-x-3.5 sm:gap-x-6 gap-y-6 sm:gap-y-8">
             {favorites.map((fav) => {
               const product = fav.product;
 

@@ -40,7 +40,6 @@ export default function Navbar() {
 
   const [menuOpen, setMenuOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const { isDark: darkMode, toggleTheme } = useTheme();
@@ -50,6 +49,8 @@ export default function Navbar() {
   const [openMenu, setOpenMenu] = useState(null);
 
   const closeTimer = useRef(null);
+  const searchFocused = useRef(false);
+  const searchInputRef = useRef(null);
 
   const profileImage =
     user?.profile_image ||
@@ -107,6 +108,26 @@ export default function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    if (openMenu === "search") {
+      const timer = setTimeout(() => {
+        searchInputRef.current?.focus();
+      }, 60);
+      return () => clearTimeout(timer);
+    }
+  }, [openMenu]);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && openMenu === "search") {
+        searchFocused.current = false;
+        setOpenMenu(null);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [openMenu]);
+
   const handleLogout = async () => {
     try {
       await logout();
@@ -120,7 +141,7 @@ export default function Navbar() {
   };
 
   const handleSearchSubmit = (e) => {
-    e.preventDefault();
+    e?.preventDefault();
 
     const trimmed = searchTerm.trim();
 
@@ -128,12 +149,33 @@ export default function Navbar() {
 
     navigate(`/products?search=${encodeURIComponent(trimmed)}`);
 
-    setSearchOpen(false);
+    searchFocused.current = false;
+    setOpenMenu(null);
     setSearchTerm("");
+  };
+
+  const toggleSearch = () => {
+    setMenuOpen(false);
+    setAccountOpen(false);
+    if (openMenu === "search") {
+      searchFocused.current = false;
+      setOpenMenu(null);
+    } else {
+      openDropdown("search");
+    }
+  };
+
+  const closeSearch = () => {
+    searchFocused.current = false;
+    setOpenMenu(null);
   };
 
   const openDropdown = (key) => {
     clearTimeout(closeTimer.current);
+    if (key === "search") {
+      setMenuOpen(false);
+      setAccountOpen(false);
+    }
     setOpenMenu(key);
   };
 
@@ -141,8 +183,9 @@ export default function Navbar() {
     clearTimeout(closeTimer.current);
 
     closeTimer.current = setTimeout(() => {
+      if (searchFocused.current) return;
       setOpenMenu(null);
-    }, 150);
+    }, 180);
   };
 
   const closeMobileMenu = () => {
@@ -287,7 +330,7 @@ export default function Navbar() {
         }
       `}</style>
 
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 grid grid-cols-[auto_1fr_auto] items-center gap-3 sm:gap-4">
+      <div className="max-w-6xl mx-auto px-3 sm:px-6 h-16 grid grid-cols-[auto_1fr_auto] items-center gap-2 sm:gap-4">
         <Link
           to="/"
           className="nav-action flex items-center gap-2 shrink-0"
@@ -416,52 +459,28 @@ export default function Navbar() {
         </nav>
 
         <div className="flex items-center gap-1.5 sm:gap-2 justify-self-end">
-          <div className="relative">
+          <div
+            className="relative"
+            onMouseEnter={() => openDropdown("search")}
+            onMouseLeave={scheduleClose}
+          >
             <button
               type="button"
-              onClick={() => setSearchOpen((v) => !v)}
-              className="flex h-9 w-9 items-center justify-center rounded-full text-stone transition-colors hover:bg-paper hover:text-ink"
-              aria-label={searchOpen ? "Close search" : "Search"}
-              aria-expanded={searchOpen}
+              onClick={toggleSearch}
+              className={`flex h-9 w-9 items-center justify-center rounded-full transition-all duration-200 ${
+                openMenu === "search"
+                  ? "bg-moss text-white shadow-xs"
+                  : "text-stone hover:bg-paper hover:text-ink"
+              }`}
+              aria-label={openMenu === "search" ? "Close search" : "Search"}
+              aria-expanded={openMenu === "search"}
             >
-              {searchOpen ? (
+              {openMenu === "search" ? (
                 <X size={18} strokeWidth={1.75} />
               ) : (
                 <Search size={18} strokeWidth={1.75} />
               )}
             </button>
-
-            {searchOpen && (
-              <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setSearchOpen(false)}
-                  aria-hidden="true"
-                />
-
-                <form
-                  onSubmit={handleSearchSubmit}
-                  className="navdrop-in absolute right-0 top-11 z-20 w-64 bg-surface border border-hairline rounded-2xl shadow-[0_8px_24px_rgba(33,31,27,0.1)] p-2"
-                >
-                  <div className="relative">
-                    <Search
-                      size={15}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone"
-                    />
-
-                    <input
-                      autoFocus
-                      type="search"
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      placeholder={t("nav_search_placeholder", "Search products...")}
-                      className="w-full pl-9 pr-3 py-1.5 rounded-full border border-hairline bg-paper text-[13px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/20 focus:border-moss"
-                      aria-label={t("nav_search_aria", "Search products")}
-                    />
-                  </div>
-                </form>
-              </>
-            )}
           </div>
 
           <Link
@@ -589,16 +608,16 @@ export default function Navbar() {
           ) : (
             <Link
               to="/login"
-              className="flex h-9 items-center gap-1.5 px-3.5 rounded-full border border-hairline bg-surface text-stone hover:text-ink hover:border-moss hover:bg-paper transition-all text-[13px] font-medium shadow-2xs"
+              className="flex h-9 items-center gap-1.5 px-2.5 sm:px-3.5 rounded-full border border-hairline bg-surface text-stone hover:text-ink hover:border-moss hover:bg-paper transition-all text-[13px] font-medium shadow-2xs"
             >
               <User size={15} strokeWidth={1.75} />
-              <span>{t("nav_signin", "Sign in")}</span>
+              <span className="hidden sm:inline">{t("nav_signin", "Sign in")}</span>
             </Link>
           )}
 
           {/* Font & Language Switcher (EN / ខ្មែរ) */}
           <div
-            className="flex items-center rounded-full border border-hairline bg-surface p-1 text-[11px] font-medium shadow-2xs"
+            className="hidden sm:flex items-center rounded-full border border-hairline bg-surface p-1 text-[11px] font-medium shadow-2xs"
             role="group"
             aria-label={t("nav_language", "Language & Font")}
           >
@@ -662,9 +681,31 @@ export default function Navbar() {
         </div>
       </div>
 
+      {openMenu === "search" && (
+        <SearchDropdown
+          searchTerm={searchTerm}
+          setSearchTerm={setSearchTerm}
+          onSubmit={handleSearchSubmit}
+          onClose={closeSearch}
+          categories={categories}
+          brands={brands}
+          onMouseEnter={() => openDropdown("search")}
+          onMouseLeave={scheduleClose}
+          searchInputRef={searchInputRef}
+          onFocus={() => {
+            searchFocused.current = true;
+            openDropdown("search");
+          }}
+          onBlur={() => {
+            searchFocused.current = false;
+          }}
+          t={t}
+        />
+      )}
+
       {menuOpen && (
         <nav
-          className="navmenu-in md:hidden border-t border-hairline px-6 py-3 flex flex-col gap-1"
+          className="navmenu-in md:hidden border-t border-hairline px-4 sm:px-6 py-3 flex flex-col gap-1"
           aria-label="Mobile navigation"
         >
           <Link
@@ -814,6 +855,19 @@ export default function Navbar() {
               </button>
             </div>
           )}
+
+          {!user && (
+            <div className="mt-2 pt-2 border-t border-hairline">
+              <Link
+                to="/login"
+                onClick={closeMobileMenu}
+                className="flex items-center gap-2.5 py-2 text-[13.5px] font-medium text-moss hover:text-moss-deep"
+              >
+                <User size={15} strokeWidth={1.75} />
+                {t("nav_signin", "Sign in")}
+              </Link>
+            </div>
+          )}
         </nav>
       )}
     </header>
@@ -904,5 +958,214 @@ function MegaMenu({
         </div>
       </div>
     </div>
+  );
+}
+
+function SearchDropdown({
+  searchTerm,
+  setSearchTerm,
+  onSubmit,
+  onClose,
+  categories = [],
+  brands = [],
+  onMouseEnter,
+  onMouseLeave,
+  searchInputRef,
+  onFocus,
+  onBlur,
+  t,
+}) {
+  const navigate = useNavigate();
+
+  const trimmed = searchTerm.trim().toLowerCase();
+  const matchingCategories = trimmed
+    ? categories
+        .filter((c) => c.name?.toLowerCase().includes(trimmed))
+        .slice(0, 5)
+    : [];
+  const matchingBrands = trimmed
+    ? brands
+        .filter((b) => b.name?.toLowerCase().includes(trimmed))
+        .slice(0, 5)
+    : [];
+
+  const POPULAR_SEARCHES = [
+    "Serum",
+    "Cleanser",
+    "Moisturizer",
+    "Sunscreen",
+    "Toner",
+    "Best rated",
+  ];
+
+  const handleSuggestionClick = (query) => {
+    setSearchTerm(query);
+    navigate(`/products?search=${encodeURIComponent(query)}`);
+    onClose();
+  };
+
+  return (
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 top-16 z-25 bg-ink/15 backdrop-blur-[2px] transition-opacity"
+        onClick={onClose}
+        aria-hidden="true"
+      />
+
+      <div
+        className="navmega-in absolute left-0 right-0 top-full z-30 w-full border-t border-hairline bg-surface/98 backdrop-blur-md shadow-[0_24px_60px_rgba(33,31,27,0.12)]"
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 py-5 sm:py-7">
+          {/* Main Search Input Form */}
+          <form onSubmit={onSubmit} className="relative">
+            <div className="relative flex items-center">
+              <Search
+                size={18}
+                className="absolute left-4 text-moss pointer-events-none"
+                strokeWidth={2}
+              />
+
+              <input
+                ref={searchInputRef}
+                type="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                onFocus={onFocus}
+                onBlur={onBlur}
+                placeholder={t(
+                  "nav_search_placeholder",
+                  "Search products, brands, or categories...",
+                )}
+                className="w-full pl-11 pr-24 sm:pr-28 py-3 rounded-2xl border border-hairline bg-paper text-[14px] sm:text-[15px] text-ink placeholder:text-stone/50 focus:outline-none focus:ring-2 focus:ring-moss/25 focus:border-moss transition-all shadow-xs"
+                aria-label={t("nav_search_aria", "Search products")}
+              />
+
+              <div className="absolute right-2 flex items-center gap-1">
+                {searchTerm && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchTerm("")}
+                    className="p-1.5 text-stone hover:text-ink rounded-lg hover:bg-surface transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  className="flex items-center gap-1.5 px-3.5 py-1.5 sm:px-4 sm:py-2 rounded-xl bg-moss text-white text-[12.5px] sm:text-[13px] font-medium hover:bg-moss-deep transition-all shadow-xs active:scale-95 shrink-0"
+                >
+                  <span>{t("search", "Search")}</span>
+                  <ArrowRight size={13} strokeWidth={2} />
+                </button>
+              </div>
+            </div>
+          </form>
+
+          {/* Dynamic Content: Live suggestions or Popular Searches */}
+          <div className="mt-4 sm:mt-5">
+            {trimmed ? (
+              /* Live matches while typing */
+              <div className="space-y-3">
+                {matchingCategories.length > 0 && (
+                  <div>
+                    <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-stone mb-2">
+                      {t("nav_categories", "Categories")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {matchingCategories.map((cat) => (
+                        <Link
+                          key={cat.id}
+                          to={`/products?category_id=${cat.id}`}
+                          onClick={onClose}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-hairline bg-paper text-[12.5px] font-medium text-ink hover:border-moss hover:bg-moss-tint hover:text-moss-deep transition-all"
+                        >
+                          <Tag size={12} className="text-moss" />
+                          <span>{cat.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {matchingBrands.length > 0 && (
+                  <div>
+                    <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-stone mb-2">
+                      {t("nav_brands", "Brands")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {matchingBrands.map((brand) => (
+                        <Link
+                          key={brand.id}
+                          to={`/products?brand_id=${brand.id}`}
+                          onClick={onClose}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-hairline bg-paper text-[12.5px] font-medium text-ink hover:border-moss hover:bg-moss-tint hover:text-moss-deep transition-all"
+                        >
+                          <Award size={12} className="text-moss" />
+                          <span>{brand.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {matchingCategories.length === 0 && matchingBrands.length === 0 && (
+                  <p className="text-xs text-stone pt-1">
+                    Press <span className="font-mono text-ink font-semibold">Enter</span> to search for "{searchTerm}"
+                  </p>
+                )}
+              </div>
+            ) : (
+              /* Default: Popular searches & Browse categories */
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 pt-1">
+                <div>
+                  <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-stone mb-2">
+                    {t("search_popular", "Popular searches")}
+                  </p>
+                  <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                    {POPULAR_SEARCHES.map((query) => (
+                      <button
+                        key={query}
+                        type="button"
+                        onClick={() => handleSuggestionClick(query)}
+                        className="inline-flex items-center gap-1 px-3 py-1 rounded-full border border-hairline bg-paper text-[11.5px] sm:text-[12px] font-medium text-stone hover:text-ink hover:border-moss/40 hover:bg-moss-tint hover:text-moss-deep transition-all active:scale-95"
+                      >
+                        <Search size={10} className="text-stone/60" />
+                        <span>{query}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {categories.length > 0 && (
+                  <div>
+                    <p className="text-[10.5px] font-medium uppercase tracking-[0.14em] text-stone mb-2">
+                      {t("search_explore_categories", "Explore categories")}
+                    </p>
+                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                      {categories.slice(0, 6).map((cat) => (
+                        <Link
+                          key={cat.id}
+                          to={`/products?category_id=${cat.id}`}
+                          onClick={onClose}
+                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-hairline bg-paper text-[11.5px] sm:text-[12px] font-medium text-stone hover:text-ink hover:border-moss/40 hover:bg-moss-tint hover:text-moss-deep transition-all"
+                        >
+                          <Leaf size={10} className="text-moss" />
+                          <span>{cat.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
   );
 }

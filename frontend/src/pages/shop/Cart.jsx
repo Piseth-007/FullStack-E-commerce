@@ -35,7 +35,7 @@ export default function Cart() {
 
   if (items.length === 0) {
     return (
-      <div className="max-w-2xl mx-auto px-6 py-24 text-center">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-16 sm:py-24 text-center">
         <div className="w-14 h-14 rounded-2xl border border-hairline bg-moss-tint flex items-center justify-center mx-auto mb-5">
           <ShoppingBag size={22} className="text-moss" strokeWidth={1.75} />
         </div>
@@ -56,19 +56,19 @@ export default function Cart() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      <h1 className="font-display text-[28px] font-medium text-ink mb-8">
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+      <h1 className="font-display text-[24px] sm:text-[28px] font-medium text-ink mb-6 sm:mb-8">
         {t("cart_title", "Your cart")}
       </h1>
 
-      <div className="grid grid-cols-3 gap-10">
-        <div className="col-span-2 space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
+        <div className="col-span-1 lg:col-span-2 space-y-4">
           {items.map((item) => (
             <div
               key={item.id}
-              className="flex gap-4 bg-surface border border-hairline rounded-2xl p-4 shadow-xs"
+              className="flex gap-3 sm:gap-4 bg-surface border border-hairline rounded-2xl p-3.5 sm:p-4 shadow-xs"
             >
-              <div className="w-20 h-20 rounded-xl bg-paper border border-hairline overflow-hidden shrink-0">
+              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl bg-paper border border-hairline overflow-hidden shrink-0">
                 {item.product?.images?.[0]?.url && (
                   <img
                     src={item.product.images[0].url}
@@ -126,7 +126,7 @@ export default function Cart() {
           ))}
         </div>
 
-        <div className="bg-surface border border-hairline rounded-2xl p-5 h-fit sticky top-24 shadow-xs">
+        <div className="bg-surface border border-hairline rounded-2xl p-5 h-fit lg:sticky lg:top-24 shadow-xs">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-4">
             {t("cart_order_summary", "Order Summary")}
           </p>

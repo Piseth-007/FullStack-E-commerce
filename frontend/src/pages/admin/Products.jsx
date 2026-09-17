@@ -74,8 +74,6 @@ export default function Products() {
       }
 
       const res = await api.get("/admin/products");
-      console.log(res);
-
       setProducts(res.data?.data || res.data || []);
     } catch (err) {
       setProducts([]);

@@ -1,5 +1,5 @@
 import { lazy, Suspense } from "react";
-import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { CartProvider } from "./context/CartContext";
 import { ToastProvider } from "./context/ToastContext";
@@ -81,9 +81,16 @@ function App() {
                       <Route path="/favorites" element={<Favorites />} />
                       <Route path="/about" element={<About />} />
                       <Route path="/contact" element={<Contact />} />
-                      <Route path="/profile" element={<Profile />} />
 
                       {/* Storefront — requires login */}
+                      <Route
+                        path="/profile"
+                        element={
+                          <RequireAuth>
+                            <Profile />
+                          </RequireAuth>
+                        }
+                      />
                       <Route
                         path="/checkout"
                         element={
@@ -133,6 +140,10 @@ function App() {
                         </AdminRoute>
                       }
                     >
+                      <Route
+                        path="/admin"
+                        element={<Navigate to="/admin/dashboard" replace />}
+                      />
                       <Route path="/admin/dashboard" element={<Dashboard />} />
                       <Route path="/admin/products" element={<Products />} />
                       <Route

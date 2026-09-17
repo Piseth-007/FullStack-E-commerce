@@ -685,12 +685,12 @@ export default function Home() {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto max-w-6xl px-6 py-16 sm:py-20 lg:py-24">
-          <div className="grid w-full items-center gap-12 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 py-12 sm:py-20 lg:py-24">
+          <div className="grid w-full items-center gap-10 lg:grid-cols-[1.05fr_.95fr] lg:gap-14">
             {/* HERO CONTENT — Clean editorial left column */}
             <div className="max-w-xl">
               {/* Eyebrow */}
-              <div className="mb-5 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-moss">
+              <div className="mb-4 sm:mb-5 flex items-center gap-2 text-[11px] font-medium uppercase tracking-[0.16em] text-moss">
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-moss-tint">
                   <Leaf size={13} strokeWidth={1.8} />
                 </span>
@@ -698,7 +698,7 @@ export default function Home() {
               </div>
 
               {/* Heading */}
-              <h1 className="font-display text-[40px] sm:text-[54px] lg:text-[64px] font-medium leading-[1.06] tracking-tight text-ink">
+              <h1 className="font-display text-[32px] sm:text-[50px] lg:text-[64px] font-medium leading-[1.08] tracking-tight text-ink">
                 {t("home_hero_title")}{" "}
                 <span className="relative italic text-moss-deep">
                   {t("home_hero_title_accent")}
@@ -707,12 +707,12 @@ export default function Home() {
               </h1>
 
               {/* Description */}
-              <p className="mt-6 max-w-md text-[15.5px] leading-relaxed text-stone">
+              <p className="mt-4 sm:mt-6 max-w-md text-sm sm:text-[15.5px] leading-relaxed text-stone">
                 {t("home_hero_desc")}
               </p>
 
               {/* CTA Buttons */}
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              <div className="mt-6 sm:mt-8 flex flex-wrap items-center gap-3">
                 <Link
                   to="/products"
                   className="
@@ -803,7 +803,7 @@ export default function Home() {
             <div className="relative flex w-full items-center justify-center">
               {showProductSkeleton ? (
                 /* Skeleton loader while products load */
-                <div className="w-full max-w-md rounded-3xl border border-hairline/80 bg-surface/90 p-5 sm:p-6 shadow-[0_20px_50px_rgba(40,55,43,0.06)] backdrop-blur-md">
+                <div className="w-full max-w-md rounded-2xl sm:rounded-3xl border border-hairline/80 bg-surface/90 p-4 sm:p-6 shadow-[0_20px_50px_rgba(40,55,43,0.06)] backdrop-blur-md">
                   <div className="flex items-center justify-between">
                     <div className="h-5 w-24 rounded-full botaniq-skeleton" />
                     <div className="h-6 w-16 rounded-full botaniq-skeleton" />
@@ -821,7 +821,7 @@ export default function Home() {
               ) : (
                 /* Product Image Slider */
                 <div
-                  className="w-full max-w-md sm:max-w-lg lg:max-w-md xl:max-w-lg rounded-3xl border border-hairline/80 bg-surface/90 p-5 sm:p-6 shadow-[0_20px_50px_rgba(40,55,43,0.07)] backdrop-blur-md"
+                  className="w-full max-w-md sm:max-w-lg lg:max-w-md xl:max-w-lg rounded-2xl sm:rounded-3xl border border-hairline/80 bg-surface/90 p-4 sm:p-6 shadow-[0_20px_50px_rgba(40,55,43,0.07)] backdrop-blur-md"
                   onMouseEnter={() => setIsSliderHovered(true)}
                   onMouseLeave={() => setIsSliderHovered(false)}
                 >
@@ -980,8 +980,10 @@ export default function Home() {
             max-w-6xl
             grid-cols-1
             gap-2
-            px-6
-            py-6
+            px-4
+            sm:px-6
+            py-4
+            sm:py-6
             sm:grid-cols-3
           "
         >
@@ -1011,8 +1013,10 @@ export default function Home() {
         className={`
           mx-auto
           max-w-6xl
-          px-6
-          py-14
+          px-4
+          sm:px-6
+          py-10
+          sm:py-14
           transition-all
           duration-1000
           ${
@@ -1211,8 +1215,10 @@ export default function Home() {
             relative
             mx-auto
             max-w-3xl
-            px-6
-            py-16
+            px-4
+            sm:px-6
+            py-12
+            sm:py-16
             text-center
           "
         >
@@ -1272,8 +1278,10 @@ export default function Home() {
         className={`
           mx-auto
           max-w-6xl
-          px-6
-          py-20
+          px-4
+          sm:px-6
+          py-14
+          sm:py-20
           transition-all
           duration-1000
           ${
@@ -1369,8 +1377,10 @@ export default function Home() {
             className="
               grid
               grid-cols-2
-              gap-x-5
-              gap-y-12
+              gap-x-3.5
+              sm:gap-x-5
+              gap-y-8
+              sm:gap-y-12
               md:grid-cols-4
               md:gap-6
             "
@@ -1429,8 +1439,10 @@ export default function Home() {
           className="
             mx-auto
             max-w-5xl
-            px-6
-            py-20
+            px-4
+            sm:px-6
+            py-14
+            sm:py-20
             text-center
           "
         >
