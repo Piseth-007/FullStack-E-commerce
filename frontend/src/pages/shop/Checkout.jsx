@@ -453,7 +453,12 @@ export default function Checkout() {
     }
   };
   useEffect(() => {
-    if (!showQrModal || !paymentData?.payment_id || paymentStatus === "paid") {
+    if (
+      !showQrModal ||
+      !paymentData?.payment_id ||
+      paymentStatus === "paid" ||
+      paymentStatus === "expired"
+    ) {
       return;
     }
 
@@ -508,31 +513,40 @@ export default function Checkout() {
   }, [showQrModal, paymentData?.expires_at, paymentStatus]);
 
   const handleClosePayment = async () => {
-    if (checkingPayment || cancellingPayment) return;
-    if (paymentData?.payment_id && paymentStatus !== "paid") {
-      setCancellingPayment(true);
+    if (cancellingPayment) return;
 
+    const paymentId = paymentData?.payment_id;
+    const isExpired = paymentStatus === "expired";
+    const isPaid = paymentStatus === "paid";
+
+    // If pending payment and not yet expired/paid, notify backend to cancel reservation
+    if (paymentId && !isExpired && !isPaid) {
+      setCancellingPayment(true);
       try {
-        await api.post(`/payments/${paymentData.payment_id}/cancel`);
-        await refreshCart();
+        await api.post(`/payments/${paymentId}/cancel`);
       } catch (error) {
-        console.error("Payment cancellation error:", error);
-        showToast(
-          error.response?.data?.message ||
-            "Failed to cancel payment. Please try again.",
-          "error",
+        console.warn(
+          "Payment cancellation notice:",
+          error?.response?.data?.message || error?.message,
         );
-        return;
       } finally {
         setCancellingPayment(false);
       }
     }
 
+    // Always close modal and reset payment states cleanly
     setShowQrModal(false);
     setPaymentData(null);
     setPaymentStatus("pending");
     setSecondsLeft(null);
     paymentCompletedRef.current = false;
+
+    // Refresh cart in background so stock/cart items are updated
+    try {
+      await refreshCart();
+    } catch (err) {
+      console.error("Cart refresh error:", err);
+    }
   };
 
   const handleCopyQr = async () => {
@@ -933,7 +947,14 @@ export default function Checkout() {
 
       {/* KHQR MODAL */}
       {showQrModal && paymentData && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto">
+        <div
+          onClick={(e) => {
+            if (e.target === e.currentTarget && (paymentStatus === "expired" || !cancellingPayment)) {
+              handleClosePayment();
+            }
+          }}
+          className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 z-50 overflow-y-auto"
+        >
           <div className="bg-surface rounded-3xl max-w-[380px] w-full shadow-2xl overflow-hidden border border-hairline my-auto animate-in fade-in zoom-in-95 duration-200">
             {/* OFFICIAL KHQR STAND CARD */}
             <div className="relative bg-surface">
@@ -948,8 +969,8 @@ export default function Checkout() {
                   <button
                     type="button"
                     onClick={handleClosePayment}
-                    disabled={checkingPayment || cancellingPayment}
-                    className="p-1.5 rounded-full border border-white/20 bg-white/15 hover:bg-white/25 transition-colors disabled:opacity-50 text-white"
+                    disabled={cancellingPayment}
+                    className="p-1.5 rounded-full border border-white/20 bg-white/15 hover:bg-white/25 transition-colors disabled:opacity-50 text-white cursor-pointer"
                     title="Close"
                   >
                     <X size={18} />
@@ -1051,97 +1072,117 @@ export default function Checkout() {
             <div className="bg-paper px-4 sm:px-6 py-4 border-t border-hairline space-y-3">
               {paymentStatus !== "paid" && (
                 <>
-                  {/* COUNTDOWN */}
                   {paymentStatus === "expired" ? (
-                    <div className="rounded-xl border border-clay/30 bg-clay-tint px-3 py-2 text-center text-[12px] font-medium text-clay">
-                      {t("checkout_qr_expired", "This QR code has expired. Please close and try again.")}
+                    <div className="space-y-3">
+                      {/* EXPIRED BANNER */}
+                      <div className="rounded-xl border border-clay/30 bg-clay-tint px-3.5 py-3 text-center space-y-1">
+                        <div className="flex items-center justify-center gap-1.5 text-clay font-semibold text-[13px]">
+                          <Clock3 size={15} />
+                          <span>{t("checkout_qr_expired_title", "QR Code Expired")}</span>
+                        </div>
+                        <p className="text-[12px] text-clay/90">
+                          {t("checkout_qr_expired", "This QR code has expired. Please close and try again.")}
+                        </p>
+                      </div>
+
+                      {/* PROMINENT CLOSE / TRY AGAIN BUTTON */}
+                      <button
+                        type="button"
+                        onClick={handleClosePayment}
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-ink text-white text-[13px] font-semibold hover:opacity-90 transition-opacity shadow-xs cursor-pointer"
+                      >
+                        <span>{t("checkout_close_try_again", "Close & Try Again")}</span>
+                      </button>
                     </div>
                   ) : (
-                    <div
-                      className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border ${
-                        isExpiringSoon
-                          ? "border-clay/30 bg-clay-tint text-clay"
-                          : "border-moss/20 bg-moss-tint text-moss-deep"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Clock3 size={15} strokeWidth={2} />
-                        <span className="text-[11px] font-medium uppercase tracking-wider">
-                          {isExpiringSoon ? t("checkout_expires_soon", "Expires soon") : t("checkout_time_remaining", "Time remaining")}
+                    <>
+                      {/* COUNTDOWN */}
+                      <div
+                        className={`flex items-center justify-between px-3.5 py-2.5 rounded-xl border ${
+                          isExpiringSoon
+                            ? "border-clay/30 bg-clay-tint text-clay"
+                            : "border-moss/20 bg-moss-tint text-moss-deep"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <Clock3 size={15} strokeWidth={2} />
+                          <span className="text-[11px] font-medium uppercase tracking-wider">
+                            {isExpiringSoon ? t("checkout_expires_soon", "Expires soon") : t("checkout_time_remaining", "Time remaining")}
+                          </span>
+                        </div>
+                        <span className="font-mono text-[16px] font-semibold tracking-wider">
+                          {secondsLeft !== null ? formatTime(secondsLeft) : "--:--"}
                         </span>
                       </div>
-                      <span className="font-mono text-[16px] font-semibold tracking-wider">
-                        {secondsLeft !== null ? formatTime(secondsLeft) : "--:--"}
-                      </span>
-                    </div>
+
+                      {/* AUTO-CHECK INDICATOR */}
+                      <div className="flex items-center justify-center gap-1.5 text-[11px] text-stone">
+                        <span className="relative flex h-2 w-2">
+                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-moss opacity-75"></span>
+                          <span className="relative inline-flex rounded-full h-2 w-2 bg-moss"></span>
+                        </span>
+                        <span>{t("checkout_checking_auto", "Checking payment automatically every 5s")}</span>
+                      </div>
+
+                      {/* REFERENCE MD5 */}
+                      <p
+                        className="text-[11px] text-stone text-center truncate px-2"
+                        title={paymentData.md5}
+                      >
+                        {t("checkout_ref", "Ref:")} <span className="font-mono text-ink/70">{paymentData.md5}</span>
+                      </p>
+
+                      {/* MANUAL VERIFY BUTTON */}
+                      <button
+                        type="button"
+                        onClick={() => checkPaymentStatus(true)}
+                        disabled={checkingPayment}
+                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs disabled:opacity-50 cursor-pointer"
+                      >
+                        {checkingPayment && (
+                          <Loader2 size={16} className="animate-spin" />
+                        )}
+                        <span>
+                          {checkingPayment
+                            ? t("checkout_verifying_payment", "Verifying Payment...")
+                            : t("checkout_i_have_paid", "I Have Completed Payment")}
+                        </span>
+                      </button>
+
+                      {/* COPY & DOWNLOAD BUTTONS */}
+                      <div className="flex gap-2">
+                        <button
+                          type="button"
+                          onClick={handleCopyQr}
+                          className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors cursor-pointer"
+                        >
+                          <Copy size={13} />
+                          <span>{t("checkout_copy_khqr", "Copy KHQR")}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={handleDownloadQr}
+                          className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors cursor-pointer"
+                        >
+                          <Download size={13} />
+                          <span>{t("checkout_download_qr", "Download QR")}</span>
+                        </button>
+                      </div>
+
+                      {/* CANCEL / CLOSE */}
+                      <button
+                        type="button"
+                        onClick={handleClosePayment}
+                        disabled={cancellingPayment}
+                        className="w-full py-2 text-stone hover:text-ink text-[12.5px] font-medium transition-colors disabled:opacity-50 cursor-pointer"
+                      >
+                        {cancellingPayment ? t("checkout_cancelling", "Cancelling payment...") : t("checkout_cancel_and_return", "Cancel & Return to Cart")}
+                      </button>
+                    </>
                   )}
-
-                  {/* AUTO-CHECK INDICATOR */}
-                  <div className="flex items-center justify-center gap-1.5 text-[11px] text-stone">
-                    <span className="relative flex h-2 w-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-moss opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-2 w-2 bg-moss"></span>
-                    </span>
-                    <span>{t("checkout_checking_auto", "Checking payment automatically every 5s")}</span>
-                  </div>
-
-                  {/* REFERENCE MD5 */}
-                  <p
-                    className="text-[11px] text-stone text-center truncate px-2"
-                    title={paymentData.md5}
-                  >
-                    {t("checkout_ref", "Ref:")} <span className="font-mono text-ink/70">{paymentData.md5}</span>
-                  </p>
-
-                  {/* MANUAL VERIFY BUTTON */}
-                  <button
-                    type="button"
-                    onClick={() => checkPaymentStatus(true)}
-                    disabled={checkingPayment || paymentStatus === "expired"}
-                    className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs disabled:opacity-50"
-                  >
-                    {checkingPayment && (
-                      <Loader2 size={16} className="animate-spin" />
-                    )}
-                    <span>
-                      {checkingPayment
-                        ? t("checkout_verifying_payment", "Verifying Payment...")
-                        : t("checkout_i_have_paid", "I Have Completed Payment")}
-                    </span>
-                  </button>
-
-                  {/* COPY & DOWNLOAD BUTTONS */}
-                  <div className="flex gap-2">
-                    <button
-                      type="button"
-                      onClick={handleCopyQr}
-                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors"
-                    >
-                      <Copy size={13} />
-                      <span>{t("checkout_copy_khqr", "Copy KHQR")}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={handleDownloadQr}
-                      className="flex items-center justify-center gap-1.5 flex-1 py-2.5 px-3 border border-hairline bg-surface rounded-xl hover:bg-paper text-ink text-[12px] font-medium transition-colors"
-                    >
-                      <Download size={13} />
-                      <span>{t("checkout_download_qr", "Download QR")}</span>
-                    </button>
-                  </div>
                 </>
               )}
-
-              {/* CANCEL / CLOSE */}
-              <button
-                type="button"
-                onClick={handleClosePayment}
-                disabled={checkingPayment || cancellingPayment}
-                className="w-full py-2 text-stone hover:text-ink text-[12.5px] font-medium transition-colors disabled:opacity-50"
-              >
-                {cancellingPayment ? t("checkout_cancelling", "Cancelling payment...") : t("checkout_cancel_and_return", "Cancel & Return to Cart")}
-              </button>
             </div>
           </div>
         </div>

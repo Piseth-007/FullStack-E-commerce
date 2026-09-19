@@ -61,3 +61,4 @@ services:
         value: "${APP_NAME}"
       - key: GOOGLE_CLIENT_ID
         sync: false
+

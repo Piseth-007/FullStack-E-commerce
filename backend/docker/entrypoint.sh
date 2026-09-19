@@ -20,3 +20,4 @@ php artisan migrate --force || echo "Warning: Migration failed or database not r
 
 echo "Starting Apache on port ${PORT}..."
 exec apache2-foreground
+

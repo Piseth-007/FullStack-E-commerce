@@ -162,12 +162,34 @@ class PaymentController extends Controller
         TelegramService $telegram,
         OrderCancellationService $orderCancellation
     ) {
-        $payment->loadMissing('order');
+        if ($payment->status === 'paid' || $payment->status === 'cancelled' || $payment->status === 'expired') {
+            return response()->json([
+                'status' => $payment->status,
+            ]);
+        }
+
+        if ($payment->expires_at && $payment->expires_at->isPast()) {
+            $payment->update([
+                'status' => 'expired',
+            ]);
+
+            if ($payment->order) {
+                $this->restoreOrderIfNoActivePayment(
+                    $payment,
+                    $orderCancellation
+                );
+            }
+
+            return response()->json([
+                'status' => 'expired',
+            ]);
+        }
 
         if (!$payment->order) {
             return response()->json([
+                'status' => 'cancelled',
                 'message' => 'Order associated with this payment was not found.',
-            ], 404);
+            ]);
         }
 
         if ($payment->order->user_id !== $request->user()->id) {
@@ -178,39 +200,6 @@ class PaymentController extends Controller
             return response()->json([
                 'message' => 'Unsupported payment method.',
             ], 422);
-        }
-
-        if ($payment->status === 'paid') {
-            return response()->json([
-                'status' => 'paid',
-            ]);
-        }
-
-        if ($payment->status === 'cancelled') {
-            return response()->json([
-                'status' => 'cancelled',
-            ]);
-        }
-
-        if ($payment->status === 'expired') {
-            return response()->json([
-                'status' => 'expired',
-            ]);
-        }
-
-        if ($payment->expires_at && $payment->expires_at->isPast()) {
-            $payment->update([
-                'status' => 'expired',
-            ]);
-
-            $this->restoreOrderIfNoActivePayment(
-                $payment,
-                $orderCancellation
-            );
-
-            return response()->json([
-                'status' => 'expired',
-            ]);
         }
 
         try {
@@ -310,16 +299,6 @@ class PaymentController extends Controller
     ) {
         $payment->loadMissing('order');
 
-        if (!$payment->order) {
-            return response()->json([
-                'message' => 'Order associated with this payment was not found.',
-            ], 404);
-        }
-
-        if ($payment->order->user_id !== $request->user()->id) {
-            abort(403);
-        }
-
         if ($payment->method !== self::PAYMENT_METHOD) {
             return response()->json([
                 'message' => 'Unsupported payment method.',
@@ -338,15 +317,32 @@ class PaymentController extends Controller
             ]);
         }
 
-        if ($payment->status === 'expired') {
-            $this->restoreOrderIfNoActivePayment(
-                $payment,
-                $orderCancellation
-            );
+        if ($payment->status === 'expired' || ($payment->expires_at && $payment->expires_at->isPast())) {
+            if ($payment->status !== 'expired') {
+                $payment->update(['status' => 'expired']);
+            }
+
+            if ($payment->order) {
+                $this->restoreOrderIfNoActivePayment(
+                    $payment,
+                    $orderCancellation
+                );
+            }
 
             return response()->json([
                 'status' => 'expired',
             ]);
+        }
+
+        if (!$payment->order) {
+            $payment->update(['status' => 'cancelled']);
+            return response()->json([
+                'status' => 'cancelled',
+            ]);
+        }
+
+        if ($payment->order->user_id !== $request->user()->id) {
+            abort(403);
         }
 
         try {
