@@ -253,6 +253,15 @@ class PaymentController extends Controller
                         'paid_at' => now(),
                     ]);
 
+                    // Payment successfully completed: clear user's cart items
+                    DB::table('cart_items')
+                        ->whereIn('cart_id', function ($query) use ($lockedPayment) {
+                            $query->select('id')
+                                ->from('carts')
+                                ->where('user_id', $lockedPayment->order->user_id);
+                        })
+                        ->delete();
+
                     return true;
                 });
 

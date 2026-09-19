@@ -22,30 +22,30 @@ class OrderCancellationService
                 return false;
             }
 
-            $cart = Cart::firstOrCreate(['user_id' => $order->user_id]);
-
+            // Restore reserved product stock
             foreach ($order->items as $item) {
-                $cartItem = $cart->items()
-                    ->where('product_id', $item->product_id)
-                    ->lockForUpdate()
-                    ->first();
+                Product::whereKey($item->product_id)->increment('stock', $item->quantity);
+            }
 
-                if ($cartItem) {
-                    $cartItem->increment('quantity', $item->quantity);
-                } else {
+            // Ensure the user's cart contains the products from this order
+            $cart = Cart::firstOrCreate(['user_id' => $order->user_id]);
+            foreach ($order->items as $item) {
+                $exists = $cart->items()
+                    ->where('product_id', $item->product_id)
+                    ->exists();
+
+                if (!$exists) {
                     $cart->items()->create([
                         'product_id' => $item->product_id,
                         'quantity' => $item->quantity,
                     ]);
                 }
-
-                Product::whereKey($item->product_id)->increment('stock', $item->quantity);
             }
 
-            // An unpaid checkout is only a temporary reservation.  Once the
-            // payment is cancelled or expires, restore its stock/cart and
-            // remove the draft order instead of retaining a cancellation.
-            $order->delete();
+            // Mark order as cancelled so records remain coherent
+            $order->update([
+                'status' => 'cancelled',
+            ]);
 
             return true;
         });

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Services\OrderCancellationService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,7 +55,7 @@ class OrderController extends Controller
         return response()->json($order);
     }
 
-    public function store(Request $request)
+    public function store(Request $request, OrderCancellationService $orderCancellation)
     {
         $validated = $request->validate([
             'address_id' => [
@@ -75,6 +76,17 @@ class OrderController extends Controller
                     'Address not found or does not belong to you.',
                 ],
             ]);
+        }
+
+        // If the user previously initiated a pending order that was never paid,
+        // cancel it and restore its reserved stock before placing a new attempt.
+        $previousPendingOrders = Order::query()
+            ->where('user_id', Auth::id())
+            ->where('status', 'pending')
+            ->get();
+
+        foreach ($previousPendingOrders as $prevOrder) {
+            $orderCancellation->cancelPendingOrder($prevOrder);
         }
 
         $cartItems = DB::table('cart_items')
@@ -170,13 +182,8 @@ class OrderController extends Controller
                     );
             }
 
-            DB::table('cart_items')
-                ->whereIn('cart_id', function ($query) {
-                    $query->select('id')
-                        ->from('carts')
-                        ->where('user_id', Auth::id());
-                })
-                ->delete();
+            // Note: Cart items are intentionally preserved here.
+            // Items remain in the user's cart until payment is actually confirmed paid.
 
             return $order;
         });

@@ -12,6 +12,7 @@ import {
   CheckCircle2,
   Clock3,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import api from "../../api/axios";
 import { useCart } from "../../context/useCard";
@@ -546,6 +547,54 @@ export default function Checkout() {
       await refreshCart();
     } catch (err) {
       console.error("Cart refresh error:", err);
+    }
+  };
+
+  const handleRegenerateKhqr = async () => {
+    if (placing) return;
+    setPlacing(true);
+
+    try {
+      const orderResponse = await api.post("/orders", {
+        address_id: selectedId,
+      });
+
+      const order = orderResponse.data;
+      const orderId = order.id || order.order?.id || order.data?.id;
+
+      if (!orderId) {
+        throw new Error("Order ID was not returned from the server");
+      }
+
+      const paymentResponse = await api.post(`/orders/${orderId}/payment`);
+      const result = paymentResponse.data;
+
+      if (!result.qr_string || !result.payment_id) {
+        throw new Error(result.message || "KHQR code was not generated");
+      }
+
+      setPaymentData({
+        payment_id: result.payment_id,
+        qr_string: result.qr_string,
+        md5: result.md5,
+        expires_at: result.expires_at,
+        order_id: orderId,
+      });
+
+      setPaymentStatus("pending");
+      showToast(
+        t("checkout_new_qr_generated", "New QR code generated successfully"),
+        "success",
+      );
+    } catch (err) {
+      console.error("Regenerate KHQR error:", err);
+      showToast(
+        err.response?.data?.message || err.message || "Failed to generate new QR",
+        "error",
+      );
+      handleClosePayment();
+    } finally {
+      setPlacing(false);
     }
   };
 
@@ -1085,14 +1134,37 @@ export default function Checkout() {
                         </p>
                       </div>
 
-                      {/* PROMINENT CLOSE / TRY AGAIN BUTTON */}
-                      <button
-                        type="button"
-                        onClick={handleClosePayment}
-                        className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-ink text-white text-[13px] font-semibold hover:opacity-90 transition-opacity shadow-xs cursor-pointer"
-                      >
-                        <span>{t("checkout_close_try_again", "Close & Try Again")}</span>
-                      </button>
+                      {/* ACTION BUTTONS */}
+                      <div className="space-y-2">
+                        {/* PRIMARY: GENERATE NEW QR */}
+                        <button
+                          type="button"
+                          onClick={handleRegenerateKhqr}
+                          disabled={placing}
+                          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-moss text-white text-[13px] font-semibold hover:bg-moss-deep transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                        >
+                          {placing ? (
+                            <>
+                              <Loader2 size={16} className="animate-spin" />
+                              <span>{t("checkout_generating_qr", "Generating QR...")}</span>
+                            </>
+                          ) : (
+                            <>
+                              <RefreshCw size={15} />
+                              <span>{t("checkout_generate_new_qr", "Generate New QR")}</span>
+                            </>
+                          )}
+                        </button>
+
+                        {/* SECONDARY: CLOSE */}
+                        <button
+                          type="button"
+                          onClick={handleClosePayment}
+                          className="w-full py-2.5 px-4 rounded-xl border border-hairline bg-surface hover:bg-paper text-ink text-[12.5px] font-medium transition-colors cursor-pointer text-center"
+                        >
+                          {t("checkout_close", "Close")}
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <>
