@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import {
   BarChart,
   Bar,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
@@ -31,6 +33,9 @@ import {
   RotateCcw,
   Check,
   X,
+  Activity,
+  BarChart3,
+  Sparkles,
 } from "lucide-react";
 
 import api from "../../api/axios";
@@ -181,6 +186,64 @@ function getFilterDisplayLabel(filter, t, isKhmer) {
   return t("dash_filter_all", "All Time");
 }
 
+function formatYAxisTick(value) {
+  const num = Number(value);
+  if (isNaN(num)) return `$${value}`;
+  if (num >= 1_000_000) return `$${(num / 1_000_000).toFixed(1).replace(/\.0$/, "")}M`;
+  if (num >= 1_000) return `$${(num / 1_000).toFixed(1).replace(/\.0$/, "")}k`;
+  if (num === 0) return "$0";
+  if (num < 1) return `$${num.toFixed(2)}`;
+  return `$${Math.round(num)}`;
+}
+
+function ModernChartTooltip({ active, payload, label, isSingleDay, isDark, t }) {
+  if (!active || !payload || !payload.length) return null;
+  const item = payload[0]?.payload || {};
+  const sales = Number(item.sales || 0);
+  const orders = Number(item.orders || 0);
+
+  return (
+    <div
+      className={`min-w-44 rounded-xl p-3 shadow-2xl backdrop-blur-md transition-all border ${
+        isDark
+          ? "border-white/10 bg-[#18191e]/95 text-white shadow-black/50"
+          : "border-stone-200/80 bg-white/95 text-ink shadow-stone-400/20"
+      }`}
+    >
+      <div className="mb-2 flex items-center justify-between gap-2 border-b border-hairline pb-1.5">
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2">
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+          </span>
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-stone">
+            {isSingleDay ? `${label} (Hour)` : item.date || label}
+          </span>
+        </div>
+        {orders > 0 && (
+          <span className="rounded bg-emerald-500/10 px-1.5 py-0.5 text-[10px] font-medium text-emerald-600 dark:text-emerald-400">
+            {orders} {orders === 1 ? (t ? t("dash_item_single", "order") : "order") : (t ? t("dash_item_plural", "orders") : "orders")}
+          </span>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-baseline justify-between gap-3">
+          <span className="text-[11px] text-stone">
+            {t ? t("dash_sales_tooltip", "Sales") : "Sales"}
+          </span>
+          <span className="font-mono text-[15px] font-bold text-emerald-600 dark:text-emerald-400">
+            ${sales.toLocaleString(undefined, {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2,
+            })}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function useDarkMode() {
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark"),
@@ -214,6 +277,7 @@ export default function Dashboard() {
   const [orders, setOrders] = useState([]);
   const [trend, setTrend] = useState([]);
   const [range, setRange] = useState("7d");
+  const [chartType, setChartType] = useState("area");
 
   const [dateFilter, setDateFilter] = useState({
     preset: "all",
@@ -360,6 +424,27 @@ export default function Dashboard() {
     });
     setRange("7d");
   };
+
+  const trendStats = useMemo(() => {
+    if (!Array.isArray(trend) || trend.length === 0) {
+      return { peak: 0, peakLabel: null, totalOrders: 0 };
+    }
+    let peak = 0;
+    let peakLabel = "";
+    let totalOrders = 0;
+
+    trend.forEach((item) => {
+      const s = Number(item.sales || 0);
+      const o = Number(item.orders || 0);
+      totalOrders += o;
+      if (s > peak) {
+        peak = s;
+        peakLabel = item.label;
+      }
+    });
+
+    return { peak, peakLabel, totalOrders };
+  }, [trend]);
 
   const recentOrders = useMemo(() => {
     if (!Array.isArray(orders)) {
@@ -532,18 +617,18 @@ export default function Dashboard() {
   const chartColors = isDark
     ? {
         grid: "#2b2d35",
-        axisText: "#a6a29a",
-        barFill: "#3e6344",
-        cursorFill: "#3e6344",
+        axisText: "#8e95a5",
+        barFill: "#10b981",
+        cursorFill: "#10b981",
         tooltipBg: "#18191e",
         tooltipBorder: "#2b2d35",
         tooltipText: "#f5f4f0",
       }
     : {
-        grid: "#e4e0d8",
+        grid: "#e8e5de",
         axisText: "#736e63",
-        barFill: "#38543c",
-        cursorFill: "#38543c",
+        barFill: "#10b981",
+        cursorFill: "#10b981",
         tooltipBg: "#ffffff",
         tooltipBorder: "#e4e0d8",
         tooltipText: "#211f1b",
@@ -638,7 +723,7 @@ export default function Dashboard() {
                   )}
                 </p>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-3">
                   <h2 className="font-mono text-[28px] leading-none text-ink">
                     ${Number(summary?.total_sales || 0).toLocaleString(undefined, {
                       minimumFractionDigits: 2,
@@ -652,32 +737,75 @@ export default function Dashboard() {
                       positive={Number(summary?.sales_growth) >= 0}
                     />
                   )}
+
+                  {trendStats.peak > 0 && (
+                    <div className="inline-flex items-center gap-1.5 rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2.5 py-1 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
+                      <Sparkles className="h-3 w-3" />
+                      <span>
+                        Peak: ${trendStats.peak.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        {trendStats.peakLabel ? ` (${trendStats.peakLabel})` : ""}
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <div className="flex items-center rounded-lg border border-hairline bg-paper p-1">
-                {ranges.map((item) => (
+              <div className="flex flex-wrap items-center gap-2">
+                {/* View Type Toggle: Area vs Bar */}
+                <div className="flex items-center rounded-lg border border-hairline bg-paper p-1">
                   <button
-                    key={item.key}
                     type="button"
-                    disabled={trendLoading}
-                    onClick={() => handleRangeChange(item.key)}
-                    className={`rounded-md px-3 py-1.5 text-[12px] font-medium transition-all disabled:opacity-60 ${
-                      range === item.key && !isFiltered
+                    onClick={() => setChartType("area")}
+                    title="Area Chart"
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11.5px] font-medium transition-all ${
+                      chartType === "area"
                         ? "bg-surface text-ink shadow-[0_1px_3px_rgba(33,31,27,0.08)]"
                         : "text-stone hover:text-ink"
                     }`}
                   >
-                    {item.label}
+                    <Activity className="h-3.5 w-3.5" />
+                    <span>Area</span>
                   </button>
-                ))}
-                {isFiltered && (
-                  <span className="rounded-md bg-surface px-3 py-1.5 text-[12px] font-medium text-moss shadow-[0_1px_3px_rgba(33,31,27,0.08)] dark:text-emerald-400">
-                    {dateFilter.preset === "custom"
-                      ? t("dash_filter_custom", "Custom")
-                      : dateFilter.label}
-                  </span>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => setChartType("bar")}
+                    title="Bar Chart"
+                    className={`flex items-center gap-1.5 rounded-md px-2.5 py-1 text-[11.5px] font-medium transition-all ${
+                      chartType === "bar"
+                        ? "bg-surface text-ink shadow-[0_1px_3px_rgba(33,31,27,0.08)]"
+                        : "text-stone hover:text-ink"
+                    }`}
+                  >
+                    <BarChart3 className="h-3.5 w-3.5" />
+                    <span>Bar</span>
+                  </button>
+                </div>
+
+                {/* Range Selector */}
+                <div className="flex items-center rounded-lg border border-hairline bg-paper p-1">
+                  {ranges.map((item) => (
+                    <button
+                      key={item.key}
+                      type="button"
+                      disabled={trendLoading}
+                      onClick={() => handleRangeChange(item.key)}
+                      className={`rounded-md px-3 py-1 text-[12px] font-medium transition-all disabled:opacity-60 ${
+                        range === item.key && !isFiltered
+                          ? "bg-surface text-ink shadow-[0_1px_3px_rgba(33,31,27,0.08)]"
+                          : "text-stone hover:text-ink"
+                      }`}
+                    >
+                      {item.label}
+                    </button>
+                  ))}
+                  {isFiltered && (
+                    <span className="rounded-md bg-surface px-3 py-1 text-[12px] font-medium text-moss shadow-[0_1px_3px_rgba(33,31,27,0.08)] dark:text-emerald-400">
+                      {dateFilter.preset === "custom"
+                        ? t("dash_filter_custom", "Custom")
+                        : dateFilter.label}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
 
@@ -690,79 +818,175 @@ export default function Dashboard() {
                 </p>
               </div>
             ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart
-                  data={trend}
-                  margin={{
-                    top: 10,
-                    right: 5,
-                    left: -20,
-                    bottom: 0,
-                  }}
-                  barCategoryGap="25%"
-                >
-                  <CartesianGrid
-                    strokeDasharray="4 4"
-                    stroke={chartColors.grid}
-                    vertical={false}
-                  />
+              <div className="relative">
+                <ResponsiveContainer width="100%" height={320}>
+                  {chartType === "area" ? (
+                    <AreaChart
+                      data={trend}
+                      margin={{
+                        top: 15,
+                        right: 10,
+                        left: -15,
+                        bottom: 0,
+                      }}
+                    >
+                      <defs>
+                        <linearGradient id="salesAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop
+                            offset="0%"
+                            stopColor="#10b981"
+                            stopOpacity={isDark ? 0.38 : 0.28}
+                          />
+                          <stop
+                            offset="65%"
+                            stopColor="#10b981"
+                            stopOpacity={isDark ? 0.1 : 0.05}
+                          />
+                          <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                        </linearGradient>
+                      </defs>
 
-                  <XAxis
-                    dataKey="label"
-                    tick={{
-                      fontSize: 11,
-                      fill: chartColors.axisText,
-                    }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
+                      <CartesianGrid
+                        strokeDasharray="4 4"
+                        stroke={chartColors.grid}
+                        vertical={false}
+                        opacity={0.6}
+                      />
 
-                  <YAxis
-                    tick={{
-                      fontSize: 11,
-                      fill: chartColors.axisText,
-                    }}
-                    axisLine={false}
-                    tickLine={false}
-                    tickFormatter={(value) => `$${value}`}
-                  />
+                      <XAxis
+                        dataKey="label"
+                        tick={{
+                          fontSize: 11,
+                          fill: chartColors.axisText,
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        dy={8}
+                      />
 
-                  <Tooltip
-                    cursor={{
-                      fill: chartColors.cursorFill,
-                      fillOpacity: 0.06,
-                    }}
-                    contentStyle={{
-                      background: chartColors.tooltipBg,
-                      border: `1px solid ${chartColors.tooltipBorder}`,
-                      borderRadius: 10,
-                      fontSize: 12,
-                      color: chartColors.tooltipText,
-                      boxShadow: "0 8px 24px rgba(33,31,27,0.08)",
-                    }}
-                    labelStyle={{
-                      color: chartColors.tooltipText,
-                    }}
-                    itemStyle={{
-                      color: chartColors.tooltipText,
-                    }}
-                    labelFormatter={(label) =>
-                      isSingleDay ? `${label} (Hour)` : label
-                    }
-                    formatter={(value) => [
-                      `$${Number(value).toFixed(2)}`,
-                      t("dash_sales_tooltip", "Sales"),
-                    ]}
-                  />
+                      <YAxis
+                        tick={{
+                          fontSize: 11,
+                          fill: chartColors.axisText,
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={formatYAxisTick}
+                        width={48}
+                      />
 
-                  <Bar
-                    dataKey="sales"
-                    fill={chartColors.barFill}
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={42}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+                      <Tooltip
+                        content={
+                          <ModernChartTooltip
+                            isSingleDay={isSingleDay}
+                            isDark={isDark}
+                            t={t}
+                          />
+                        }
+                        cursor={{
+                          stroke: isDark ? "rgba(255,255,255,0.18)" : "rgba(0,0,0,0.12)",
+                          strokeWidth: 1.5,
+                          strokeDasharray: "4 4",
+                        }}
+                      />
+
+                      <Area
+                        type="monotone"
+                        dataKey="sales"
+                        stroke="#10b981"
+                        strokeWidth={2.5}
+                        fillOpacity={1}
+                        fill="url(#salesAreaGradient)"
+                        activeDot={{
+                          r: 5.5,
+                          stroke: isDark ? "#18191e" : "#ffffff",
+                          strokeWidth: 2.5,
+                          fill: "#10b981",
+                        }}
+                        dot={
+                          trend.length <= 12
+                            ? {
+                                r: 3,
+                                fill: "#10b981",
+                                stroke: isDark ? "#18191e" : "#ffffff",
+                                strokeWidth: 1.5,
+                              }
+                            : false
+                        }
+                      />
+                    </AreaChart>
+                  ) : (
+                    <BarChart
+                      data={trend}
+                      margin={{
+                        top: 15,
+                        right: 10,
+                        left: -15,
+                        bottom: 0,
+                      }}
+                      barCategoryGap="25%"
+                    >
+                      <defs>
+                        <linearGradient id="salesBarGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#10b981" />
+                          <stop offset="100%" stopColor="#059669" />
+                        </linearGradient>
+                      </defs>
+
+                      <CartesianGrid
+                        strokeDasharray="4 4"
+                        stroke={chartColors.grid}
+                        vertical={false}
+                        opacity={0.6}
+                      />
+
+                      <XAxis
+                        dataKey="label"
+                        tick={{
+                          fontSize: 11,
+                          fill: chartColors.axisText,
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        dy={8}
+                      />
+
+                      <YAxis
+                        tick={{
+                          fontSize: 11,
+                          fill: chartColors.axisText,
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        tickFormatter={formatYAxisTick}
+                        width={48}
+                      />
+
+                      <Tooltip
+                        content={
+                          <ModernChartTooltip
+                            isSingleDay={isSingleDay}
+                            isDark={isDark}
+                            t={t}
+                          />
+                        }
+                        cursor={{
+                          fill: chartColors.cursorFill,
+                          fillOpacity: 0.08,
+                          radius: 6,
+                        }}
+                      />
+
+                      <Bar
+                        dataKey="sales"
+                        fill="url(#salesBarGradient)"
+                        radius={[6, 6, 0, 0]}
+                        maxBarSize={38}
+                      />
+                    </BarChart>
+                  )}
+                </ResponsiveContainer>
+              </div>
             )}
           </div>
 
