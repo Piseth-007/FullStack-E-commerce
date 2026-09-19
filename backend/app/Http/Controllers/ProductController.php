@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Subscriber;
+use App\Models\CartItem;
+use App\Models\Favorite;
 use App\Mail\NewProductAlert;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -302,24 +304,24 @@ class ProductController extends Controller
 
     public function destroy(Product $product)
     {
-        if ($product->images) {
-            foreach ($product->images as $img) {
-                if (
-                    isset($img['public_id']) &&
-                    $img['public_id']
-                ) {
-                    cloudinary()->destroy(
-                        $img['public_id']
-                    );
-                }
-            }
+        try {
+            // Clean up active shopping carts and favorites for this product
+            CartItem::where('product_id', $product->id)->delete();
+            Favorite::where('product_id', $product->id)->delete();
+
+            // Soft-delete the product (marks deleted_at timestamp)
+            // Preserves image assets and order history
+            $product->delete();
+
+            return response()->json([
+                'message' => 'Product deleted successfully',
+            ]);
+        } catch (\Throwable $e) {
+            Log::error("Failed to soft-delete product {$product->id}: " . $e->getMessage());
+
+            return response()->json([
+                'message' => 'Failed to delete product. ' . $e->getMessage(),
+            ], 500);
         }
-
-        $product->delete();
-
-        return response()->json([
-            'message' =>
-            'Product deleted successfully',
-        ]);
     }
 }
