@@ -4,13 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Brand;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class BrandController extends Controller
 {
     public function index()
     {
-        return response()->json(Brand::all());
+        $brands = Cache::remember('brands:all', 3600, function () {
+            return Brand::all();
+        });
+
+        return response()->json($brands);
     }
 
     public function show(Brand $brand)
@@ -29,6 +34,8 @@ class BrandController extends Controller
             'slug' => Str::slug($validated['name']),
         ]);
 
+        Cache::forget('brands:all');
+
         return response()->json($brand, 201);
     }
 
@@ -43,6 +50,8 @@ class BrandController extends Controller
             'slug' => Str::slug($validated['name']),
         ]);
 
+        Cache::forget('brands:all');
+
         return response()->json($brand);
     }
 
@@ -53,6 +62,8 @@ class BrandController extends Controller
         }
 
         $brand->delete();
+
+        Cache::forget('brands:all');
 
         return response()->json(['message' => 'Brand deleted']);
     }
@@ -76,6 +87,8 @@ class BrandController extends Controller
             'logo_url' => $result->getSecurePath(),
             'logo_public_id' => $result->getPublicId(),
         ]);
+
+        Cache::forget('brands:all');
 
         return response()->json($brand);
     }

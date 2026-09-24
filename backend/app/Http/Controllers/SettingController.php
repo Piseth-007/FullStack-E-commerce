@@ -8,14 +8,19 @@ use App\Rules\RealEmail;
 use App\Services\TelegramService;
 use Cloudinary\Cloudinary;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 
 class SettingController extends Controller
 {
     public function publicStore()
     {
+        $store = Cache::remember('settings:store', 3600, function () {
+            return Setting::getGroup('store');
+        });
+
         return response()->json([
-            'data' => Setting::getGroup('store'),
+            'data' => $store,
         ]);
     }
 
@@ -73,6 +78,8 @@ class SettingController extends Controller
         }
 
         unset($data['remove_logo']);
+
+        Cache::forget('settings:store');
 
         return response()->json(['data' => Setting::putGroup('store', $data)]);
     }

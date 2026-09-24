@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
@@ -111,66 +112,70 @@ class DashboardController extends Controller
             ]);
         }
 
-        // All-Time Summary (Default)
-        $todayStart = today()->startOfDay()->toDateTimeString();
-        $todayEnd = today()->endOfDay()->toDateTimeString();
-        $weekStart = now()->startOfWeek()->startOfDay()->toDateTimeString();
-        $weekEnd = now()->endOfWeek()->endOfDay()->toDateTimeString();
+        // All-Time Summary (Default) - cached for 60s
+        $cachedSummary = Cache::remember('dashboard:summary:all_time', 60, function () {
+            $todayStart = today()->startOfDay()->toDateTimeString();
+            $todayEnd = today()->endOfDay()->toDateTimeString();
+            $weekStart = now()->startOfWeek()->startOfDay()->toDateTimeString();
+            $weekEnd = now()->endOfWeek()->endOfDay()->toDateTimeString();
 
-        $orderStats = DB::table('orders')
-            ->selectRaw("
-                COALESCE(SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END), 0) as total_sales,
-                COUNT(*) as total_orders,
-                COUNT(CASE WHEN status = 'pending' THEN 1 END) as orders_pending,
-                COALESCE(SUM(CASE WHEN status != 'cancelled' AND created_at BETWEEN ? AND ? THEN total ELSE 0 END), 0) as sales_today,
-                COUNT(CASE WHEN created_at BETWEEN ? AND ? THEN 1 END) as orders_this_week
-            ", [$todayStart, $todayEnd, $weekStart, $weekEnd])
-            ->first();
+            $orderStats = DB::table('orders')
+                ->selectRaw("
+                    COALESCE(SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END), 0) as total_sales,
+                    COUNT(*) as total_orders,
+                    COUNT(CASE WHEN status = 'pending' THEN 1 END) as orders_pending,
+                    COALESCE(SUM(CASE WHEN status != 'cancelled' AND created_at BETWEEN ? AND ? THEN total ELSE 0 END), 0) as sales_today,
+                    COUNT(CASE WHEN created_at BETWEEN ? AND ? THEN 1 END) as orders_this_week
+                ", [$todayStart, $todayEnd, $weekStart, $weekEnd])
+                ->first();
 
-        $productStats = DB::table('products')
-            ->selectRaw("
-                COUNT(*) as total_products,
-                COUNT(CASE WHEN stock <= 5 THEN 1 END) as low_stock_products
-            ")
-            ->first();
+            $productStats = DB::table('products')
+                ->selectRaw("
+                    COUNT(*) as total_products,
+                    COUNT(CASE WHEN stock <= 5 THEN 1 END) as low_stock_products
+                ")
+                ->first();
 
-        $totalCustomers = DB::table('users')
-            ->where('role', 'customer')
-            ->count();
+            $totalCustomers = DB::table('users')
+                ->where('role', 'customer')
+                ->count();
 
-        // Previous week vs this week growth
-        $prevWeekStart = now()->subWeek()->startOfWeek()->startOfDay()->toDateTimeString();
-        $prevWeekEnd = now()->subWeek()->endOfWeek()->endOfDay()->toDateTimeString();
+            // Previous week vs this week growth
+            $prevWeekStart = now()->subWeek()->startOfWeek()->startOfDay()->toDateTimeString();
+            $prevWeekEnd = now()->subWeek()->endOfWeek()->endOfDay()->toDateTimeString();
 
-        $prevWeekSales = (float) (DB::table('orders')
-            ->where('status', '!=', 'cancelled')
-            ->whereBetween('created_at', [$prevWeekStart, $prevWeekEnd])
-            ->sum('total') ?? 0);
+            $prevWeekSales = (float) (DB::table('orders')
+                ->where('status', '!=', 'cancelled')
+                ->whereBetween('created_at', [$prevWeekStart, $prevWeekEnd])
+                ->sum('total') ?? 0);
 
-        $thisWeekSales = (float) (DB::table('orders')
-            ->where('status', '!=', 'cancelled')
-            ->whereBetween('created_at', [$weekStart, $weekEnd])
-            ->sum('total') ?? 0);
+            $thisWeekSales = (float) (DB::table('orders')
+                ->where('status', '!=', 'cancelled')
+                ->whereBetween('created_at', [$weekStart, $weekEnd])
+                ->sum('total') ?? 0);
 
-        $salesGrowth = null;
-        if ($prevWeekSales > 0) {
-            $salesGrowth = round((($thisWeekSales - $prevWeekSales) / $prevWeekSales) * 100, 1);
-        } elseif ($thisWeekSales > 0) {
-            $salesGrowth = 100.0;
-        }
+            $salesGrowth = null;
+            if ($prevWeekSales > 0) {
+                $salesGrowth = round((($thisWeekSales - $prevWeekSales) / $prevWeekSales) * 100, 1);
+            } elseif ($thisWeekSales > 0) {
+                $salesGrowth = 100.0;
+            }
 
-        return response()->json([
-            'total_sales' => (float) ($orderStats->total_sales ?? 0),
-            'total_orders' => (int) ($orderStats->total_orders ?? 0),
-            'orders_pending' => (int) ($orderStats->orders_pending ?? 0),
-            'total_products' => (int) ($productStats->total_products ?? 0),
-            'low_stock_products' => (int) ($productStats->low_stock_products ?? 0),
-            'total_customers' => (int) $totalCustomers,
-            'sales_today' => (float) ($orderStats->sales_today ?? 0),
-            'orders_this_week' => (int) ($orderStats->orders_this_week ?? 0),
-            'sales_growth' => $salesGrowth,
-            'is_filtered' => false,
-        ]);
+            return [
+                'total_sales' => (float) ($orderStats->total_sales ?? 0),
+                'total_orders' => (int) ($orderStats->total_orders ?? 0),
+                'orders_pending' => (int) ($orderStats->orders_pending ?? 0),
+                'total_products' => (int) ($productStats->total_products ?? 0),
+                'low_stock_products' => (int) ($productStats->low_stock_products ?? 0),
+                'total_customers' => (int) $totalCustomers,
+                'sales_today' => (float) ($orderStats->sales_today ?? 0),
+                'orders_this_week' => (int) ($orderStats->orders_this_week ?? 0),
+                'sales_growth' => $salesGrowth,
+                'is_filtered' => false,
+            ];
+        });
+
+        return response()->json($cachedSummary);
     }
 
     public function salesTrend(Request $request)

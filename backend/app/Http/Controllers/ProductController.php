@@ -8,6 +8,7 @@ use App\Models\CartItem;
 use App\Models\Favorite;
 use App\Mail\NewProductAlert;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
@@ -27,7 +28,26 @@ class ProductController extends Controller
 
     public function adminIndex(Request $request)
     {
-        $query = $this->buildFilteredQuery($request);
+        $query = Product::query()
+            ->select([
+                'id',
+                'category_id',
+                'brand_id',
+                'name',
+                'slug',
+                'price',
+                'discount',
+                'free_delivery',
+                'stock',
+                'images',
+                'created_at',
+                'updated_at',
+            ])
+            ->with([
+                'category:id,name,slug',
+                'brand:id,name,slug',
+            ])
+            ->latest('created_at');
 
         return response()->json($query->get());
     }
@@ -226,21 +246,23 @@ class ProductController extends Controller
             'skinTypes',
         ]);
 
-        // Send notification to subscribed customers
+        // Queue notification to subscribed customers
         try {
             $subscribers = Subscriber::where('is_active', true)->pluck('email');
             if ($subscribers->isNotEmpty()) {
                 foreach ($subscribers as $subscriberEmail) {
                     try {
-                        Mail::to($subscriberEmail)->send(new NewProductAlert($product));
+                        Mail::to($subscriberEmail)->queue(new NewProductAlert($product));
                     } catch (\Throwable $mailErr) {
-                        Log::warning("Could not send new product email to {$subscriberEmail}: " . $mailErr->getMessage());
+                        Log::warning("Could not queue new product email to {$subscriberEmail}: " . $mailErr->getMessage());
                     }
                 }
             }
         } catch (\Throwable $e) {
             Log::error("Failed to notify subscribers about new product {$product->id}: " . $e->getMessage());
         }
+
+        Cache::forget('dashboard:summary:all_time');
 
         return response()->json([
             'message' =>
@@ -295,6 +317,8 @@ class ProductController extends Controller
             'skinTypes',
         ]);
 
+        Cache::forget('dashboard:summary:all_time');
+
         return response()->json([
             'message' =>
             'Product updated successfully',
@@ -312,6 +336,8 @@ class ProductController extends Controller
             // Soft-delete the product (marks deleted_at timestamp)
             // Preserves image assets and order history
             $product->delete();
+
+            Cache::forget('dashboard:summary:all_time');
 
             return response()->json([
                 'message' => 'Product deleted successfully',

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class CategoryController extends Controller
@@ -11,7 +12,11 @@ class CategoryController extends Controller
 
     public function index()
     {
-        return response()->json(Category::all());
+        $categories = Cache::remember('categories:all', 3600, function () {
+            return Category::all();
+        });
+
+        return response()->json($categories);
     }
 
 
@@ -41,6 +46,8 @@ class CategoryController extends Controller
             'slug' => Str::slug($validated['name']),
         ]);
 
+        Cache::forget('categories:all');
+
         return response()->json([
             'message' => 'Category created successfully!',
             'category' => $category,
@@ -69,6 +76,8 @@ class CategoryController extends Controller
             'slug' => Str::slug($validated['name']),
         ]);
 
+        Cache::forget('categories:all');
+
         return response()->json([
             'message' => 'Category updated successfully!',
             'category' => $category,
@@ -81,6 +90,8 @@ class CategoryController extends Controller
     public function destroy(Category $category)
     {
         $category->delete();
+
+        Cache::forget('categories:all');
 
         return response()->json([
             'message' => 'Category deleted successfully!',

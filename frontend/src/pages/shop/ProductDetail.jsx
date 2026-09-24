@@ -183,9 +183,11 @@ export default function ProductDetail() {
       setRelatedLoading(true);
 
       try {
-        const response = await api.get("/products");
+        const response = await fetchWithCache("/products", {
+          category_id: categoryId,
+        });
 
-        const data = response.data?.data || response.data || [];
+        const data = response?.data || response || [];
         const products = Array.isArray(data)
           ? data
           : Array.isArray(data?.data)

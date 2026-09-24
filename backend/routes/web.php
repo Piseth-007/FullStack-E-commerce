@@ -14,7 +14,11 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'Botaniq E-commerce API is running',
+        'version' => '1.0.0',
+    ]);
 })->name('index');
 Route::get('/register', function () {
     return view('auth.register');

@@ -52,7 +52,6 @@ export default function ProductCard({ product }) {
     if (!productId) return;
     prefetchApi(`/products/${productId}`);
     prefetchApi(`/products/${productId}/reviews`);
-    prefetchApi(`/products/${productId}/related`);
     import("../../pages/shop/ProductDetail").catch(() => {});
   };
 
