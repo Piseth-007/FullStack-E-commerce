@@ -614,6 +614,19 @@ export default function Dashboard() {
     0,
   );
 
+  const pieChartData = useMemo(() => {
+    if (totalBreakdownOrders === 0) {
+      return [
+        {
+          name: t("dash_no_orders", "No orders"),
+          value: 1,
+          color: isDark ? "rgba(255, 255, 255, 0.08)" : "rgba(0, 0, 0, 0.08)",
+        },
+      ];
+    }
+    return orderBreakdown.filter((item) => item.value > 0);
+  }, [totalBreakdownOrders, orderBreakdown, isDark, t]);
+
   const chartColors = isDark
     ? {
         grid: "#2b2d35",
@@ -818,8 +831,8 @@ export default function Dashboard() {
                 </p>
               </div>
             ) : (
-              <div className="relative">
-                <ResponsiveContainer width="100%" height={320}>
+              <div className="relative w-full h-[320px] min-h-[320px]">
+                <ResponsiveContainer width="100%" height="100%" minHeight={320}>
                   {chartType === "area" ? (
                     <AreaChart
                       data={trend}
@@ -865,6 +878,9 @@ export default function Dashboard() {
                       />
 
                       <YAxis
+                        dataKey="sales"
+                        domain={[0, (dataMax) => (dataMax > 0 ? Math.ceil(dataMax * 1.15) : 100)]}
+                        allowDecimals={false}
                         tick={{
                           fontSize: 11,
                           fill: chartColors.axisText,
@@ -952,6 +968,13 @@ export default function Dashboard() {
                       />
 
                       <YAxis
+                        dataKey="sales"
+                        domain={[
+                          0,
+                          (dataMax) =>
+                            dataMax > 0 ? Math.ceil(dataMax * 1.15) : 100,
+                        ]}
+                        allowDecimals={false}
                         tick={{
                           fontSize: 11,
                           fill: chartColors.axisText,
@@ -1167,27 +1190,35 @@ export default function Dashboard() {
               </div>
             ) : (
               <>
-                <div className="relative h-61.25">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="relative h-[245px] w-full min-h-[245px]">
+                  <ResponsiveContainer width="100%" height="100%" minHeight={245}>
                     <PieChart>
                       <Pie
-                        data={orderBreakdown}
+                        data={pieChartData}
                         dataKey="value"
                         nameKey="name"
                         cx="50%"
                         cy="50%"
                         innerRadius={62}
                         outerRadius={86}
-                        paddingAngle={4}
+                        paddingAngle={
+                          totalBreakdownOrders > 0 && pieChartData.length > 1
+                            ? 4
+                            : 0
+                        }
                         stroke="none"
                         startAngle={90}
                         endAngle={-270}
                       >
-                        {orderBreakdown.map((item) => (
+                        {pieChartData.map((item) => (
                           <Cell
                             key={item.name}
                             fill={item.color}
-                            cornerRadius={8}
+                            cornerRadius={
+                              totalBreakdownOrders > 0 && pieChartData.length > 1
+                                ? 8
+                                : 0
+                            }
                           />
                         ))}
                       </Pie>
