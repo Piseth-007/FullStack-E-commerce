@@ -23,7 +23,7 @@ import khqrLogoWhite from "../../assets/KHQR Logo.svg";
 import khqrBadgeBg from "../../assets/KHQR available here - logo with bg.svg";
 
 export default function Checkout() {
-  const { cart, subtotal, refreshCart } = useCart();
+  const { cart, subtotal, rawSubtotal, totalDiscount, refreshCart } = useCart();
   const { showToast } = useToast();
   const { language, isKhmer, t } = useLanguage();
   const navigate = useNavigate();
@@ -318,6 +318,7 @@ export default function Checkout() {
 
       const order = orderResponse.data;
       const orderId = order.id || order.order?.id || order.data?.id;
+      const orderTotal = Number(order.total || order.order?.total || order.data?.total || 0);
 
       if (!orderId) {
         throw new Error("Order ID was not returned from the server");
@@ -335,6 +336,7 @@ export default function Checkout() {
         qr_string: result.qr_string,
         md5: result.md5,
         expires_at: result.expires_at,
+        amount: result.amount ?? (orderTotal > 0 ? orderTotal : subtotal),
         order_id: orderId,
       });
 
@@ -561,6 +563,7 @@ export default function Checkout() {
 
       const order = orderResponse.data;
       const orderId = order.id || order.order?.id || order.data?.id;
+      const orderTotal = Number(order.total || order.order?.total || order.data?.total || 0);
 
       if (!orderId) {
         throw new Error("Order ID was not returned from the server");
@@ -578,6 +581,7 @@ export default function Checkout() {
         qr_string: result.qr_string,
         md5: result.md5,
         expires_at: result.expires_at,
+        amount: result.amount ?? (orderTotal > 0 ? orderTotal : subtotal),
         order_id: orderId,
       });
 
@@ -913,30 +917,50 @@ export default function Checkout() {
             </p>
 
             <div className="bg-surface border border-hairline rounded-2xl divide-y divide-hairline shadow-xs overflow-hidden">
-              {items.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex justify-between items-center p-4 text-[13.5px]"
-                >
-                  <div>
-                    <p className="font-medium text-ink">
-                      {item.product?.name || "Product"}
-                    </p>
+              {items.map((item) => {
+                const rawPrice = Math.max(0, Number(item.product?.price || 0));
+                const discount = Math.min(100, Math.max(0, Number(item.product?.discount || 0)));
+                const unitPrice = discount > 0
+                  ? Math.max(0, Math.round((rawPrice - (rawPrice * discount) / 100) * 100) / 100)
+                  : rawPrice;
+                const lineTotal = unitPrice * Number(item.quantity || 1);
+                const rawLineTotal = rawPrice * Number(item.quantity || 1);
 
-                    <p className="text-[12px] text-stone mt-1">
-                      {t("checkout_quantity", "Quantity:")} {item.quantity}
-                    </p>
+                return (
+                  <div
+                    key={item.id}
+                    className="flex justify-between items-center p-4 text-[13.5px]"
+                  >
+                    <div>
+                      <p className="font-medium text-ink">
+                        {item.product?.name || "Product"}
+                      </p>
+
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[12px] text-stone">
+                          {t("checkout_quantity", "Quantity:")} {item.quantity}
+                        </span>
+                        {discount > 0 && (
+                          <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-500/20">
+                            -{Math.round(discount)}%
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <span className="font-mono text-ink font-medium">
+                        ${lineTotal.toFixed(2)}
+                      </span>
+                      {discount > 0 && (
+                        <div className="font-mono text-[11px] text-stone/60 line-through">
+                          ${rawLineTotal.toFixed(2)}
+                        </div>
+                      )}
+                    </div>
                   </div>
-
-                  <span className="font-mono text-ink">
-                    $
-                    {(
-                      Number(item.product?.price || 0) *
-                      Number(item.quantity || 0)
-                    ).toFixed(2)}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
@@ -953,9 +977,22 @@ export default function Checkout() {
               <span>{items.length}</span>
             </div>
 
+            {totalDiscount > 0 && (
+              <>
+                <div className="flex justify-between text-[13px] text-stone">
+                  <span>{t("checkout_subtotal", "Subtotal")}</span>
+                  <span className="font-mono">${rawSubtotal.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-[13px] text-red-600 dark:text-red-400 font-medium">
+                  <span>{t("checkout_discount", "Discount")}</span>
+                  <span className="font-mono">-${totalDiscount.toFixed(2)}</span>
+                </div>
+              </>
+            )}
+
             <div className="border-t border-hairline pt-4 flex justify-between text-[16px] font-medium text-ink">
               <span>{t("checkout_total", "Total")}</span>
-              <span className="font-mono">
+              <span className="font-mono font-bold">
                 ${Number(subtotal || 0).toFixed(2)}
               </span>
             </div>
@@ -1035,7 +1072,7 @@ export default function Checkout() {
                 <div className="mt-1 flex items-baseline justify-center gap-1">
                   <span className="text-[19px] font-semibold text-ink">$</span>
                   <span className="font-mono text-[30px] sm:text-[32px] font-bold tracking-tight text-ink leading-none">
-                    {Number(subtotal || 0).toFixed(2)}
+                    {Number(paymentData?.amount ?? subtotal ?? 0).toFixed(2)}
                   </span>
                   <span className="text-[12px] font-medium text-stone uppercase ml-0.5">
                     USD

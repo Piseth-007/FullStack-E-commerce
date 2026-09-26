@@ -70,6 +70,7 @@ class PaymentController extends Controller
                 'payment_id' => $existingPayment->id,
                 'qr_string' => $existingPayment->qr_string,
                 'md5' => $existingPayment->md5,
+                'amount' => (float) $existingPayment->amount,
                 'expires_at' => $existingPayment->expires_at,
             ]);
         }
@@ -141,6 +142,7 @@ class PaymentController extends Controller
                 'payment_id' => $payment->id,
                 'qr_string' => $payment->qr_string,
                 'md5' => $payment->md5,
+                'amount' => (float) $payment->amount,
                 'expires_at' => $payment->expires_at,
             ], 201);
         } catch (Throwable $e) {

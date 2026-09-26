@@ -58,13 +58,30 @@ export function CartProvider({ children }) {
     setCart((prev) => (prev ? { ...prev, items: [] } : prev));
   };
 
-  const itemCount = cart?.items?.reduce((sum, i) => sum + i.quantity, 0) || 0;
+  const getItemPrice = useCallback((item) => {
+    const rawPrice = Math.max(0, Number(item?.product?.price ?? 0));
+    const discount = Math.min(100, Math.max(0, Number(item?.product?.discount ?? 0)));
+    if (discount > 0) {
+      return Math.max(0, Math.round((rawPrice - (rawPrice * discount) / 100) * 100) / 100);
+    }
+    return rawPrice;
+  }, []);
+
+  const itemCount = cart?.items?.reduce((sum, i) => sum + (Number(i.quantity) || 0), 0) || 0;
+
+  const rawSubtotal =
+    cart?.items?.reduce(
+      (sum, i) => sum + Math.max(0, Number(i.product?.price ?? 0)) * (Number(i.quantity) || 0),
+      0,
+    ) || 0;
 
   const subtotal =
     cart?.items?.reduce(
-      (sum, i) => sum + Number(i.product?.price ?? 0) * i.quantity,
+      (sum, i) => sum + getItemPrice(i) * (Number(i.quantity) || 0),
       0,
     ) || 0;
+
+  const totalDiscount = Math.max(0, rawSubtotal - subtotal);
 
   return (
     <CartContext.Provider
@@ -73,6 +90,9 @@ export function CartProvider({ children }) {
         loading,
         itemCount,
         subtotal,
+        rawSubtotal,
+        totalDiscount,
+        getItemPrice,
         addToCart,
         updateItem,
         removeItem,

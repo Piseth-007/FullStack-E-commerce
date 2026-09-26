@@ -5,7 +5,14 @@ import { useToast } from "../../context/useToast";
 import { useLanguage } from "../../context/useLanguage";
 
 export default function Cart() {
-  const { cart, subtotal, updateItem, removeItem } = useCart();
+  const {
+    cart,
+    subtotal,
+    rawSubtotal,
+    totalDiscount,
+    updateItem,
+    removeItem,
+  } = useCart();
   const { showToast } = useToast();
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -63,77 +70,117 @@ export default function Cart() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-10">
         <div className="col-span-1 lg:col-span-2 space-y-4">
-          {items.map((item) => (
-            <div
-              key={item.id}
-              className="flex gap-3 sm:gap-4 bg-surface border border-hairline rounded-2xl p-3.5 sm:p-4 shadow-xs"
-            >
-              <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl bg-paper border border-hairline overflow-hidden shrink-0">
-                {item.product?.images?.[0]?.url && (
-                  <img
-                    src={item.product.images[0].url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
-                )}
-              </div>
+          {items.map((item) => {
+            const rawPrice = Math.max(0, Number(item.product?.price ?? 0));
+            const discount = Math.min(100, Math.max(0, Number(item.product?.discount ?? 0)));
+            const unitPrice = discount > 0
+              ? Math.max(0, Math.round((rawPrice - (rawPrice * discount) / 100) * 100) / 100)
+              : rawPrice;
 
-              <div className="flex-1 min-w-0">
-                <h3 className="text-[14px] font-medium text-ink truncate mb-1">
-                  {item.product?.name}
-                </h3>
-                <p className="font-mono text-[13px] text-stone mb-3">
-                  ${item.product?.price}
-                </p>
+            return (
+              <div
+                key={item.id}
+                className="flex gap-3 sm:gap-4 bg-surface border border-hairline rounded-2xl p-3.5 sm:p-4 shadow-xs"
+              >
+                <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-xl bg-paper border border-hairline overflow-hidden shrink-0">
+                  {item.product?.images?.[0]?.url && (
+                    <img
+                      src={item.product.images[0].url}
+                      alt=""
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center border border-hairline rounded-lg bg-paper overflow-hidden">
-                    <button
-                      disabled={item.quantity <= 1}
-                      onClick={() =>
-                        handleQuantityChange(item.id, item.quantity - 1)
-                      }
-                      className="p-1.5 text-stone hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
-                    >
-                      <Minus size={13} strokeWidth={2} />
-                    </button>
-                    <span className="w-7 text-center font-mono text-[13px] text-ink">
-                      {item.quantity}
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-[14px] font-medium text-ink truncate mb-1">
+                    {item.product?.name}
+                  </h3>
+
+                  <div className="flex items-center gap-2 mb-3">
+                    <span className="font-mono text-[13px] font-medium text-ink">
+                      ${unitPrice.toFixed(2)}
                     </span>
-                    <button
-                      disabled={
-                        item.product?.stock != null &&
-                        item.quantity >= item.product.stock
-                      }
-                      onClick={() =>
-                        handleQuantityChange(item.id, item.quantity + 1)
-                      }
-                      className="p-1.5 text-stone hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
-                    >
-                      <Plus size={13} strokeWidth={2} />
-                    </button>
+                    {discount > 0 && (
+                      <>
+                        <span className="font-mono text-[11.5px] text-stone/60 line-through">
+                          ${rawPrice.toFixed(2)}
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded-full text-[10px] font-semibold bg-red-500/10 text-red-600 dark:bg-red-950/40 dark:text-red-400 border border-red-500/20">
+                          -{Math.round(discount)}%
+                        </span>
+                      </>
+                    )}
                   </div>
 
-                  <button
-                    onClick={() => handleRemove(item.id)}
-                    className="p-1.5 rounded-full border border-transparent hover:border-clay/20 text-stone hover:bg-clay-tint hover:text-clay transition-colors"
-                  >
-                    <X size={15} strokeWidth={1.75} />
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center border border-hairline rounded-lg bg-paper overflow-hidden">
+                      <button
+                        disabled={item.quantity <= 1}
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.quantity - 1)
+                        }
+                        className="p-1.5 text-stone hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+                      >
+                        <Minus size={13} strokeWidth={2} />
+                      </button>
+                      <span className="w-7 text-center font-mono text-[13px] text-ink">
+                        {item.quantity}
+                      </span>
+                      <button
+                        disabled={
+                          item.product?.stock != null &&
+                          item.quantity >= item.product.stock
+                        }
+                        onClick={() =>
+                          handleQuantityChange(item.id, item.quantity + 1)
+                        }
+                        className="p-1.5 text-stone hover:text-ink disabled:opacity-30 disabled:cursor-not-allowed transition-opacity"
+                      >
+                        <Plus size={13} strokeWidth={2} />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => handleRemove(item.id)}
+                      className="p-1.5 rounded-full border border-transparent hover:border-clay/20 text-stone hover:bg-clay-tint hover:text-clay transition-colors"
+                    >
+                      <X size={15} strokeWidth={1.75} />
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="bg-surface border border-hairline rounded-2xl p-5 h-fit lg:sticky lg:top-24 shadow-xs">
           <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-stone mb-4">
             {t("cart_order_summary", "Order Summary")}
           </p>
-          <div className="flex justify-between text-[13.5px] text-ink mb-2">
-            <span>{t("cart_subtotal", "Subtotal")}</span>
-            <span className="font-mono">${subtotal.toFixed(2)}</span>
-          </div>
+
+          {totalDiscount > 0 ? (
+            <div className="space-y-2 mb-3">
+              <div className="flex justify-between text-[13.5px] text-stone">
+                <span>{t("cart_subtotal", "Subtotal")}</span>
+                <span className="font-mono">${rawSubtotal.toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between text-[13.5px] text-red-600 dark:text-red-400 font-medium">
+                <span>{t("cart_discount", "Discount")}</span>
+                <span className="font-mono">-${totalDiscount.toFixed(2)}</span>
+              </div>
+              <div className="border-t border-hairline pt-2 flex justify-between text-[14.5px] font-semibold text-ink">
+                <span>{t("cart_total", "Total")}</span>
+                <span className="font-mono">${subtotal.toFixed(2)}</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex justify-between text-[13.5px] text-ink mb-2">
+              <span>{t("cart_subtotal", "Subtotal")}</span>
+              <span className="font-mono">${subtotal.toFixed(2)}</span>
+            </div>
+          )}
+
           <p className="text-[12px] text-stone mb-5">
             {t("cart_shipping_calc", "Shipping calculated at checkout")}
           </p>

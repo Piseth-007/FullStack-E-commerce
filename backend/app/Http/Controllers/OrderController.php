@@ -136,6 +136,7 @@ class OrderController extends Controller
                 'cart_items.product_id'
             )
             ->where('carts.user_id', Auth::id())
+            ->whereNull('products.deleted_at')
             ->select(
                 'cart_items.product_id',
                 'cart_items.quantity',
@@ -180,7 +181,7 @@ class OrderController extends Controller
                 $price = (float) $item->price;
                 $discount = (float) $item->discount;
 
-                $unitPrice = $price - ($price * $discount / 100);
+                $unitPrice = $discount > 0 ? round(max(0, $price - ($price * $discount / 100)), 2) : $price;
 
                 return $unitPrice * $item->quantity;
             });
@@ -197,14 +198,14 @@ class OrderController extends Controller
                 $price = (float) $item->price;
                 $discount = (float) $item->discount;
 
-                $unitPrice = $price - ($price * $discount / 100);
+                $unitPrice = $discount > 0 ? round(max(0, $price - ($price * $discount / 100)), 2) : $price;
 
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item->product_id,
                     'product_name' => $item->product_name,
                     'quantity' => $item->quantity,
-                    'price' => round($unitPrice, 2),
+                    'price' => $unitPrice,
                 ]);
 
                 DB::table('products')
