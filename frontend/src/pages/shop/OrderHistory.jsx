@@ -12,7 +12,7 @@ const statusStyles = {
   cancelled: "bg-clay-tint text-clay",
 };
 
-const ORDERS_CACHE_KEY = "botaniq-orderhistory-v1";
+const ORDERS_CACHE_KEY = "botaniq-orderhistory-v2";
 
 // ─────────────────────────────────────────────
 // Cache helpers
@@ -25,8 +25,14 @@ function readOrdersCache() {
     const parsed = JSON.parse(raw);
     if (!parsed || !Array.isArray(parsed.orders)) return null;
 
+    const paidOrders = parsed.orders.filter(
+      (order) =>
+        order.payment_status === "paid" ||
+        ["paid", "shipped", "completed"].includes(order.status),
+    );
+
     return {
-      orders: parsed.orders,
+      orders: paidOrders,
       reviewableItems: parsed.reviewableItems || [],
       cachedAt: Number(parsed.cachedAt) || 0,
     };
@@ -199,7 +205,12 @@ export default function OrderHistory() {
 
         if (!mountedRef.current) return;
 
-        const nextOrders = ordersRes.data || [];
+        const rawOrders = ordersRes.data || [];
+        const nextOrders = rawOrders.filter(
+          (order) =>
+            order.payment_status === "paid" ||
+            ["paid", "shipped", "completed"].includes(order.status),
+        );
         const nextReviewable = reviewableRes.data || [];
 
         hasDataRef.current = nextOrders.length > 0;

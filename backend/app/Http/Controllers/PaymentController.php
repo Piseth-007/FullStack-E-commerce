@@ -380,7 +380,7 @@ class PaymentController extends Controller
             );
 
             return response()->json([
-                'status' => $payment->status,
+                'status' => 'cancelled',
             ]);
         } catch (Throwable $e) {
             Log::error('KHQR payment cancellation failed', [

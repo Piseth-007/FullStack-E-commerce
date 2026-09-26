@@ -27,8 +27,41 @@ class OrderController extends Controller
 
     public function index(Request $request)
     {
+        $userId = Auth::id();
+
+        // Automatically purge any unpaid cancelled or abandoned pending orders
+        $unpaidOrders = Order::query()
+            ->where('user_id', $userId)
+            ->where(function ($q) {
+                $q->where('status', 'cancelled')
+                    ->orWhere(function ($sub) {
+                        $sub->where('status', 'pending')
+                            ->whereDoesntHave('payments', function ($pq) {
+                                $pq->where('status', 'pending')
+                                    ->where('expires_at', '>', now());
+                            });
+                    });
+            })
+            ->where('payment_status', '!=', 'paid')
+            ->with('items')
+            ->get();
+
+        foreach ($unpaidOrders as $unpaidOrder) {
+            if ($unpaidOrder->status === 'pending') {
+                foreach ($unpaidOrder->items as $item) {
+                    \App\Models\Product::whereKey($item->product_id)->increment('stock', $item->quantity);
+                }
+            }
+            $unpaidOrder->delete();
+        }
+
+        // Only return orders that have been paid
         $orders = Order::query()
-            ->where('user_id', Auth::id())
+            ->where('user_id', $userId)
+            ->where(function ($q) {
+                $q->whereIn('status', ['paid', 'shipped', 'completed'])
+                    ->orWhere('payment_status', 'paid');
+            })
             ->with([
                 'items.product:id,name,images',
                 'payments',

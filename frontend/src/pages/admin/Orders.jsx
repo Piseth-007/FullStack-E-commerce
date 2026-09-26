@@ -394,11 +394,14 @@ export default function Orders() {
           )}
         </>
       )}
-      <div className="print-area">
-        <Receipt
-          order={receiptModalOrder || printingOrder}
-          format={receiptFormat}
-        />
+      {/* Hidden during normal screen view, only active during window.print() */}
+      <div className="hidden print:block print-area">
+        {printingOrder && (
+          <Receipt
+            order={printingOrder}
+            format={receiptFormat}
+          />
+        )}
       </div>
       <ReceiptModal
         order={receiptModalOrder}
@@ -407,6 +410,7 @@ export default function Orders() {
         onClose={() => {
           setIsReceiptModalOpen(false);
           setReceiptModalOrder(null);
+          setPrintingOrder(null);
         }}
       />
     </div>

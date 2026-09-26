@@ -101,6 +101,11 @@ html[lang="km"] [style*="Fraunces"],
 
 
 
+/* Ensure print-area is strictly hidden on screen */
+.print-area {
+  display: none !important;
+}
+
 @media print {
   @page {
     margin: 8mm;

@@ -42,10 +42,9 @@ class OrderCancellationService
                 }
             }
 
-            // Mark order as cancelled so records remain coherent
-            $order->update([
-                'status' => 'cancelled',
-            ]);
+            // If payment was not completed, remove the unpaid order completely
+            // Cascading foreign keys will cleanly delete related order items and payment records
+            $order->delete();
 
             return true;
         });
