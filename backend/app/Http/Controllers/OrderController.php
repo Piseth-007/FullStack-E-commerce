@@ -356,4 +356,53 @@ class OrderController extends Controller
 
         return response()->json($order);
     }
+
+    public function userUpdateStatus(
+        Request $request,
+        Order $order
+    ) {
+        if ($order->user_id !== Auth::id()) {
+            abort(403, 'This order does not belong to you.');
+        }
+
+        $targetStatus = $request->input('status', 'completed');
+
+        if ($targetStatus !== 'completed') {
+            return response()->json([
+                'message' => 'Users can only mark orders as completed after receiving their items.',
+            ], 422);
+        }
+
+        if ($order->status === 'completed') {
+            return response()->json([
+                'message' => 'Order is already marked as completed.',
+                'order' => $order->load([
+                    'items.product:id,name,images',
+                    'payments',
+                    'address',
+                ]),
+            ]);
+        }
+
+        if (!in_array($order->status, ['paid', 'shipped'])) {
+            return response()->json([
+                'message' => 'Only paid or shipped orders can be confirmed as received.',
+            ], 422);
+        }
+
+        $order->update([
+            'status' => 'completed',
+        ]);
+
+        $order->load([
+            'items.product:id,name,images',
+            'payments',
+            'address',
+        ]);
+
+        return response()->json([
+            'message' => 'Order confirmed as received successfully.',
+            'order' => $order,
+        ]);
+    }
 }

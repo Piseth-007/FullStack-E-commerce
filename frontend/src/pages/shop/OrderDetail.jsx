@@ -1,7 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { PackageX, ArrowLeft } from "lucide-react";
+import {
+  PackageX,
+  ArrowLeft,
+  CheckCircle2,
+  PackageCheck,
+  Loader2,
+  X,
+} from "lucide-react";
 import api from "../../api/axios";
+import { useToast } from "../../context/useToast";
+import { useLanguage } from "../../context/useLanguage";
 import khqrLogoRed from "../../assets/KHQR Logo red.svg";
 
 const STEPS = [
@@ -116,9 +125,13 @@ function SummaryRow({ label, value, strong = false }) {
 
 export default function OrderDetail() {
   const { id } = useParams();
+  const { showToast } = useToast();
+  const { t, isKhmer } = useLanguage();
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -143,6 +156,42 @@ export default function OrderDetail() {
       mounted = false;
     };
   }, [id]);
+
+  const handleConfirmReceived = async () => {
+    if (updating) return;
+    setUpdating(true);
+    try {
+      const response = await api.patch(`/orders/${id}/confirm-received`, {
+        status: "completed",
+      });
+      const updatedOrder = response.data?.order || response.data;
+      setOrder(updatedOrder);
+      setShowConfirmModal(false);
+      showToast(
+        t(
+          "order_marked_received_toast",
+          "Order marked as received! Thank you for shopping with us.",
+        ),
+        "success",
+      );
+
+      // Invalidate session cache for orders so OrderHistory refreshes on back navigation
+      try {
+        sessionStorage.removeItem("botaniq-orderhistory-v2");
+        sessionStorage.removeItem("botaniq-orderhistory-v1");
+      } catch (e) {
+        console.warn("Could not clear order cache", e);
+      }
+    } catch (err) {
+      showToast(
+        err.response?.data?.message ||
+          t("order_confirm_err", "Failed to update order status"),
+        "error",
+      );
+    } finally {
+      setUpdating(false);
+    }
+  };
 
   const details = useMemo(() => {
     if (!order) return null;
@@ -202,30 +251,75 @@ export default function OrderDetail() {
       : order.status === "completed"
         ? "bg-moss text-white"
         : "bg-moss-tint text-moss-deep";
+  const canConfirmReceived = order && ["shipped", "paid"].includes(order.status);
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
+    <div className={`max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-10 ${isKhmer ? "font-khmer" : ""}`}>
       <Link
         to="/orders"
         className="text-sm inline-flex items-center gap-1 mb-6 sm:mb-8 text-stone hover:text-ink"
       >
         ← Back to orders
       </Link>
-      <div className="flex items-start justify-between gap-4 mb-6 sm:mb-10">
+      <div className="flex flex-wrap items-start justify-between gap-4 mb-6 sm:mb-10">
         <div>
           <h1 className="font-display text-2xl sm:text-3xl text-ink">Order #{order.id}</h1>
           <p className="text-xs sm:text-sm mt-1.5 text-stone">
             Placed {formatDate(order.created_at)}
           </p>
         </div>
-        <span
-          className={`rounded-full border px-3 py-1 text-xs font-mono uppercase tracking-wider capitalize ${statusTone}`}
-        >
-          {order.status || "pending"}
-        </span>
+        <div className="flex items-center gap-2.5">
+          <span
+            className={`rounded-full border px-3 py-1 text-xs font-mono uppercase tracking-wider capitalize ${statusTone}`}
+          >
+            {order.status || "pending"}
+          </span>
+          {canConfirmReceived && (
+            <button
+              type="button"
+              onClick={() => setShowConfirmModal(true)}
+              disabled={updating}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-moss bg-moss text-white text-xs font-medium hover:bg-moss-deep transition-all shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              <CheckCircle2 size={13} />
+              <span>{t("order_confirm_short_btn", "Confirm Received")}</span>
+            </button>
+          )}
+        </div>
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
         <main className="md:col-span-2">
+          {canConfirmReceived && (
+            <div className="mb-6 rounded-2xl border border-moss/30 bg-moss-tint/40 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
+              <div className="flex items-start gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-moss/10 flex items-center justify-center shrink-0 text-moss">
+                  <PackageCheck size={22} strokeWidth={1.75} />
+                </div>
+                <div>
+                  <h3 className="text-[14px] font-semibold text-ink">
+                    {t("order_received_prompt_title", "Have you received this order?")}
+                  </h3>
+                  <p className="text-[12.5px] text-stone mt-0.5 leading-relaxed">
+                    {t(
+                      "order_received_prompt_desc",
+                      "Once you have gotten your items, confirm receipt below to complete your order.",
+                    )}
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(true)}
+                disabled={updating}
+                className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                <CheckCircle2 size={15} />
+                <span>{t("order_confirm_btn", "I Have Received the Product")}</span>
+              </button>
+            </div>
+          )}
+
           <div className="mb-10">
             <Timeline status={order.status} />
           </div>
@@ -280,9 +374,104 @@ export default function OrderDetail() {
             <SummaryRow label="Subtotal" value={money(subtotal)} />
             <div className="my-3 border-t border-hairline" />
             <SummaryRow label="Total" value={money(order.total)} strong />
+
+            {canConfirmReceived && (
+              <div className="mt-5 pt-4 border-t border-hairline">
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmModal(true)}
+                  disabled={updating}
+                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-moss bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+                >
+                  <CheckCircle2 size={16} />
+                  <span>{t("order_confirm_btn", "I Have Received the Product")}</span>
+                </button>
+              </div>
+            )}
+
+            {order.status === "completed" && (
+              <div className="mt-5 pt-4 border-t border-hairline">
+                <div className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl bg-moss-tint border border-moss/20 text-moss-deep text-[12.5px] font-medium text-center">
+                  <CheckCircle2 size={15} className="text-moss shrink-0" />
+                  <span>{t("order_completed_notice", "Order Delivered & Received")}</span>
+                </div>
+              </div>
+            )}
           </div>
         </aside>
       </div>
+
+      {/* Confirm Received Modal */}
+      {showConfirmModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !updating) setShowConfirmModal(false);
+          }}
+        >
+          <div className="bg-surface rounded-2xl max-w-[420px] w-full border border-hairline p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            <div className="flex items-start justify-between gap-4 mb-4">
+              <div className="w-12 h-12 rounded-2xl bg-moss-tint border border-moss/20 flex items-center justify-center text-moss">
+                <PackageCheck size={24} strokeWidth={1.75} />
+              </div>
+              <button
+                type="button"
+                onClick={() => !updating && setShowConfirmModal(false)}
+                disabled={updating}
+                className="p-1 rounded-lg text-stone hover:text-ink transition-colors cursor-pointer"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <h3 className="font-display text-[18px] font-semibold text-ink mb-2">
+              {t("order_confirm_modal_title", "Confirm Order Receipt")}
+            </h3>
+
+            <p className="text-[13px] text-stone leading-relaxed mb-3">
+              {t(
+                "order_confirm_modal_desc",
+                `Are you sure you have received your order #${order.id} in good condition? This will update the status to Delivered.`,
+              ).replace("{id}", order.id)}
+            </p>
+
+            <p className="text-[12px] text-moss bg-moss-tint/60 rounded-xl px-3 py-2 border border-moss/15 mb-6">
+              ✓ {t("order_confirm_modal_hint", "Once confirmed, you will be able to review the items you received.")}
+            </p>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setShowConfirmModal(false)}
+                disabled={updating}
+                className="px-4 py-2.5 rounded-xl border border-hairline bg-paper text-stone hover:text-ink text-[13px] font-medium transition-colors cursor-pointer disabled:opacity-50"
+              >
+                {t("order_confirm_modal_cancel", "Not Yet")}
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReceived}
+                disabled={updating}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs cursor-pointer disabled:opacity-50"
+              >
+                {updating ? (
+                  <>
+                    <Loader2 size={14} className="animate-spin" />
+                    <span>{t("order_confirming", "Confirming...")}</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={15} />
+                    <span>{t("order_confirm_modal_confirm", "Yes, Order Received")}</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
