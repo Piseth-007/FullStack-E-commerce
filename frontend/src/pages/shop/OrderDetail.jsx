@@ -274,41 +274,22 @@ export default function OrderDetail() {
           >
             {order.status || "pending"}
           </span>
+          {canConfirmReceived && (
+            <button
+              type="button"
+              onClick={() => setShowConfirmModal(true)}
+              disabled={updating}
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full border border-moss bg-moss text-white text-xs font-medium hover:bg-moss-deep transition-all shadow-xs cursor-pointer disabled:opacity-50"
+            >
+              <CheckCircle2 size={13} />
+              <span>{t("order_confirm_short_btn", "Confirm Received")}</span>
+            </button>
+          )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-10">
         <main className="md:col-span-2">
-          {canConfirmReceived && (
-            <div className="mb-6 rounded-2xl border border-moss/30 bg-moss-tint/40 p-4 sm:p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-2xs">
-              <div className="flex items-start gap-3.5">
-                <div className="w-10 h-10 rounded-xl bg-moss/10 flex items-center justify-center shrink-0 text-moss">
-                  <PackageCheck size={22} strokeWidth={1.75} />
-                </div>
-                <div>
-                  <h3 className="text-[14px] font-semibold text-ink">
-                    {t("order_received_prompt_title", "Have you received this order?")}
-                  </h3>
-                  <p className="text-[12.5px] text-stone mt-0.5 leading-relaxed">
-                    {t(
-                      "order_received_prompt_desc",
-                      "Once you have gotten your items, confirm receipt below to complete your order.",
-                    )}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowConfirmModal(true)}
-                disabled={updating}
-                className="w-full sm:w-auto shrink-0 flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-moss bg-moss text-white text-[13px] font-medium hover:bg-moss-deep transition-colors shadow-xs cursor-pointer disabled:opacity-50"
-              >
-                <CheckCircle2 size={15} />
-                <span>{t("order_confirm_btn", "I Have Received the Product")}</span>
-              </button>
-            </div>
-          )}
-
           <div className="mb-10">
             <Timeline status={order.status} />
           </div>
