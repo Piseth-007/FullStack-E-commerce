@@ -752,6 +752,19 @@ export const translations = {
     not_found_link_brands: "Explore Brands",
     not_found_link_contact: "Contact Support",
     not_found_link_orders: "My Orders",
+
+    // Admin Access Control
+    admin_auth_verifying: "Verifying Access...",
+    admin_auth_verifying_sub: "Please wait while we verify your administrator permissions.",
+    admin_denied_badge: "403 Restricted Access",
+    admin_denied_title: "Administrator Access Required",
+    admin_denied_desc: "This dashboard is strictly reserved for store administrators. Your current account does not have permission to access administrative tools.",
+    admin_denied_signed_in_as: "Signed in as",
+    admin_denied_role: "Role",
+    admin_denied_btn_home: "Back to Storefront",
+    admin_denied_btn_switch: "Switch to Admin Account",
+    admin_denied_btn_profile: "My Customer Profile",
+    admin_denied_help: "Need access? Please contact your store administrator or supervisor.",
   },
 
   km: {
@@ -1507,5 +1520,18 @@ export const translations = {
     not_found_link_brands: "ស្វែងរកតាមម៉ាកយីហោ",
     not_found_link_contact: "ទាក់ទងមកយើងខ្ញុំ",
     not_found_link_orders: "ប្រវត្តិការបញ្ជាទិញ",
+
+    // Admin Access Control
+    admin_auth_verifying: "កំពុងផ្ទៀងផ្ទាត់សិទ្ធិ...",
+    admin_auth_verifying_sub: "សូមរង់ចាំបន្តិច ខណៈពេលដែលយើងផ្ទៀងផ្ទាត់សិទ្ធិអ្នកគ្រប់គ្រងរបស់អ្នក។",
+    admin_denied_badge: "កំហុស 403 - គ្មានសិទ្ធិចូល",
+    admin_denied_title: "តម្រូវឱ្យមានសិទ្ធិជាអ្នកគ្រប់គ្រង",
+    admin_denied_desc: "ផ្ទាំងគ្រប់គ្រងនេះត្រូវបានកំណត់សម្រាប់តែអ្នកគ្រប់គ្រងហាងប៉ុណ្ណោះ។ គណនីបច្ចុប្បន្នរបស់អ្នកមិនមានសិទ្ធិចូលប្រើប្រាស់ឧបករណ៍គ្រប់គ្រងទេ។",
+    admin_denied_signed_in_as: "បានចូលប្រើប្រាស់ដោយ",
+    admin_denied_role: "តួនាទី",
+    admin_denied_btn_home: "ត្រឡប់ទៅទំព័រដើម",
+    admin_denied_btn_switch: "ប្តូរទៅគណនី Admin",
+    admin_denied_btn_profile: "គណនីរបស់ខ្ញុំ",
+    admin_denied_help: "ប្រសិនបើអ្នកត្រូវការសិទ្ធិចូលប្រើ សូមទាក់ទងអ្នកគ្រប់គ្រងហាង ឬប្រធានផ្នែករបស់អ្នក។",
   },
 };
