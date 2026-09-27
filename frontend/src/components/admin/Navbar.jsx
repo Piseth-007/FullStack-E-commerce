@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   AlertTriangle,
   X,
+  Languages,
 } from "lucide-react";
 import api from "../../api/axios";
 import { useTheme } from "../../hooks/useTheme";
@@ -18,7 +19,7 @@ const POLL_INTERVAL_MS = 60000;
 
 export default function Navbar({ onMenuClick }) {
   const navigate = useNavigate();
-  const { language, setLanguage, t } = useLanguage();
+  const { language, setLanguage, toggleLanguage, t } = useLanguage();
 
   const { isDark: darkMode, toggleTheme } = useTheme();
   const [open, setOpen] = useState(false);
@@ -284,38 +285,16 @@ export default function Navbar({ onMenuClick }) {
         </div>
 
         {/* Font & Language Switcher (EN / ខ្មែរ) */}
-        <div
-          className="flex items-center rounded-full border border-hairline bg-surface p-1 text-[11px] font-medium shadow-2xs"
-          role="group"
-          aria-label={t("nav_language", "Language & Font")}
+        <button
+          type="button"
+          onClick={toggleLanguage}
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-hairline bg-surface/90 hover:bg-paper text-[12px] font-medium text-ink transition-colors cursor-pointer shadow-2xs backdrop-blur-xs"
+          aria-label="Toggle language"
+          title={language === "km" ? "Switch to English" : "ប្តូរទៅជាភាសាខ្មែរ"}
         >
-          <button
-            type="button"
-            onClick={() => setLanguage("en")}
-            className={`rounded-full px-3 py-1 text-center transition-all duration-200 ${
-              language === "en"
-                ? "bg-moss text-white font-semibold shadow-xs"
-                : "text-stone hover:text-ink hover:bg-paper"
-            }`}
-            title="English Font (Inter & Fraunces)"
-            aria-label="Switch to English font"
-          >
-            EN
-          </button>
-          <button
-            type="button"
-            onClick={() => setLanguage("km")}
-            className={`rounded-full px-3 py-1 text-center transition-all duration-200 ${
-              language === "km"
-                ? "bg-moss text-white font-semibold shadow-xs"
-                : "text-stone hover:text-ink hover:bg-paper"
-            }`}
-            title="Khmer Font (Google Sans & Poppins)"
-            aria-label="Switch to Khmer font"
-          >
-            ខ្មែរ
-          </button>
-        </div>
+          <Languages size={14} className="text-moss" />
+          <span>{language === "km" ? "English" : "ភាសាខ្មែរ"}</span>
+        </button>
 
         <button
           type="button"
