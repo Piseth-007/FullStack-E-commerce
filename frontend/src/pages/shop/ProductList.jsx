@@ -273,6 +273,36 @@ export default function ProductList() {
     }
   }, [page, meta, queryParams]);
 
+  // Auto-normalize legacy brand_id or numeric brand ID to brand slug in URL
+  useEffect(() => {
+    if (brands.length === 0) return;
+    const legacyBrandId = searchParams.get("brand_id");
+    const brandQuery = searchParams.get("brand");
+
+    if (legacyBrandId) {
+      const match = brands.find(
+        (b) => String(b.id) === legacyBrandId || b.slug === legacyBrandId,
+      );
+      const next = new URLSearchParams(searchParams);
+      next.delete("brand_id");
+      if (match?.slug) {
+        next.set("brand", match.slug);
+      } else if (match?.id) {
+        next.set("brand", String(match.id));
+      } else {
+        next.set("brand", legacyBrandId);
+      }
+      setSearchParams(next, { replace: true });
+    } else if (brandQuery && /^\d+$/.test(brandQuery)) {
+      const match = brands.find((b) => String(b.id) === brandQuery);
+      if (match?.slug) {
+        const next = new URLSearchParams(searchParams);
+        next.set("brand", match.slug);
+        setSearchParams(next, { replace: true });
+      }
+    }
+  }, [brands, searchParams, setSearchParams]);
+
   const updateParam = (key, value) => {
     const next = new URLSearchParams(searchParams);
     if (value) next.set(key, value);
