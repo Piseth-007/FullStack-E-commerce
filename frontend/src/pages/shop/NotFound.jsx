@@ -60,6 +60,15 @@ export default function NotFound({
         isKhmer ? "font-khmer" : ""
       }`}
     >
+      <style>{`
+        @keyframes notfound-spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+          animation: notfound-spin 14s linear infinite;
+        }
+      `}</style>
       {/* Ambient background glows */}
       <div
         className="pointer-events-none absolute -top-32 -left-32 w-96 h-96 rounded-full bg-moss/5 blur-3xl"
