@@ -813,6 +813,8 @@ export default function Dashboard() {
                         axisLine={false}
                         tickLine={false}
                         dy={8}
+                        interval="preserveStartEnd"
+                        minTickGap={16}
                       />
 
                       <YAxis
@@ -903,6 +905,8 @@ export default function Dashboard() {
                         axisLine={false}
                         tickLine={false}
                         dy={8}
+                        interval="preserveStartEnd"
+                        minTickGap={16}
                       />
 
                       <YAxis
