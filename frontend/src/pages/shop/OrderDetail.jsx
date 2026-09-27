@@ -274,17 +274,6 @@ export default function OrderDetail() {
           >
             {order.status || "pending"}
           </span>
-          {canConfirmReceived && (
-            <button
-              type="button"
-              onClick={() => setShowConfirmModal(true)}
-              disabled={updating}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full border border-moss bg-moss text-white text-xs font-medium hover:bg-moss-deep transition-all shadow-xs cursor-pointer disabled:opacity-50"
-            >
-              <CheckCircle2 size={13} />
-              <span>{t("order_confirm_short_btn", "Confirm Received")}</span>
-            </button>
-          )}
         </div>
       </div>
 
@@ -374,20 +363,6 @@ export default function OrderDetail() {
             <SummaryRow label="Subtotal" value={money(subtotal)} />
             <div className="my-3 border-t border-hairline" />
             <SummaryRow label="Total" value={money(order.total)} strong />
-
-            {canConfirmReceived && (
-              <div className="mt-5 pt-4 border-t border-hairline">
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmModal(true)}
-                  disabled={updating}
-                  className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl border border-moss bg-moss text-white text-[13.5px] font-medium hover:bg-moss-deep transition-colors shadow-xs cursor-pointer disabled:opacity-50"
-                >
-                  <CheckCircle2 size={16} />
-                  <span>{t("order_confirm_btn", "I Have Received the Product")}</span>
-                </button>
-              </div>
-            )}
 
             {order.status === "completed" && (
               <div className="mt-5 pt-4 border-t border-hairline">
