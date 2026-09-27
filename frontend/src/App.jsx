@@ -50,12 +50,12 @@ const Reviews = lazy(() => import("./pages/admin/Reviews"));
 
 function StorefrontLayout() {
   return (
-    <StoreSettingsProvider>
+    <>
       <ScrollProgress />
       <Navbar />
       <Outlet />
       <Footer />
-    </StoreSettingsProvider>
+    </>
   );
 }
 
@@ -64,13 +64,14 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <LanguageProvider>
-        <AuthProvider>
-          <CartProvider>
-            <ToastProvider>
-              <ConfirmProvider>
-                <FavoritesProvider>
-                  <Suspense fallback={<div className="min-h-screen bg-paper" />}>
-                    <Routes>
+        <StoreSettingsProvider>
+          <AuthProvider>
+            <CartProvider>
+              <ToastProvider>
+                <ConfirmProvider>
+                  <FavoritesProvider>
+                    <Suspense fallback={<div className="min-h-screen bg-paper" />}>
+                      <Routes>
                     {/* Storefront — persistent header/footer, zero remounting */}
                     <Route element={<StorefrontLayout />}>
                       <Route path="/" element={<Home />} />
@@ -116,10 +117,6 @@ function App() {
                           </RequireAuth>
                         }
                       />
-
-                      {/* Storefront 404 Not Found */}
-                      <Route path="/404" element={<NotFound />} />
-                      <Route path="*" element={<NotFound />} />
                     </Route>
 
                     {/* Auth */}
@@ -161,6 +158,10 @@ function App() {
                       <Route path="/admin/reviews" element={<Reviews />} />
                       <Route path="/admin/settings" element={<Settings />} />
                     </Route>
+
+                    {/* Standalone Full-Screen 404 Not Found (outside storefront & admin layouts) */}
+                    <Route path="/404" element={<NotFound />} />
+                    <Route path="*" element={<NotFound />} />
                   </Routes>
                 </Suspense>
               </FavoritesProvider>
@@ -168,8 +169,9 @@ function App() {
           </ToastProvider>
         </CartProvider>
       </AuthProvider>
-    </LanguageProvider>
-  </BrowserRouter>
+    </StoreSettingsProvider>
+  </LanguageProvider>
+</BrowserRouter>
 );
 }
 
