@@ -617,9 +617,18 @@ export default function ProductDetail() {
 
           <div className="product-detail-fade lg:sticky lg:top-24">
             <div className="flex items-center justify-between gap-4">
-              <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-moss">
-                {product.brand?.name || product.category?.name || "Skincare"}
-              </p>
+              {product.brand ? (
+                <Link
+                  to={`/products?brand=${product.brand.slug || product.brand.id}`}
+                  className="text-[10px] font-medium uppercase tracking-[0.14em] text-moss hover:underline transition-colors"
+                >
+                  {product.brand.name}
+                </Link>
+              ) : (
+                <p className="text-[10px] font-medium uppercase tracking-[0.14em] text-moss">
+                  {product.category?.name || "Skincare"}
+                </p>
+              )}
 
               <button
                 type="button"

@@ -432,7 +432,7 @@ export default function Navbar() {
                 description="Discover the brands behind your favorite formulas."
                 items={brands}
                 emptyLabel="No brands yet"
-                buildHref={(item) => `/products?brand_id=${item.id}`}
+                buildHref={(item) => `/products?brand=${item.slug || item.id}`}
                 viewAllHref="/brands"
                 viewAllLabel="View all brands"
                 onNavigate={() => setOpenMenu(null)}
@@ -1064,7 +1064,7 @@ function SearchDropdown({
                       {matchingBrands.map((brand) => (
                         <Link
                           key={brand.id}
-                          to={`/products?brand_id=${brand.id}`}
+                          to={`/products?brand=${brand.slug || brand.id}`}
                           onClick={onClose}
                           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-hairline bg-paper text-[12.5px] font-medium text-ink hover:border-moss hover:bg-moss-tint hover:text-moss-deep transition-all"
                         >

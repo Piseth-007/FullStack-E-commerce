@@ -82,7 +82,7 @@ function BrandCard({ brand, index }) {
 
   return (
     <Link
-      to={`/products?brand_id=${brand.id}`}
+      to={`/products?brand=${brand.slug || brand.id}`}
       className="brand-fade-up group relative flex aspect-square flex-col items-center justify-center gap-2.5 sm:gap-3 overflow-hidden rounded-2xl border border-hairline bg-surface p-3.5 sm:p-5 text-center transition-all duration-500 hover:-translate-y-1.5 hover:border-moss/30 hover:shadow-[0_20px_40px_rgba(33,31,27,0.08)]"
       style={{ animationDelay: `${delay}ms` }}
     >

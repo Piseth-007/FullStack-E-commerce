@@ -104,7 +104,7 @@ export default function ProductList() {
   const page = searchParams.get("page") || 1;
   const search = searchParams.get("search") || "";
   const categoryId = searchParams.get("category_id") || "";
-  const brandId = searchParams.get("brand_id") || "";
+  const brandParam = searchParams.get("brand") || searchParams.get("brand_id") || "";
   const skinTypeId = searchParams.get("skin_type_id") || "";
   const hasDiscount = searchParams.get("has_discount") === "1";
   const hasRating = searchParams.get("has_rating") === "1";
@@ -176,7 +176,7 @@ export default function ProductList() {
       page: String(page),
       search: search || undefined,
       category_id: categoryId || undefined,
-      brand_id: brandId || undefined,
+      brand: brandParam || undefined,
       skin_type_id: skinTypeId || undefined,
       has_discount: hasDiscount ? "1" : undefined,
       has_rating: hasRating ? "1" : undefined,
@@ -188,7 +188,7 @@ export default function ProductList() {
       page,
       search,
       categoryId,
-      brandId,
+      brandParam,
       skinTypeId,
       hasDiscount,
       hasRating,
@@ -291,10 +291,25 @@ export default function ProductList() {
 
   const clearSearch = () => updateParam("search", "");
 
+  const updateBrand = (slugOrId) => {
+    const next = new URLSearchParams(searchParams);
+    next.delete("brand_id");
+    if (slugOrId) {
+      next.set("brand", slugOrId);
+    } else {
+      next.delete("brand");
+    }
+    next.delete("page");
+    setSearchParams(next);
+  };
+
   const categoryName = categories.find(
     (c) => String(c.id) === categoryId,
   )?.name;
-  const brandName = brands.find((b) => String(b.id) === brandId)?.name;
+  const selectedBrand = brands.find(
+    (b) => b.slug === brandParam || String(b.id) === brandParam,
+  );
+  const brandName = selectedBrand?.name;
   const skinTypeName = skinTypes.find((s) => String(s.id) === skinTypeId)?.name;
 
   const activeChips = [
@@ -304,10 +319,10 @@ export default function ProductList() {
       label: categoryName || t("shop_category", "Category"),
       onClear: () => updateParam("category_id", ""),
     },
-    brandId && {
+    brandParam && {
       key: "brand",
-      label: brandName || t("shop_brand", "Brand"),
-      onClear: () => updateParam("brand_id", ""),
+      label: brandName || brandParam || t("shop_brand", "Brand"),
+      onClear: () => updateBrand(""),
     },
     skinTypeId && {
       key: "skinType",
@@ -345,7 +360,7 @@ export default function ProductList() {
 
   const activeFilterCount = [
     categoryId,
-    brandId,
+    brandParam,
     skinTypeId,
     hasDiscount,
     hasRating,
@@ -382,19 +397,20 @@ export default function ProductList() {
         {brands.length === 0 ? (
           <p className="text-[12.5px] text-stone">{t("shop_no_brands", "No brands yet.")}</p>
         ) : (
-          brands.map((b) => (
-            <FilterOption
-              key={b.id}
-              label={b.name}
-              active={brandId === String(b.id)}
-              onClick={() =>
-                updateParam(
-                  "brand_id",
-                  brandId === String(b.id) ? "" : b.id,
-                )
-              }
-            />
-          ))
+          brands.map((b) => {
+            const isBrandActive =
+              b.slug === brandParam || String(b.id) === brandParam;
+            return (
+              <FilterOption
+                key={b.id}
+                label={b.name}
+                active={isBrandActive}
+                onClick={() =>
+                  updateBrand(isBrandActive ? "" : (b.slug || b.id))
+                }
+              />
+            );
+          })
         )}
       </FilterGroup>
 
