@@ -276,7 +276,6 @@ export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [orders, setOrders] = useState([]);
   const [trend, setTrend] = useState([]);
-  const [range, setRange] = useState("7d");
   const [chartType, setChartType] = useState("area");
 
   const [dateFilter, setDateFilter] = useState({
@@ -289,12 +288,6 @@ export default function Dashboard() {
   const [summaryLoading, setSummaryLoading] = useState(true);
   const [ordersLoading, setOrdersLoading] = useState(true);
   const [trendLoading, setTrendLoading] = useState(true);
-
-  const ranges = [
-    { key: "7d", label: t("dash_range_7d", "Last 7 days") },
-    { key: "30d", label: t("dash_range_30d", "Last 30 days") },
-    { key: "12m", label: t("dash_range_12m", "Last 12 months") },
-  ];
 
   // Update dateFilter label on language change
   useEffect(() => {
@@ -362,7 +355,7 @@ export default function Dashboard() {
           trendParams.end_date = dateFilter.endDate;
           trendParams.range = "custom";
         } else {
-          trendParams.range = range;
+          trendParams.range = "all";
         }
 
         const res = await api.get("/admin/dashboard/sales-trend", {
@@ -385,35 +378,7 @@ export default function Dashboard() {
     };
 
     loadTrend();
-  }, [dateFilter, range, showToast, t]);
-
-  const handleRangeChange = (newRange) => {
-    setRange(newRange);
-    if (newRange === "7d") {
-      const { startDate, endDate } = calculatePresetDates("7d");
-      setDateFilter({
-        preset: "7d",
-        startDate,
-        endDate,
-        label: t("dash_filter_7d", "Last 7 Days"),
-      });
-    } else if (newRange === "30d") {
-      const { startDate, endDate } = calculatePresetDates("30d");
-      setDateFilter({
-        preset: "30d",
-        startDate,
-        endDate,
-        label: t("dash_filter_30d", "Last 30 Days"),
-      });
-    } else if (newRange === "12m") {
-      setDateFilter({
-        preset: "12m",
-        startDate: null,
-        endDate: null,
-        label: t("dash_range_12m", "Last 12 months"),
-      });
-    }
-  };
+  }, [dateFilter, showToast, t]);
 
   const handleResetToAllTime = () => {
     setDateFilter({
@@ -422,7 +387,6 @@ export default function Dashboard() {
       endDate: null,
       label: t("dash_filter_all", "All Time"),
     });
-    setRange("7d");
   };
 
   const trendStats = useMemo(() => {
@@ -792,32 +756,6 @@ export default function Dashboard() {
                     <BarChart3 className="h-3.5 w-3.5" />
                     <span>Bar</span>
                   </button>
-                </div>
-
-                {/* Range Selector */}
-                <div className="flex items-center rounded-lg border border-hairline bg-paper p-1">
-                  {ranges.map((item) => (
-                    <button
-                      key={item.key}
-                      type="button"
-                      disabled={trendLoading}
-                      onClick={() => handleRangeChange(item.key)}
-                      className={`rounded-md px-3 py-1 text-[12px] font-medium transition-all disabled:opacity-60 ${
-                        range === item.key && !isFiltered
-                          ? "bg-surface text-ink shadow-[0_1px_3px_rgba(33,31,27,0.08)]"
-                          : "text-stone hover:text-ink"
-                      }`}
-                    >
-                      {item.label}
-                    </button>
-                  ))}
-                  {isFiltered && (
-                    <span className="rounded-md bg-surface px-3 py-1 text-[12px] font-medium text-moss shadow-[0_1px_3px_rgba(33,31,27,0.08)] dark:text-emerald-400">
-                      {dateFilter.preset === "custom"
-                        ? t("dash_filter_custom", "Custom")
-                        : dateFilter.label}
-                    </span>
-                  )}
                 </div>
               </div>
             </div>

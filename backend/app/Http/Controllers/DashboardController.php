@@ -180,7 +180,7 @@ class DashboardController extends Controller
 
     public function salesTrend(Request $request)
     {
-        $range = $request->get('range', '7d');
+        $range = $request->get('range', 'all');
         $startDateInput = $request->get('start_date');
         $endDateInput = $request->get('end_date');
 
@@ -281,7 +281,7 @@ class DashboardController extends Controller
             return response()->json($data);
         }
 
-        // Standard presets
+        // Presets if specifically requested
         if ($range === '12m') {
             $startDate = now()->subMonths(11)->startOfMonth()->startOfDay()->toDateTimeString();
             $endDate = now()->endOfMonth()->endOfDay()->toDateTimeString();
@@ -312,37 +312,122 @@ class DashboardController extends Controller
             return response()->json($data);
         }
 
-        $days = match ($range) {
-            '30d' => 29,
-            '14d' => 13,
-            default => 6, // 7d
-        };
+        if (in_array($range, ['7d', '14d', '30d'])) {
+            $days = match ($range) {
+                '30d' => 29,
+                '14d' => 13,
+                default => 6, // 7d
+            };
 
-        $startDate = now()->subDays($days)->startOfDay()->toDateTimeString();
-        $endDate = now()->endOfDay()->toDateTimeString();
+            $startDate = now()->subDays($days)->startOfDay()->toDateTimeString();
+            $endDate = now()->endOfDay()->toDateTimeString();
 
-        $dayAggregates = DB::table('orders')
-            ->whereBetween('created_at', [$startDate, $endDate])
+            $dayAggregates = DB::table('orders')
+                ->whereBetween('created_at', [$startDate, $endDate])
+                ->selectRaw("
+                    DATE(created_at) as date_key,
+                    COALESCE(SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END), 0) as sales,
+                    COUNT(*) as orders
+                ")
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get()
+                ->keyBy(fn($item) => (string) $item->date_key);
+
+            $data = collect(range($days, 0))->map(function ($daysAgo) use ($dayAggregates) {
+                $date = now()->subDays($daysAgo);
+                $dateStr = $date->toDateString();
+                $agg = $dayAggregates->get($dateStr);
+
+                return [
+                    'label' => $date->format('M j'),
+                    'sales' => (float) ($agg->sales ?? 0),
+                    'orders' => (int) ($agg->orders ?? 0),
+                ];
+            });
+
+            return response()->json($data);
+        }
+
+        // Default: All-Time Sales Trend (Displays all sales history)
+        $earliest = DB::table('orders')->where('status', '!=', 'cancelled')->min('created_at');
+
+        if (!$earliest) {
+            $data = collect(range(6, 0))->map(function ($daysAgo) {
+                $date = now()->subDays($daysAgo);
+                return [
+                    'label' => $date->format('M j'),
+                    'sales' => 0.0,
+                    'orders' => 0,
+                ];
+            });
+
+            return response()->json($data);
+        }
+
+        $start = Carbon::parse($earliest)->startOfDay();
+        $end = now()->endOfDay();
+
+        // Ensure at least 6 days width if earliest order was very recent
+        if ($start->diffInDays($end) < 6) {
+            $start = now()->subDays(6)->startOfDay();
+        }
+
+        $daysDiff = $start->diffInDays($end);
+
+        if ($daysDiff <= 90) {
+            $dayAggregates = DB::table('orders')
+                ->whereBetween('created_at', [$start->toDateTimeString(), $end->toDateTimeString()])
+                ->selectRaw("
+                    DATE(created_at) as date_key,
+                    COALESCE(SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END), 0) as sales,
+                    COUNT(*) as orders
+                ")
+                ->groupBy(DB::raw('DATE(created_at)'))
+                ->get()
+                ->keyBy(fn($item) => (string) $item->date_key);
+
+            $data = collect();
+            $curr = $start->copy();
+            while ($curr->lte($end)) {
+                $dateStr = $curr->toDateString();
+                $agg = $dayAggregates->get($dateStr);
+                $data->push([
+                    'label' => $curr->format('M j'),
+                    'date' => $dateStr,
+                    'sales' => (float) ($agg->sales ?? 0),
+                    'orders' => (int) ($agg->orders ?? 0),
+                ]);
+                $curr->addDay();
+            }
+
+            return response()->json($data);
+        }
+
+        // More than 90 days: group by month
+        $monthAggregates = DB::table('orders')
+            ->whereBetween('created_at', [$start->toDateTimeString(), $end->toDateTimeString()])
             ->selectRaw("
-                DATE(created_at) as date_key,
+                DATE_FORMAT(created_at, '%Y-%m') as month_key,
                 COALESCE(SUM(CASE WHEN status != 'cancelled' THEN total ELSE 0 END), 0) as sales,
                 COUNT(*) as orders
             ")
-            ->groupBy(DB::raw('DATE(created_at)'))
+            ->groupBy(DB::raw("DATE_FORMAT(created_at, '%Y-%m')"))
             ->get()
-            ->keyBy(fn($item) => (string) $item->date_key);
+            ->keyBy('month_key');
 
-        $data = collect(range($days, 0))->map(function ($daysAgo) use ($dayAggregates) {
-            $date = now()->subDays($daysAgo);
-            $dateStr = $date->toDateString();
-            $agg = $dayAggregates->get($dateStr);
-
-            return [
-                'label' => $date->format('M j'),
+        $data = collect();
+        $curr = $start->copy()->startOfMonth();
+        while ($curr->lte($end)) {
+            $key = $curr->format('Y-m');
+            $agg = $monthAggregates->get($key);
+            $data->push([
+                'label' => $curr->format('M Y'),
+                'month' => $key,
                 'sales' => (float) ($agg->sales ?? 0),
                 'orders' => (int) ($agg->orders ?? 0),
-            ];
-        });
+            ]);
+            $curr->addMonth();
+        }
 
         return response()->json($data);
     }
