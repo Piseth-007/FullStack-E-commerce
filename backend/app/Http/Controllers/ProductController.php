@@ -72,17 +72,43 @@ class ProductController extends Controller
         }
 
         if ($request->filled('category_id')) {
-            $query->where(
-                'category_id',
-                $request->category_id
-            );
+            $cat = $request->category_id;
+            if (!is_numeric($cat)) {
+                $query->whereHas('category', function ($q) use ($cat) {
+                    $q->where('slug', $cat);
+                });
+            } else {
+                $query->where('category_id', $cat);
+            }
+        } elseif ($request->filled('category')) {
+            $cat = $request->category;
+            $query->whereHas('category', function ($q) use ($cat) {
+                if (is_numeric($cat)) {
+                    $q->where('id', $cat);
+                } else {
+                    $q->where('slug', $cat);
+                }
+            });
         }
 
         if ($request->filled('brand_id')) {
-            $query->where(
-                'brand_id',
-                $request->brand_id
-            );
+            $brand = $request->brand_id;
+            if (!is_numeric($brand)) {
+                $query->whereHas('brand', function ($q) use ($brand) {
+                    $q->where('slug', $brand);
+                });
+            } else {
+                $query->where('brand_id', $brand);
+            }
+        } elseif ($request->filled('brand')) {
+            $brand = $request->brand;
+            $query->whereHas('brand', function ($q) use ($brand) {
+                if (is_numeric($brand)) {
+                    $q->where('id', $brand);
+                } else {
+                    $q->where('slug', $brand);
+                }
+            });
         }
 
         if ($request->filled('skin_type_id')) {

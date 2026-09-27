@@ -29,6 +29,7 @@ const OrderHistory = lazy(() => import("./pages/shop/OrderHistory"));
 const OrderDetail = lazy(() => import("./pages/shop/OrderDetail"));
 const About = lazy(() => import("./pages/shop/About"));
 const Contact = lazy(() => import("./pages/shop/Contact"));
+const NotFound = lazy(() => import("./pages/shop/NotFound"));
 const Contacts = lazy(() => import("./pages/admin/Contacts"));
 const Settings = lazy(() => import("./pages/admin/Settings"));
 const Login = lazy(() => import("./pages/auth/Login"));
@@ -76,7 +77,7 @@ function App() {
                       <Route path="/products" element={<ProductList />} />
                       <Route path="/categories" element={<Category />} />
                       <Route path="/brands" element={<Brand />} />
-                      <Route path="/products/:id" element={<ProductDetail />} />
+                      <Route path="/products/:slug" element={<ProductDetail />} />
                       <Route path="/cart" element={<Cart />} />
                       <Route path="/favorites" element={<Favorites />} />
                       <Route path="/about" element={<About />} />
@@ -115,6 +116,10 @@ function App() {
                           </RequireAuth>
                         }
                       />
+
+                      {/* Storefront 404 Not Found */}
+                      <Route path="/404" element={<NotFound />} />
+                      <Route path="*" element={<NotFound />} />
                     </Route>
 
                     {/* Auth */}

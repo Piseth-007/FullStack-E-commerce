@@ -389,6 +389,7 @@ export default function Home() {
 
       return {
         id: item.id,
+        slug: item.slug,
         name: item.name,
         brand: item.brand?.name || item.category?.name || "Skincare Ritual",
         price: Number(item.price) || 0,
@@ -880,7 +881,7 @@ export default function Home() {
                           className="relative h-full w-full shrink-0"
                         >
                           <Link
-                            to={`/products/${slide.id}`}
+                            to={`/products/${slide.slug || slide.id}`}
                             className="group/slide block h-full w-full"
                             aria-label={`View product: ${slide.name}`}
                           >
@@ -904,7 +905,7 @@ export default function Home() {
                         {heroSlides[activeSlide]?.brand}
                       </p>
                       <Link
-                        to={`/products/${heroSlides[activeSlide]?.id}`}
+                        to={`/products/${heroSlides[activeSlide]?.slug || heroSlides[activeSlide]?.id}`}
                         className="mt-1 block font-display text-[16px] sm:text-[18px] font-medium leading-snug text-ink truncate hover:text-moss transition-colors"
                       >
                         {heroSlides[activeSlide]?.name}

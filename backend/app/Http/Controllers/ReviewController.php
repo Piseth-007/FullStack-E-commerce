@@ -3,16 +3,23 @@
 namespace App\Http\Controllers;
 
 use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\Review;
 use Illuminate\Http\Request;
 
 class ReviewController extends Controller
 {
 
-    public function index(Request $request, $productId)
+    public function index(Request $request, $productParam)
     {
+        $product = Product::where('id', $productParam)
+            ->orWhere('slug', $productParam)
+            ->first();
+
+        $resolvedId = $product ? $product->id : (is_numeric($productParam) ? $productParam : 0);
+
         return response()->json(
-            Review::where('product_id', $productId)
+            Review::where('product_id', $resolvedId)
                 ->with('user:id,name,profile_image')
                 ->latest()
                 ->get()

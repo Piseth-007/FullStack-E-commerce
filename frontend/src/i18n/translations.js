@@ -735,6 +735,23 @@ export const translations = {
     dash_status_paid: "Paid",
     dash_status_shipped: "Shipped",
     dash_status_cancelled: "Cancelled",
+
+    // 404 Not Found
+    not_found_badge: "404 Not Found",
+    not_found_title: "Page Not Found",
+    not_found_desc: "The page you're looking for doesn't exist, may have been removed, or the link might be broken.",
+    not_found_product_title: "Product Not Found",
+    not_found_product_desc: "This product is no longer available or the link may have changed.",
+    not_found_btn_home: "Back to Home",
+    not_found_btn_shop: "Browse Collection",
+    not_found_btn_back: "Go Back",
+    not_found_search_placeholder: "Try searching for products or brands...",
+    not_found_search_btn: "Search",
+    not_found_popular_title: "Helpful links",
+    not_found_link_categories: "Shop by Category",
+    not_found_link_brands: "Explore Brands",
+    not_found_link_contact: "Contact Support",
+    not_found_link_orders: "My Orders",
   },
 
   km: {
@@ -1473,5 +1490,22 @@ export const translations = {
     dash_status_paid: "បានបង់ប្រាក់",
     dash_status_shipped: "បានផ្ញើចេញ",
     dash_status_cancelled: "បានបោះបង់",
+
+    // 404 Not Found
+    not_found_badge: "កំហុស 404",
+    not_found_title: "រកមិនឃើញទំព័រនេះទេ",
+    not_found_desc: "ទំព័រដែលអ្នកកំពុងស្វែងរកមិនមាន អាចត្រូវបានផ្លាស់ប្តូរ ឬតំណភ្ជាប់មិនត្រឹមត្រូវ។",
+    not_found_product_title: "រកមិនឃើញផលិតផលនេះទេ",
+    not_found_product_desc: "ផលិតផលនេះមិនមានលក់ទៀតទេ ឬតំណភ្ជាប់ត្រូវបានផ្លាស់ប្តូរ។",
+    not_found_btn_home: "ត្រឡប់ទៅទំព័រដើម",
+    not_found_btn_shop: "មើលទំនិញទាំងអស់",
+    not_found_btn_back: "ថយក្រោយ",
+    not_found_search_placeholder: "សាកល្បងស្វែងរកផលិតផល ឬម៉ាកយីហោ...",
+    not_found_search_btn: "ស្វែងរក",
+    not_found_popular_title: "តំណភ្ជាប់មានប្រយោជន៍",
+    not_found_link_categories: "ទិញតាមប្រភេទផលិតផល",
+    not_found_link_brands: "ស្វែងរកតាមម៉ាកយីហោ",
+    not_found_link_contact: "ទាក់ទងមកយើងខ្ញុំ",
+    not_found_link_orders: "ប្រវត្តិការបញ្ជាទិញ",
   },
 };

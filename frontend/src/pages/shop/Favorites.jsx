@@ -116,7 +116,7 @@ export default function Favorites() {
 
               return (
                 <article key={fav.id} className="group relative">
-                  <Link to={`/products/${product.id}`} className="block">
+                  <Link to={`/products/${product.slug || product.id}`} className="block">
                     <div
                       className="aspect-square rounded-2xl overflow-hidden mb-3"
                       style={{

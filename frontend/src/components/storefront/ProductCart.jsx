@@ -9,6 +9,7 @@ import { useLanguage } from "../../context/useLanguage";
 export default function ProductCard({ product }) {
   const { t } = useLanguage();
   const productId = product?.id;
+  const productSlug = product?.slug || product?.id;
   const image = product?.images?.[0]?.url || "";
   const productName = product?.name || "Product";
 
@@ -49,9 +50,9 @@ export default function ProductCard({ product }) {
   const roundedRating = Math.round(rating);
 
   const handlePrefetch = () => {
-    if (!productId) return;
-    prefetchApi(`/products/${productId}`);
-    prefetchApi(`/products/${productId}/reviews`);
+    if (!productSlug) return;
+    prefetchApi(`/products/${productSlug}`);
+    prefetchApi(`/products/${productSlug}/reviews`);
     import("../../pages/shop/ProductDetail").catch(() => {});
   };
 
@@ -66,7 +67,7 @@ export default function ProductCard({ product }) {
       `}
     >
       <Link
-        to={`/products/${productId}`}
+        to={`/products/${productSlug}`}
         aria-label={`View ${productName}`}
         className="
           block

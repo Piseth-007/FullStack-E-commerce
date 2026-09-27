@@ -26,9 +26,11 @@ import { useFavorites } from "../../context/useFavorites";
 import { useLanguage } from "../../context/useLanguage";
 import FavoriteButton from "../../components/storefront/FavoriteButton";
 import { fetchWithCache, getCached } from "../../utils/apiCache";
+import NotFound from "./NotFound";
 
 export default function ProductDetail() {
-  const { id } = useParams();
+  const { slug, id } = useParams();
+  const identifier = slug || id;
   const navigate = useNavigate();
 
   const { user } = useAuth();
@@ -85,7 +87,7 @@ export default function ProductDetail() {
 
     const loadProduct = async () => {
       // Instant render from cache if available (e.g. from hover prefetch)
-      const cached = getCached(`/products/${id}`);
+      const cached = getCached(`/products/${identifier}`);
       if (cached && !cached.isStale) {
         const data = cached.data?.data || cached.data;
         setProduct(data);
@@ -106,11 +108,16 @@ export default function ProductDetail() {
       });
 
       try {
-        const resData = await fetchWithCache(`/products/${id}`);
+        const resData = await fetchWithCache(`/products/${identifier}`);
 
         if (mounted) {
           const data = resData.data || resData;
           setProduct(data);
+
+          // If the user accessed via numeric id and product has a slug, update the URL cleanly
+          if (data?.slug && identifier !== data.slug && !isNaN(Number(identifier))) {
+            navigate(`/products/${data.slug}`, { replace: true });
+          }
         }
       } catch {
         if (mounted) {
@@ -129,7 +136,7 @@ export default function ProductDetail() {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [identifier, navigate]);
 
   useEffect(() => {
     let mounted = true;
@@ -138,7 +145,7 @@ export default function ProductDetail() {
       setReviewsLoading(true);
 
       try {
-        const response = await api.get(`/products/${id}/reviews`);
+        const response = await api.get(`/products/${identifier}/reviews`);
 
         if (mounted) {
           const data = response.data?.data || response.data || [];
@@ -160,7 +167,7 @@ export default function ProductDetail() {
     return () => {
       mounted = false;
     };
-  }, [id]);
+  }, [identifier]);
 
   useEffect(() => {
     let mounted = true;
@@ -353,31 +360,7 @@ export default function ProductDetail() {
   }
 
   if (error || !product) {
-    return (
-      <div className="mx-auto flex min-h-[60vh] max-w-6xl items-center justify-center px-6">
-        <div className="text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-hairline bg-moss-tint">
-            <ImageOff size={22} strokeWidth={1.4} className="text-moss" />
-          </div>
-
-          <h1 className="font-display text-[24px] text-ink">
-            Product not found
-          </h1>
-
-          <p className="mt-2 text-[13px] text-stone">
-            We couldn't find the product you're looking for.
-          </p>
-
-          <Link
-            to="/products"
-            className="mt-6 inline-flex items-center gap-2 rounded-lg bg-moss px-5 py-3 text-[13px] font-medium text-white transition-all duration-300 hover:-translate-y-0.5 hover:bg-moss-deep"
-          >
-            <ArrowLeft size={14} />
-            {t("product_back_to_shop", "Back to shop")}
-          </Link>
-        </div>
-      </div>
-    );
+    return <NotFound type="product" />;
   }
 
   const categoryId = product.category_id ?? product.category?.id ?? null;
@@ -1137,7 +1120,7 @@ function RelatedProductCard({ product }) {
 
   return (
     <div className="group relative block">
-      <Link to={`/products/${product.id}`} className="block">
+      <Link to={`/products/${product.slug || product.id}`} className="block">
         <div className="relative aspect-square overflow-hidden rounded-xl border border-hairline bg-surface">
           {image ? (
             <img
