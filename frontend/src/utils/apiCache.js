@@ -1,4 +1,4 @@
-﻿import api from "../api/axios";
+import api from "../api/axios";
 
 // In-memory cache store: key -> { data, timestamp, ttl }
 const cacheStore = new Map();
@@ -111,10 +111,13 @@ export function prefetchApi(url, params = {}, ttl = DEFAULT_TTL) {
   const promise = api
     .get(url, { params })
     .then((res) => {
-      setCached(url, params, res.data, ttl);
+      const payload = res.data;
+      setCached(url, params, payload, ttl);
+      return payload;
     })
-    .catch(() => {
-      // ignore prefetch errors silently
+    .catch((err) => {
+      // Re-throw so callers joining this in-flight request know it failed
+      throw err;
     })
     .finally(() => {
       inflightRequests.delete(key);

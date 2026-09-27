@@ -204,10 +204,15 @@ export default function ProductList() {
     const controller = new AbortController();
     productsControllerRef.current = controller;
 
-    // Instant in-memory cache check: 0ms page transitions
+    // Instant in-memory cache check: 0ms page transitions if populated
     const cached = getCached("/products", queryParams);
-    if (cached && !cached.isStale) {
-      setProducts(cached.data?.data || []);
+    if (
+      cached &&
+      !cached.isStale &&
+      Array.isArray(cached.data?.data) &&
+      cached.data.data.length > 0
+    ) {
+      setProducts(cached.data.data);
       setMeta(cached.data);
       setLoading(false);
       setFetching(false);
@@ -215,12 +220,8 @@ export default function ProductList() {
       return;
     }
 
-    if (hasLoadedOnceRef.current && products.length > 0) {
-      setFetching(true);
-    } else {
-      setLoading(true);
-    }
-
+    setLoading(true);
+    setFetching(true);
     setError(false);
 
     try {
@@ -230,8 +231,14 @@ export default function ProductList() {
 
       if (!mountedRef.current) return;
 
-      setProducts(data.data || []);
-      setMeta(data);
+      const items = Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data)
+          ? data
+          : [];
+
+      setProducts(items);
+      setMeta(data || null);
       hasLoadedOnceRef.current = true;
     } catch (err) {
       if (err?.name === "CanceledError" || err?.name === "AbortError") return;
@@ -244,7 +251,7 @@ export default function ProductList() {
         setFetching(false);
       }
     }
-  }, [queryParams, products.length]);
+  }, [queryParams]);
 
   useEffect(() => {
     fetchProducts();
@@ -347,7 +354,7 @@ export default function ProductList() {
   ].filter(Boolean).length;
 
   const isLoading = loading || fetching;
-  const showSkeleton = loading && products.length === 0;
+  const showSkeleton = isLoading;
 
   const renderFilterContent = () => (
     <>
@@ -613,7 +620,7 @@ export default function ProductList() {
                 <ProductSkeleton key={i} />
               ))}
             </div>
-          ) : error && products.length === 0 ? (
+          ) : error ? (
             <div className="flex flex-col items-center text-center py-20 border border-dashed border-clay/20 rounded-2xl bg-surface">
               <p className="text-[14px] text-clay mb-3">
                 {t("shop_error", "Couldn't load products.")}
