@@ -43,6 +43,7 @@ const ResetPassword = lazy(() => import("./pages/auth/ResetPassword"));
 const AdminLayout = lazy(() => import("./components/admin/AdminLayout"));
 const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 const Products = lazy(() => import("./pages/admin/Products"));
+const ProductFormPage = lazy(() => import("./pages/admin/ProductFormPage"));
 const Categories = lazy(() => import("./pages/admin/Categories"));
 const Brands = lazy(() => import("./pages/admin/Brands"));
 const Orders = lazy(() => import("./pages/admin/Orders"));
@@ -148,6 +149,18 @@ function App() {
                       />
                       <Route path="/admin/dashboard" element={<Dashboard />} />
                       <Route path="/admin/products" element={<Products />} />
+                      <Route
+                        path="/admin/products/create"
+                        element={<ProductFormPage />}
+                      />
+                      <Route
+                        path="/admin/products/new"
+                        element={<ProductFormPage />}
+                      />
+                      <Route
+                        path="/admin/products/:id/edit"
+                        element={<ProductFormPage />}
+                      />
                       <Route
                         path="/admin/categories"
                         element={<Categories />}

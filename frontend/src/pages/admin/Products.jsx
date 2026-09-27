@@ -1,4 +1,5 @@
 import { useContext, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Plus,
   Package,
@@ -23,7 +24,6 @@ import { ToastContext } from "../../context/ToastContext";
 import { ConfirmContext } from "../../context/ConfirmContext";
 import { useLanguage } from "../../context/LanguageContext";
 import ProductCard from "../../components/admin/ProductCard";
-import ProductFormModal from "../../components/admin/ProductFormModal";
 
 const STOCK_FILTERS = [
   { key: "all", label: "All Stock" },
@@ -51,14 +51,12 @@ export default function Products() {
     return localStorage.getItem("admin-products-view") || "card";
   });
 
+  const navigate = useNavigate();
   const { showToast } = useContext(ToastContext);
   const { confirm } = useContext(ConfirmContext);
 
-  const [modalState, setModalState] = useState(null);
-
-  const openCreateModal = () => setModalState({ productId: null });
-  const openEditModal = (id) => setModalState({ productId: id });
-  const closeModal = () => setModalState(null);
+  const handleCreateProduct = () => navigate("/admin/products/create");
+  const handleEditProduct = (id) => navigate(`/admin/products/${id}/edit`);
 
   const changeViewMode = (mode) => {
     setViewMode(mode);
@@ -91,10 +89,6 @@ export default function Products() {
   useEffect(() => {
     loadProducts();
   }, []);
-
-  const handleModalSuccess = () => {
-    loadProducts(true);
-  };
 
   const categories = useMemo(() => {
     const uniqueCategories = new Map();
@@ -391,7 +385,7 @@ export default function Products() {
 
           <button
             type="button"
-            onClick={openCreateModal}
+            onClick={handleCreateProduct}
             className="flex items-center gap-2 rounded-lg bg-moss px-4 py-2.5 text-[13.5px] font-medium text-white transition-all hover:bg-moss-deep active:scale-[0.98]"
           >
             <Plus size={16} strokeWidth={2} />
@@ -583,21 +577,21 @@ export default function Products() {
           ))}
         </div>
       ) : products.length === 0 ? (
-        <EmptyState onCreate={openCreateModal} />
+        <EmptyState onCreate={handleCreateProduct} />
       ) : sortedProducts.length === 0 ? (
         <SearchEmptyState onClear={clearFilters} />
       ) : viewMode === "card" ? (
         <CardView
           products={paginatedProducts}
           deletingId={deletingId}
-          onEdit={openEditModal}
+          onEdit={handleEditProduct}
           onDelete={handleDelete}
         />
       ) : (
         <TableView
           products={paginatedProducts}
           deletingId={deletingId}
-          onEdit={openEditModal}
+          onEdit={handleEditProduct}
           onDelete={handleDelete}
         />
       )}
@@ -613,14 +607,6 @@ export default function Products() {
           onNext={() =>
             setCurrentPage((page) => Math.min(totalPages, page + 1))
           }
-        />
-      )}
-
-      {modalState && (
-        <ProductFormModal
-          productId={modalState.productId}
-          onClose={closeModal}
-          onSuccess={handleModalSuccess}
         />
       )}
     </div>
